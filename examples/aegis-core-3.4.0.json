@@ -1,0 +1,138 @@
+{
+  "spec_version": "0.1",
+  "system": "AEGIS Core",
+  "system_version": "3.4.0",
+  "revision": "1bcdec1b10c294ca55bc0018fc0de00fc98a09c8",
+  "assessed_at": "2026-08-22",
+  "assessor": "Agent Authority Conformance project",
+  "scope": {
+    "process_model": "single-process",
+    "deployment_model": "process-local execution disposition evaluated immediately before tool dispatch",
+    "external_effects": "simulated",
+    "trust_assumptions": [
+      "Assessment is limited to the immutable public artifacts referenced below",
+      "The same-ID fixture is a standalone executable test invoked with python test_same_tool_call_execution.py"
+    ],
+    "explicit_non_claims": [
+      "delegation-chain validity",
+      "credential-path non-bypassability",
+      "multiprocess protection",
+      "post-dispatch recovery",
+      "semantic correctness",
+      "external-effect verification",
+      "integrity over an arbitrary normalized tool-arguments object"
+    ]
+  },
+  "properties": [
+    {
+      "id": "A",
+      "property": "Receipt Integrity",
+      "status": "PASS",
+      "evidence_tier": "RESOLVED",
+      "claimed_status": "partial",
+      "supported_scope": "process-local same-ID replay suppression under 100 concurrent identical attempts",
+      "untested_remainder": "signature or MAC authenticity, expiry, not-before, identity binding, and replay behavior outside the evidenced process model",
+      "reasoning": "The standalone contention fixture directly exercises duplicate suppression for one identical tool_call_id: one fresh execution grant and 99 cached replays with execution_permitted false.",
+      "caveat": "This is a partial A result scoped to the demonstrated replay property. It is not evidence for every receipt-integrity mechanism named by property A.",
+      "evidence": [
+        {
+          "kind": "fixture",
+          "reference": "https://github.com/LortuArte/aegis-sdk/blob/1bcdec1b10c294ca55bc0018fc0de00fc98a09c8/test_same_tool_call_execution.py",
+          "revision": "1bcdec1b10c294ca55bc0018fc0de00fc98a09c8",
+          "command": "python test_same_tool_call_execution.py",
+          "description": "Same-ID contention fixture with 100 concurrent attempts, one fresh grant, 99 cached replays, and one simulated external execution."
+        },
+        {
+          "kind": "ci",
+          "reference": "https://github.com/LortuArte/aegis-sdk/actions/runs/32240260216",
+          "revision": "1bcdec1b10c294ca55bc0018fc0de00fc98a09c8",
+          "description": "CI run supplied as canonical evidence for the assessed revision."
+        }
+      ]
+    },
+    {
+      "id": "B",
+      "property": "Authority Provenance",
+      "status": "OUT_OF_SCOPE",
+      "evidence_tier": "NONE",
+      "claimed_status": "not claimed",
+      "reasoning": "Delegation-chain validity and broader authority provenance are explicit non-claims for the assessed SDK scope.",
+      "caveat": "OUT_OF_SCOPE records a deliberate claim boundary and is not negative credit.",
+      "evidence": []
+    },
+    {
+      "id": "C",
+      "property": "Exact-Call Integrity",
+      "status": "PASS",
+      "evidence_tier": "RESOLVED",
+      "claimed_status": "partial",
+      "supported_scope": "reuse of the same ID with changed operation or changed amount_usd is rejected as idempotency_conflict without mutating the balance",
+      "untested_remainder": "arbitrary mutation of normalized tool arguments outside the fields represented by the current authorization interface",
+      "reasoning": "The idempotency-conflict cases discriminate ID-only memoization from binding of the operation and amount fields represented by the current interface.",
+      "caveat": "AEGIS Core 3.4.0 does not currently accept or claim integrity over an arbitrary normalized tool-arguments object comparable to a full argument hash.",
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "https://github.com/LortuArte/aegis-sdk/blob/1bcdec1b10c294ca55bc0018fc0de00fc98a09c8/test_financial_loss_matrix.py#L75-L158",
+          "revision": "1bcdec1b10c294ca55bc0018fc0de00fc98a09c8",
+          "description": "Existing idempotency-conflict cases for changed amount_usd and changed operation under a reused ID."
+        }
+      ]
+    },
+    {
+      "id": "D",
+      "property": "Semantic Authority",
+      "status": "OUT_OF_SCOPE",
+      "evidence_tier": "NONE",
+      "claimed_status": "not claimed",
+      "reasoning": "Semantic correctness is an explicit non-claim for the assessed scope.",
+      "caveat": "No inference is made from exact-call integrity to semantic authority.",
+      "evidence": []
+    },
+    {
+      "id": "E",
+      "property": "Execution-Boundary Integrity",
+      "status": "OUT_OF_SCOPE",
+      "evidence_tier": "NONE",
+      "claimed_status": "not claimed",
+      "reasoning": "Credential-path non-bypassability is an explicit non-claim. SDK-level receipt behavior cannot establish that an alternate credential path does not exist.",
+      "caveat": "Deployment and credential-topology evidence would be required to assess E.",
+      "evidence": []
+    },
+    {
+      "id": "F",
+      "property": "TOCTOU Resistance",
+      "status": "PASS",
+      "evidence_tier": "RESOLVED",
+      "claimed_status": "partial",
+      "supported_scope": "process-local concurrent identical-ID contention evaluated immediately before tool dispatch",
+      "untested_remainder": "multiprocess protection, distributed races, and arbitrary state changes between authorization and external effect",
+      "reasoning": "The fixture exercises 100 concurrent attempts against one identical tool_call_id in a single process and demonstrates one fresh execution grant under that contention model.",
+      "caveat": "Single-process evidence does not establish multiprocess behavior or exactly-once external effects.",
+      "evidence": [
+        {
+          "kind": "fixture",
+          "reference": "https://github.com/LortuArte/aegis-sdk/blob/1bcdec1b10c294ca55bc0018fc0de00fc98a09c8/test_same_tool_call_execution.py",
+          "revision": "1bcdec1b10c294ca55bc0018fc0de00fc98a09c8",
+          "command": "python test_same_tool_call_execution.py",
+          "description": "Process-local concurrency fixture evaluated immediately before tool dispatch."
+        }
+      ]
+    },
+    {
+      "id": "G",
+      "property": "Effect Verification",
+      "status": "OUT_OF_SCOPE",
+      "evidence_tier": "NONE",
+      "claimed_status": "not claimed",
+      "reasoning": "External-effect verification is an explicit non-claim and the fixture uses simulated external execution.",
+      "caveat": "A valid pre-execution disposition or simulated dispatch does not establish the actual external postcondition.",
+      "evidence": []
+    }
+  ],
+  "notes": [
+    "This example is a bounded conformance record, not a ranking or certification.",
+    "PASS on A, C and F is partial and applies only to the supported_scope stated in each property row.",
+    "Release reference: https://github.com/LortuArte/aegis-sdk/releases/tag/v3.4.0"
+  ]
+}
