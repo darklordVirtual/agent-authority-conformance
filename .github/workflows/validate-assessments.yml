@@ -1,0 +1,27 @@
+name: Validate assessments
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  schema:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install validator
+        run: python -m pip install --disable-pip-version-check check-jsonschema==0.33.2
+
+      - name: Validate assessment examples
+        run: check-jsonschema --schemafile schema/assessment.schema.json examples/*.json
