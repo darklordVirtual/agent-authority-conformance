@@ -1,0 +1,283 @@
+{
+  "spec_version": "0.1",
+  "system": "REMORA",
+  "system_version": "0.12.0",
+  "revision": "64f3db0",
+  "assessed_at": "2026-08-27",
+  "assessor": "REMORA-research maintainer (self-assessment)",
+  "scope": {
+    "process_model": "Tests run in-process by default. Property E additionally uses a three-process fixture (agent/authority, execution domain, effect service). Property F concurrency is in-process threads plus a shared database, not separate hosts.",
+    "deployment_model": "Source repository at the stated revision. No production deployment is assessed. The strict runtime profiles (review, controlled_pilot) are configuration contracts enforced at startup, not observed deployments.",
+    "external_effects": "mixed",
+    "trust_assumptions": [
+      "The deployment supplies the tool callables and the credentials they close over; this repository holds none for a real external system.",
+      "Actor identity is bound into the lease, but binding that identity to the transport is deployment-supplied.",
+      "The agent reaches REMORA as a remote client over remora.sdk and the REST contract; deployments that embed agent code in the authority process have a wider agent zone."
+    ],
+    "explicit_non_claims": [
+      "single-process enforcement: the strict profiles refuse to start in that configuration",
+      "deployment network segmentation and container boundaries",
+      "distributed single-use of the lease nonce (REM-025)",
+      "delegation chain on the enforcing path",
+      "intent provenance from a deployment-owned primary source",
+      "authoritative read-back against a live external system of record",
+      "independent tool-interception validation (REM-030)"
+    ]
+  },
+  "properties": [
+    {
+      "id": "A",
+      "property": "Receipt Integrity",
+      "status": "PASS",
+      "evidence_tier": "RESOLVED",
+      "supported_scope": "single process by default; cross-instance replay refusal only over a shared durable ledger",
+      "untested_remainder": "behaviour across a real process restart, and distributed single-use of the lease nonce (REM-025)",
+      "reasoning": "Signature, tamper detection over the full field set, expiry, not-before, maximum age, audience binding and one-time consumption are each exercised by a named refusal test rather than inferred.",
+      "caveat": "The default jti ledger is in-process, and the repository says so in its own tests. Durable replay refusal is shown with a second gate over a shared ledger, not a second interpreter.",
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/64f3db0/tests/test_token_hardening.py",
+          "revision": "64f3db0",
+          "description": "Signed expiry and jti, TTL bounds, not-before, max-age, audience binding, single consumption.",
+          "command": "python -m pytest tests/test_token_hardening.py"
+        },
+        {
+          "kind": "test",
+          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/64f3db0/tests/test_execution_lease.py",
+          "revision": "64f3db0",
+          "description": "Tampered fields invalidate the signature; unsigned and expired leases refused; nonce ledger atomic single use."
+        },
+        {
+          "kind": "test",
+          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/64f3db0/tests/test_grant_ledger_tamper_evidence.py",
+          "revision": "64f3db0",
+          "description": "Tamper evidence over the grant ledger."
+        }
+      ]
+    },
+    {
+      "id": "B",
+      "property": "Authority Provenance",
+      "status": "PASS",
+      "evidence_tier": "RESOLVED",
+      "supported_scope": "approver role enforcement, tenant scope and actor binding",
+      "untested_remainder": "delegation chain on the enforcing path, transport-anchored actor identity, and revocation of a principal's authority after approval",
+      "reasoning": "Approval requires the role the profile demands, tenants cannot see each other's items, and a lease presented by a different actor is refused.",
+      "caveat": "Revocation is tested at the level of signing identity, not principal authority. An actorless configuration is permitted, so actor binding is a deployment choice rather than a runtime invariant.",
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/64f3db0/tests/test_execution_api.py",
+          "revision": "64f3db0",
+          "description": "Profile approval role enforced; cross-tenant item access refused."
+        },
+        {
+          "kind": "test",
+          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/64f3db0/tests/test_execution_lease.py",
+          "revision": "64f3db0",
+          "description": "Stolen lease refused for a different actor; actor-bound lease requires an actor identity."
+        },
+        {
+          "kind": "test",
+          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/64f3db0/tests/test_token_key_lifecycle.py",
+          "revision": "64f3db0",
+          "description": "A revoked kid is refused even when the key is present."
+        }
+      ]
+    },
+    {
+      "id": "C",
+      "property": "Exact-Call Integrity",
+      "status": "PASS",
+      "evidence_tier": "RESOLVED",
+      "supported_scope": "the /v1/execution/* surface",
+      "untested_remainder": "the legacy /v1/assess surface, which binds a summary rather than full arguments",
+      "reasoning": "The dispatcher recomputes the canonical hash over the full argument set immediately before execution, and the binding set covers tenant, actor, tool, arguments, target environment, policy bundle hash, nonce and expiry. The mutation test is property-based, so the refusal is not tied to one hand-picked mutation.",
+      "caveat": "The property test is narrower than 'any mutation' sounds: its search domain is flat dictionaries and the mutation is an added top-level key. Nested structures, value edits, key removal and type changes are covered by the hash construction rather than by the generator.",
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/64f3db0/tests/test_execution_lease.py",
+          "revision": "64f3db0",
+          "description": "Mutated arguments, context mismatch, unknown tool and policy-bundle mismatch each refused."
+        },
+        {
+          "kind": "test",
+          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/64f3db0/tests/test_enforcement_properties.py",
+          "revision": "64f3db0",
+          "description": "Property-based: the lease refuses any argument mutation."
+        },
+        {
+          "kind": "test",
+          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/64f3db0/tests/test_toolspec_execution_wiring.py",
+          "revision": "64f3db0",
+          "description": "A redeployed spec refuses a prior approval."
+        }
+      ]
+    },
+    {
+      "id": "D",
+      "property": "Semantic Authority",
+      "status": "PASS",
+      "evidence_tier": "RESOLVED",
+      "supported_scope": "a wrong-resource or wrong-effect call cannot reach ACCEPT, and a model cannot assert its own semantic authority",
+      "untested_remainder": "intent provenance: nothing on the enforcing path requires a deployment-owned primary-source intent",
+      "reasoning": "The semantic-authority floor is in the decision engine, not a library. A well-formed call against the wrong resource is UNSUPPORTED, a mutating tool never reaches SUPPORTED from a read intent, and tool-goal matching is computed rather than supplied by the intent producer. Tool meaning comes from a deployment-signed ToolSpec.",
+      "caveat": "A model-proposed intent with valid spans is still accepted as input, so whether this was the right user, in the right time window, under a valid business intent is bounded by span grounding rather than by deployment authority.",
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/64f3db0/tests/test_semantic_authority_floor.py",
+          "revision": "64f3db0",
+          "description": "UNKNOWN goal fit or expected effect can never reach ACCEPT; FALSE stops rather than verifies."
+        },
+        {
+          "kind": "test",
+          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/64f3db0/tests/test_goal_match.py",
+          "revision": "64f3db0",
+          "description": "Wrong resource unsupported despite a well-formed call; a mutating tool never reaches supported from a read intent."
+        },
+        {
+          "kind": "test",
+          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/64f3db0/tests/test_toolspec_runtime.py",
+          "revision": "64f3db0",
+          "description": "Target outside the allowlist refused; credential-scope drift refused; description rug-pull refused."
+        }
+      ]
+    },
+    {
+      "id": "E",
+      "property": "Execution-Boundary Integrity",
+      "status": "PASS",
+      "evidence_tier": "RESOLVED",
+      "supported_scope": "the strict runtime profiles (review, controlled_pilot), where the ADR-A custody split is a startup prerequisite; import reachability within the declared agent zone; and a three-process fixture with a real credential and authoritative read-back",
+      "out_of_scope_remainder": "single-process enforcement, which the strict profiles refuse to start, and deployment network segmentation and container boundaries, which no in-process guard can observe",
+      "reasoning": "Reported per section 12 as both halves. Topology (12.1): 24 secret-bearing environment credentials are declared with holder and reachability claim, the register cannot go stale because a CI gate fails on undeclared credentials, stale entries and reader drift, and no credential declared unreachable is read inside the declared agent zone. The zone choice is load-bearing and its consequence is pinned: treating remora/toolcall as agent-controlled puts nine credentials inside the zone. Bypass (12.2): B3 shows the guarded callable can be pulled off the dispatcher in-process and B4 shows a co-resident process reads the environment without importing anything. Both SUCCEED and ship as passing tests. They are answered per 12.3 by refusing the configuration: under a strict profile the authority domain cannot register a tool callable, the execution domain cannot mint a lease, an unset domain role is refused and an empty effect-credential declaration is refused as vacuous. The three-process fixture then shows the agent refused when reaching the effect service directly, an authorised call succeeding, and argument substitution and replay refused with pinned reasons, every outcome confirmed against the effect service own mailbox rather than the dispatch response.",
+      "caveat": "Per 12.4 this cannot prove absence: the import scan is a regex over import statements, so a missed edge shrinks the zone and the failure mode is a missed finding rather than a false accusation. PASS means no demonstrable alternative path within the declared zone and the attempted classes. The fixture provisions its own credential over loopback HTTP; a production deployment credential is not assessed. The in-process bypasses remain true wherever the research profile is used, which is supported and labelled.",
+      "refused_configurations": [
+        "strict profile with REMORA_EXECUTION_DOMAIN_ROLE unset",
+        "strict profile, authority role, holding a declared effect credential",
+        "strict profile, executor role, holding lease signing material",
+        "strict profile, executor role, without lease verification material or its declared effect credential",
+        "strict profile with an empty REMORA_EFFECT_CREDENTIAL_ENV_NAMES declaration",
+        "strict profile, authority role, registering a tool callable",
+        "strict profile, executor role, minting a lease"
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/64f3db0/docs/assurance/credential_topology.yaml",
+          "revision": "64f3db0",
+          "description": "Declared topology per 12.1: 24 credentials, declared agent zone, six limits each with its disposition under the strict profiles."
+        },
+        {
+          "kind": "ci",
+          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/64f3db0/scripts/check_credential_topology.py",
+          "revision": "64f3db0",
+          "description": "The drift gate. Fails on undeclared credentials, stale entries, reader drift, opaque environment reads and agent-zone reachability.",
+          "command": "python scripts/check_credential_topology.py"
+        },
+        {
+          "kind": "test",
+          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/64f3db0/tests/test_check_credential_topology.py",
+          "revision": "64f3db0",
+          "description": "Falsification cases for the gate, including test_agent_zone_breach_is_reported, which uses real repository data.",
+          "command": "python -m pytest tests/test_check_credential_topology.py"
+        },
+        {
+          "kind": "test",
+          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/64f3db0/tests/conformance/test_execution_boundary.py",
+          "revision": "64f3db0",
+          "description": "Bypass suite B1-B7. B3 and B4 assert that a bypass SUCCEEDS.",
+          "command": "python -m pytest tests/conformance/test_execution_boundary.py"
+        },
+        {
+          "kind": "test",
+          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/64f3db0/tests/conformance/test_execution_boundary_process_split.py",
+          "revision": "64f3db0",
+          "description": "Three processes, a real credential, authoritative read-back. P1-P6.",
+          "command": "python -m pytest tests/conformance/test_execution_boundary_process_split.py"
+        },
+        {
+          "kind": "test",
+          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/64f3db0/tests/conformance/test_custody_guard.py",
+          "revision": "64f3db0",
+          "description": "K1-K11: the refusals required by 12.3, including that the research profile is unchanged.",
+          "command": "python -m pytest tests/conformance/test_custody_guard.py"
+        },
+        {
+          "kind": "code",
+          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/64f3db0/remora/enforcement/custody.py",
+          "revision": "64f3db0",
+          "description": "The startup guard that makes the custody split a prerequisite rather than a convention."
+        }
+      ]
+    },
+    {
+      "id": "F",
+      "property": "TOCTOU Resistance",
+      "status": "PASS",
+      "evidence_tier": "RESOLVED",
+      "supported_scope": "approval freshness, re-gate immediately before dispatch, and exclusive outbox claim under concurrency including on Postgres",
+      "untested_remainder": "multiprocess single-use of the lease nonce, and concurrency across separate hosts",
+      "reasoning": "The approved thing changing under the approval is directly tested: a redeployed ToolSpec refuses a prior approval and a spec that changes between assessment and dispatch is refused. Execution re-gates rather than trusting the earlier decision, and the outbox claim has exactly one winner under concurrency.",
+      "caveat": "Concurrency evidence is in-process threads plus a shared database, not separate hosts. The lease nonce ledger is in-process (REM-025), so distributed single-use of a lease is not demonstrated.",
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/64f3db0/tests/test_toolspec_runtime.py",
+          "revision": "64f3db0",
+          "description": "A spec changing between assessment and dispatch is refused."
+        },
+        {
+          "kind": "test",
+          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/64f3db0/tests/test_execution_outbox.py",
+          "revision": "64f3db0",
+          "description": "Concurrent claims have exactly one winner; the Postgres claim is exclusive."
+        },
+        {
+          "kind": "test",
+          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/64f3db0/tests/test_enforcement_gate_timestamps.py",
+          "revision": "64f3db0",
+          "description": "Fail-closed on unparseable and future timestamps."
+        }
+      ]
+    },
+    {
+      "id": "G",
+      "property": "Effect Verification",
+      "status": "PASS",
+      "evidence_tier": "RESOLVED",
+      "supported_scope": "the verification contract, its five-status vocabulary, one concrete verifier, and read-back inside the property-E process-split fixture",
+      "untested_remainder": "the loop against a live external system of record",
+      "reasoning": "The five statuses are frozen and enforced, the comparison rule is declared-delta rather than global unchangedness, not-observed is structurally prevented from collapsing into mismatch, verification never re-executes, and a crash after dispatch reconciles to unknown rather than to success or a blind retry.",
+      "caveat": "REMORA records a verification reported by a verifier and refuses a record without a verifier identity; the authoritative read-back is performed by the deployment verifier. The GitHub postcondition test exercises a real verifier logic against fixtures, not against GitHub.",
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/64f3db0/tests/test_effect_verification.py",
+          "revision": "64f3db0",
+          "description": "Verification contract and vocabulary; statuses are exactly the published five."
+        },
+        {
+          "kind": "test",
+          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/64f3db0/tests/test_execution_fault_injection.py",
+          "revision": "64f3db0",
+          "description": "A crash after dispatch reconciles to unknown rather than to success."
+        },
+        {
+          "kind": "test",
+          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/64f3db0/tests/conformance/test_execution_boundary_process_split.py",
+          "revision": "64f3db0",
+          "description": "Every property-E outcome is confirmed by authoritative read-back from the effect service rather than by the dispatch response."
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "This is a self-assessment by the party that authored the conformance model. Under section 4 the evidence tier is RESOLVED because the artifacts are public and runnable, but the reader should weigh the origin: the assessor had full access to the system and an interest in the outcome.",
+    "Property E is reported per section 12 as the topology half plus the bypass half. Two bypass attempts SUCCEED and are recorded as successes.",
+    "No row here should be added up with any other. Section 7 applies."
+  ]
+}

@@ -32,7 +32,7 @@ Please preserve these invariants:
 - no transitive credit between A–G;
 - absence of evidence means `UNTESTED`, not `FAIL`;
 - explicit non-claims mean `OUT_OF_SCOPE`, not `FAIL`;
-- partial passes must name both supported scope and untested remainder;
+- partial passes must name both supported scope and untested remainder, and any part of the property that is a stated non-claim rather than an untested one;
 - disagreements with implementers should be recorded, not silently rewritten.
 
 ## Proposing a new property

@@ -151,6 +151,16 @@
         "untested_remainder": {
           "type": "string"
         },
+        "out_of_scope_remainder": {
+          "type": "string",
+          "description": "The part of the property the implementer explicitly does not claim, when the headline status is not itself OUT_OF_SCOPE. A row may be PASS within a supported configuration while a different configuration is a stated non-claim; without this field that row has to be flattened into one status and the distinction is lost."
+        },
+        "refused_configurations": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1},
+          "uniqueItems": true,
+          "description": "Configurations the implementation refuses to run, named individually. Required by section 12.3 when a demonstrated bypass is answered by making its configuration unavailable: a refusal that names nothing cannot be checked, and a refusal no supported profile enforces is documentation rather than a control."
+        },
         "reasoning": {
           "type": "string",
           "minLength": 1
