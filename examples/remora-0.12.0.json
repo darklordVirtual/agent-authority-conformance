@@ -2,7 +2,7 @@
   "spec_version": "0.1",
   "system": "REMORA",
   "system_version": "0.12.0",
-  "revision": "64f3db0",
+  "revision": "64f3db013cd7aacc6cc12d5ee9daa56f0d0d4555",
   "assessed_at": "2026-08-27",
   "assessor": "REMORA-research maintainer (self-assessment)",
   "scope": {
@@ -154,7 +154,7 @@
       "supported_scope": "the strict runtime profiles (review, controlled_pilot), where the ADR-A custody split is a startup prerequisite; import reachability within the declared agent zone; and a three-process fixture with a real credential and authoritative read-back",
       "out_of_scope_remainder": "single-process enforcement, which the strict profiles refuse to start, and deployment network segmentation and container boundaries, which no in-process guard can observe",
       "reasoning": "Reported per section 12 as both halves. Topology (12.1): 24 secret-bearing environment credentials are declared with holder and reachability claim, the register cannot go stale because a CI gate fails on undeclared credentials, stale entries and reader drift, and no credential declared unreachable is read inside the declared agent zone. The zone choice is load-bearing and its consequence is pinned: treating remora/toolcall as agent-controlled puts nine credentials inside the zone. Bypass (12.2): B3 shows the guarded callable can be pulled off the dispatcher in-process and B4 shows a co-resident process reads the environment without importing anything. Both SUCCEED and ship as passing tests. They are answered per 12.3 by refusing the configuration: under a strict profile the authority domain cannot register a tool callable, the execution domain cannot mint a lease, an unset domain role is refused and an empty effect-credential declaration is refused as vacuous. The three-process fixture then shows the agent refused when reaching the effect service directly, an authorised call succeeding, and argument substitution and replay refused with pinned reasons, every outcome confirmed against the effect service own mailbox rather than the dispatch response.",
-      "caveat": "Per 12.4 this cannot prove absence: the import scan is a regex over import statements, so a missed edge shrinks the zone and the failure mode is a missed finding rather than a false accusation. PASS means no demonstrable alternative path within the declared zone and the attempted classes. The fixture provisions its own credential over loopback HTTP; a production deployment credential is not assessed. The in-process bypasses remain true wherever the research profile is used, which is supported and labelled.",
+      "caveat": "Per 12.4 this cannot prove absence: the import scan is a regex over import statements, so a missed edge shrinks the zone and the failure mode is a missed finding rather than a false accusation. PASS means no demonstrable alternative path within the declared zone and the attempted classes. The fixture provisions its own credential over loopback HTTP; a production deployment credential is not assessed. The in-process bypasses remain true wherever the research profile is used, which is supported and labelled. Per 12.4 the procedure is asymmetric: the topology half needed source access, which this assessor had; a third-party assessment of REMORA would yield the bypass half alone and an untested topology.",
       "refused_configurations": [
         "strict profile with REMORA_EXECUTION_DOMAIN_ROLE unset",
         "strict profile, authority role, holding a declared effect credential",
@@ -189,7 +189,7 @@
           "kind": "test",
           "reference": "https://github.com/darklordVirtual/REMORA-research/blob/64f3db0/tests/conformance/test_execution_boundary.py",
           "revision": "64f3db0",
-          "description": "Bypass suite B1-B7. B3 and B4 assert that a bypass SUCCEEDS.",
+          "description": "Bypass suite B1-B8, covering all five section 12.2 minimum attempts. B3, B4 and B8 assert that a bypass SUCCEEDS.",
           "command": "python -m pytest tests/conformance/test_execution_boundary.py"
         },
         {
