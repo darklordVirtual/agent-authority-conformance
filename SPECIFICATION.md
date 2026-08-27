@@ -52,6 +52,8 @@ In scope: credential custody, enforcement-point exclusivity, alternative API key
 
 A pre-tool hook, interceptor or wrapper is not sufficient evidence by itself. Evidence for E is primarily evidence about credential and execution topology.
 
+Because that evidence is easy to assert and hard to falsify, E is the one property with a prescribed evidence shape. See §12.
+
 ### F. TOCTOU Resistance
 
 **Question:** Can approved conditions change between authorization and execution?
@@ -161,7 +163,8 @@ An assessment is malformed if it:
 
 - The seven properties are asserted to be separable, not proven exhaustive.
 - Availability, cost control, rate limiting, privacy, data minimization and rollback are outside the present model.
-- E currently depends heavily on deployment evidence about credential topology and can be harder to falsify than the other properties.
+- E has a prescribed measurement procedure (§12), added after this list was first written. The underlying difficulty is unchanged: E is a claim about absence, so the procedure bounds the claim rather than proving it. An E `PASS` is only ever as wide as the declared agent zone and the attempted bypass classes, and both are chosen by the assessor.
+- The procedure for E is asymmetric across an organizational boundary, because its topology half needs source access. Assessing a third party will usually yield bypass results with an untested topology, which is a weaker row than a self-assessment can produce. This compounds the inspectable-test-suite bias below.
 - Public evidence requirements favor systems with inspectable test suites. This bias is intentional but MUST be disclosed.
 - No inter-assessor agreement study has yet established how consistently independent assessors draw the same property boundaries.
 - Applying the model to unrelated architectures remains part of the validation work for v0.1.
@@ -169,3 +172,52 @@ An assessment is malformed if it:
 ## 11. Change discipline
 
 Changes that broaden a property MUST include at least one discriminating example demonstrating why the previous boundary was insufficient. New properties SHOULD be proposed only when the claimed behavior cannot be represented without collapsing two distinct authority or execution questions into one.
+
+## 12. Measurement procedure for E
+
+The other six properties are demonstrated by a test that fails when the property is removed. E has no natural test of that shape, because it is a claim about *absence*: that no second path to the effect exists. Absence cannot be tested directly, so this section prescribes what an E assessment MUST contain instead. An E row without both halves is recorded as `UNTESTED`.
+
+### 12.1 Declared topology
+
+A machine-readable register listing every credential that reaches, or authorizes, a protected effect. Per entry: the credential, its class, the component that holds it, the authorized path, and an explicit reachability claim.
+
+The register MUST be checked against the code rather than maintained by hand, and the check MUST fail on three drifts:
+
+1. a credential the code reads but the register omits;
+2. a register entry nothing reads any more;
+3. a reader set that no longer matches the code.
+
+A register that cannot go stale is the difference between a topology and a diagram.
+
+The reachability claim is made falsifiable by declaring an **agent zone**: the set of modules agent-controlled code can reach, given as roots plus their transitive import closure. A credential declared unreachable MUST NOT be read inside that closure. The zone declaration is the load-bearing part of the claim, so the assessment MUST state the reasoning for the chosen roots and what changes if they are drawn wider.
+
+### 12.2 Bypass attempts
+
+A suite of named attempts to reach the effect without the controlled path, each recording what actually happened. Five attempts are the minimum:
+
+1. dispatch without authorization;
+2. dispatch of an unwrapped or unregistered tool name;
+3. extraction of the guarded callable from the enforcement point;
+4. reading the credential from a shared process;
+5. reaching the effect through an already authenticated client, pool or subprocess.
+
+**Attempts that succeed MUST be recorded as successes.** A bypass suite that reports only refusals is evidence about the refusals it chose to attempt, and E is precisely the property where that substitution has gone unnoticed. A demonstrated bypass with a stated architectural reason is a stronger E row than an unbroken row of green.
+
+### 12.3 Answering a bypass by refusing its configuration
+
+Some bypasses have no fix inside the component. An in-process language runtime offers no custody, so a guarded callable can always be reached by code running beside it. The legitimate response is not to weaken the attempt until it fails, and not to argue the attempt is unrealistic. It is to make the configuration in which the bypass matters unavailable, and to demonstrate the refusal with the same rigour as any other property: a named test showing the deployment does not start.
+
+An assessment reporting such a refusal MUST state three things, or the move becomes a way of defining the problem away:
+
+1. **The bypass still succeeds** where the configuration is permitted. The original case stays in the suite, passing, rather than being deleted.
+2. **Which configurations are refused**, by name, and which remain supported. A refusal that no supported profile actually enforces is documentation.
+3. **What the refusal cannot observe.** A process can check its own environment; it cannot check the network it sits on. The boundary between the two belongs in the row, not in the reader's assumptions.
+
+Where all three hold, the refused configuration is recorded as `OUT_OF_SCOPE` under §3 rather than `FAIL`, because it is a stated non-claim backed by a guard. Where they do not, the row stays `FAIL`.
+
+### 12.4 Reporting
+
+An E status is the pair, never the topology half alone, and it MUST reproduce the register's stated limits. Two structural properties MUST be stated by the assessor:
+
+- The procedure is **asymmetric**. §12.1 needs source access; §12.2 needs only a running endpoint. Assessing a third-party system will usually yield §12.2 alone, which is an untested topology and a real result for the attempts.
+- The procedure **cannot prove absence**. A static import scan that misses an edge shrinks the zone, so its failure mode is a missed finding, not a false accusation. A `PASS` therefore means *no demonstrable alternative path within the declared zone and the attempted classes*, and MUST be written that way.
