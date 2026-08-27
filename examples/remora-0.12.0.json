@@ -2,7 +2,7 @@
   "spec_version": "0.1",
   "system": "REMORA",
   "system_version": "0.12.0",
-  "revision": "64f3db013cd7aacc6cc12d5ee9daa56f0d0d4555",
+  "revision": "85e3941a91fa2e18c6045c0bcf8a14a371e057f7",
   "assessed_at": "2026-08-27",
   "assessor": "REMORA-research maintainer (self-assessment)",
   "scope": {
@@ -37,21 +37,21 @@
       "evidence": [
         {
           "kind": "test",
-          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/64f3db0/tests/test_token_hardening.py",
-          "revision": "64f3db0",
+          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/85e3941/tests/test_token_hardening.py",
+          "revision": "85e3941",
           "description": "Signed expiry and jti, TTL bounds, not-before, max-age, audience binding, single consumption.",
           "command": "python -m pytest tests/test_token_hardening.py"
         },
         {
           "kind": "test",
-          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/64f3db0/tests/test_execution_lease.py",
-          "revision": "64f3db0",
+          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/85e3941/tests/test_execution_lease.py",
+          "revision": "85e3941",
           "description": "Tampered fields invalidate the signature; unsigned and expired leases refused; nonce ledger atomic single use."
         },
         {
           "kind": "test",
-          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/64f3db0/tests/test_grant_ledger_tamper_evidence.py",
-          "revision": "64f3db0",
+          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/85e3941/tests/test_grant_ledger_tamper_evidence.py",
+          "revision": "85e3941",
           "description": "Tamper evidence over the grant ledger."
         }
       ]
@@ -68,20 +68,20 @@
       "evidence": [
         {
           "kind": "test",
-          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/64f3db0/tests/test_execution_api.py",
-          "revision": "64f3db0",
+          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/85e3941/tests/test_execution_api.py",
+          "revision": "85e3941",
           "description": "Profile approval role enforced; cross-tenant item access refused."
         },
         {
           "kind": "test",
-          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/64f3db0/tests/test_execution_lease.py",
-          "revision": "64f3db0",
+          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/85e3941/tests/test_execution_lease.py",
+          "revision": "85e3941",
           "description": "Stolen lease refused for a different actor; actor-bound lease requires an actor identity."
         },
         {
           "kind": "test",
-          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/64f3db0/tests/test_token_key_lifecycle.py",
-          "revision": "64f3db0",
+          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/85e3941/tests/test_token_key_lifecycle.py",
+          "revision": "85e3941",
           "description": "A revoked kid is refused even when the key is present."
         }
       ]
@@ -98,20 +98,20 @@
       "evidence": [
         {
           "kind": "test",
-          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/64f3db0/tests/test_execution_lease.py",
-          "revision": "64f3db0",
+          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/85e3941/tests/test_execution_lease.py",
+          "revision": "85e3941",
           "description": "Mutated arguments, context mismatch, unknown tool and policy-bundle mismatch each refused."
         },
         {
           "kind": "test",
-          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/64f3db0/tests/test_enforcement_properties.py",
-          "revision": "64f3db0",
+          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/85e3941/tests/test_enforcement_properties.py",
+          "revision": "85e3941",
           "description": "Property-based: the lease refuses any argument mutation."
         },
         {
           "kind": "test",
-          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/64f3db0/tests/test_toolspec_execution_wiring.py",
-          "revision": "64f3db0",
+          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/85e3941/tests/test_toolspec_execution_wiring.py",
+          "revision": "85e3941",
           "description": "A redeployed spec refuses a prior approval."
         }
       ]
@@ -128,20 +128,20 @@
       "evidence": [
         {
           "kind": "test",
-          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/64f3db0/tests/test_semantic_authority_floor.py",
-          "revision": "64f3db0",
+          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/85e3941/tests/test_semantic_authority_floor.py",
+          "revision": "85e3941",
           "description": "UNKNOWN goal fit or expected effect can never reach ACCEPT; FALSE stops rather than verifies."
         },
         {
           "kind": "test",
-          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/64f3db0/tests/test_goal_match.py",
-          "revision": "64f3db0",
+          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/85e3941/tests/test_goal_match.py",
+          "revision": "85e3941",
           "description": "Wrong resource unsupported despite a well-formed call; a mutating tool never reaches supported from a read intent."
         },
         {
           "kind": "test",
-          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/64f3db0/tests/test_toolspec_runtime.py",
-          "revision": "64f3db0",
+          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/85e3941/tests/test_toolspec_runtime.py",
+          "revision": "85e3941",
           "description": "Target outside the allowlist refused; credential-scope drift refused; description rug-pull refused."
         }
       ]
@@ -167,49 +167,49 @@
       "evidence": [
         {
           "kind": "artifact",
-          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/64f3db0/docs/assurance/credential_topology.yaml",
-          "revision": "64f3db0",
+          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/85e3941/docs/assurance/credential_topology.yaml",
+          "revision": "85e3941",
           "description": "Declared topology per 12.1: 24 credentials, declared agent zone, six limits each with its disposition under the strict profiles."
         },
         {
           "kind": "ci",
-          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/64f3db0/scripts/check_credential_topology.py",
-          "revision": "64f3db0",
+          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/85e3941/scripts/check_credential_topology.py",
+          "revision": "85e3941",
           "description": "The drift gate. Fails on undeclared credentials, stale entries, reader drift, opaque environment reads and agent-zone reachability.",
           "command": "python scripts/check_credential_topology.py"
         },
         {
           "kind": "test",
-          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/64f3db0/tests/test_check_credential_topology.py",
-          "revision": "64f3db0",
+          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/85e3941/tests/test_check_credential_topology.py",
+          "revision": "85e3941",
           "description": "Falsification cases for the gate, including test_agent_zone_breach_is_reported, which uses real repository data.",
           "command": "python -m pytest tests/test_check_credential_topology.py"
         },
         {
           "kind": "test",
-          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/64f3db0/tests/conformance/test_execution_boundary.py",
-          "revision": "64f3db0",
+          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/85e3941/tests/conformance/test_execution_boundary.py",
+          "revision": "85e3941",
           "description": "Bypass suite B1-B8, covering all five section 12.2 minimum attempts. B3, B4 and B8 assert that a bypass SUCCEEDS.",
           "command": "python -m pytest tests/conformance/test_execution_boundary.py"
         },
         {
           "kind": "test",
-          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/64f3db0/tests/conformance/test_execution_boundary_process_split.py",
-          "revision": "64f3db0",
+          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/85e3941/tests/conformance/test_execution_boundary_process_split.py",
+          "revision": "85e3941",
           "description": "Three processes, a real credential, authoritative read-back. P1-P6.",
           "command": "python -m pytest tests/conformance/test_execution_boundary_process_split.py"
         },
         {
           "kind": "test",
-          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/64f3db0/tests/conformance/test_custody_guard.py",
-          "revision": "64f3db0",
+          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/85e3941/tests/conformance/test_custody_guard.py",
+          "revision": "85e3941",
           "description": "K1-K11: the refusals required by 12.3, including that the research profile is unchanged.",
           "command": "python -m pytest tests/conformance/test_custody_guard.py"
         },
         {
           "kind": "code",
-          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/64f3db0/remora/enforcement/custody.py",
-          "revision": "64f3db0",
+          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/85e3941/remora/enforcement/custody.py",
+          "revision": "85e3941",
           "description": "The startup guard that makes the custody split a prerequisite rather than a convention."
         }
       ]
@@ -226,20 +226,20 @@
       "evidence": [
         {
           "kind": "test",
-          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/64f3db0/tests/test_toolspec_runtime.py",
-          "revision": "64f3db0",
+          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/85e3941/tests/test_toolspec_runtime.py",
+          "revision": "85e3941",
           "description": "A spec changing between assessment and dispatch is refused."
         },
         {
           "kind": "test",
-          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/64f3db0/tests/test_execution_outbox.py",
-          "revision": "64f3db0",
+          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/85e3941/tests/test_execution_outbox.py",
+          "revision": "85e3941",
           "description": "Concurrent claims have exactly one winner; the Postgres claim is exclusive."
         },
         {
           "kind": "test",
-          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/64f3db0/tests/test_enforcement_gate_timestamps.py",
-          "revision": "64f3db0",
+          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/85e3941/tests/test_enforcement_gate_timestamps.py",
+          "revision": "85e3941",
           "description": "Fail-closed on unparseable and future timestamps."
         }
       ]
@@ -256,20 +256,20 @@
       "evidence": [
         {
           "kind": "test",
-          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/64f3db0/tests/test_effect_verification.py",
-          "revision": "64f3db0",
+          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/85e3941/tests/test_effect_verification.py",
+          "revision": "85e3941",
           "description": "Verification contract and vocabulary; statuses are exactly the published five."
         },
         {
           "kind": "test",
-          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/64f3db0/tests/test_execution_fault_injection.py",
-          "revision": "64f3db0",
+          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/85e3941/tests/test_execution_fault_injection.py",
+          "revision": "85e3941",
           "description": "A crash after dispatch reconciles to unknown rather than to success."
         },
         {
           "kind": "test",
-          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/64f3db0/tests/conformance/test_execution_boundary_process_split.py",
-          "revision": "64f3db0",
+          "reference": "https://github.com/darklordVirtual/REMORA-research/blob/85e3941/tests/conformance/test_execution_boundary_process_split.py",
+          "revision": "85e3941",
           "description": "Every property-E outcome is confirmed by authoritative read-back from the effect service rather than by the dispatch response."
         }
       ]
