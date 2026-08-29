@@ -107,3 +107,9 @@ The most valuable contributions are not new adjectives or broader claims. They a
 - proposals for missing dimensions that cannot be represented by A–G.
 
 See [`CONTRIBUTING.md`](CONTRIBUTING.md).
+
+## Licence
+
+Apache-2.0. A vocabulary nobody may lawfully reuse is not vendor-neutral, and
+the repository shipped without a licence file until 2026-08-29. Contributions
+are accepted under the same terms.
