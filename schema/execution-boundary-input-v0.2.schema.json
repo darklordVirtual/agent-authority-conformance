@@ -1,0 +1,150 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/darklordVirtual/agent-authority-conformance/schema/execution-boundary-input-v0.2.schema.json",
+  "title": "Accepted evidence inputs for the bounded E reference rule",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "property",
+    "context",
+    "attempts"
+  ],
+  "properties": {
+    "property": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S"
+    },
+    "context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evaluation_scope",
+        "agent_zone",
+        "accepted_topology",
+        "accepted_coverage"
+      ],
+      "properties": {
+        "evaluation_scope": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "agent_zone": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "accepted_topology": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "scope",
+                "reference",
+                "revision"
+              ],
+              "properties": {
+                "scope": {
+                  "type": "string",
+                  "minLength": 1,
+                  "pattern": "\\S"
+                },
+                "reference": {
+                  "type": "string",
+                  "minLength": 1,
+                  "pattern": "\\S"
+                },
+                "revision": {
+                  "type": "string",
+                  "minLength": 1,
+                  "pattern": "\\S"
+                }
+              }
+            }
+          ]
+        },
+        "accepted_coverage": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "scope",
+                "reference",
+                "revision"
+              ],
+              "properties": {
+                "scope": {
+                  "type": "string",
+                  "minLength": 1,
+                  "pattern": "\\S"
+                },
+                "reference": {
+                  "type": "string",
+                  "minLength": 1,
+                  "pattern": "\\S"
+                },
+                "revision": {
+                  "type": "string",
+                  "minLength": 1,
+                  "pattern": "\\S"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "attempts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "scope",
+          "reference",
+          "revision",
+          "class",
+          "outcome"
+        ],
+        "properties": {
+          "scope": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S"
+          },
+          "reference": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S"
+          },
+          "revision": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S"
+          },
+          "class": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S"
+          },
+          "outcome": {
+            "enum": [
+              "BLOCKED",
+              "REACHED_EFFECT",
+              "UNKNOWN"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

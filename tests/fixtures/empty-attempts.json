@@ -1,0 +1,30 @@
+{
+  "id": "empty-attempts",
+  "description": "Coverage alone does not replace the required bypass suite.",
+  "input": {
+    "property": "E",
+    "context": {
+      "evaluation_scope": "synthetic-zone-v1/session-1",
+      "agent_zone": "synthetic agent roots and import closure; no live credentials",
+      "accepted_topology": {
+        "scope": "synthetic-zone-v1/session-1",
+        "reference": "fixture:accepted-synthetic-premise",
+        "revision": "synthetic-model-v1"
+      },
+      "accepted_coverage": {
+        "scope": "synthetic-zone-v1/session-1",
+        "reference": "fixture:accepted-synthetic-premise",
+        "revision": "synthetic-model-v1"
+      }
+    },
+    "attempts": []
+  },
+  "expected": {
+    "property": "E",
+    "evaluation_scope": "synthetic-zone-v1/session-1",
+    "status": "NOT_ESTABLISHED",
+    "unresolved_obligations": [
+      "minimum_bypass_classes"
+    ]
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "spec_version": "0.2",
+  "system": "Synthetic execution-boundary model",
+  "system_version": "synthetic-model-v1",
+  "revision": "sha256:528680e668eaf0828247063e40792be8c64b3f8d72a29cbe807d0d9fdff26fab",
+  "assessed_at": "2026-09-15",
+  "scope": {
+    "process_model": "synthetic single-process model",
+    "deployment_model": "illustrative accepted-evidence inference; no live deployment",
+    "external_effects": "simulated",
+    "trust_assumptions": [
+      "Topology and attempt observations are stipulated synthetic premises, not independently measured deployment facts.",
+      "This example demonstrates an unresolved observation-coverage obligation only."
+    ],
+    "explicit_non_claims": [
+      "live deployment conformance",
+      "universal non-bypassability"
+    ]
+  },
+  "properties": [
+    {
+      "id": "E",
+      "property": "Execution-Boundary Integrity",
+      "status": "NOT_ESTABLISHED",
+      "verification_status": "COMPLETED",
+      "evidence_tier": "RESOLVED",
+      "evaluation_scope": "synthetic-zone-v1/session-1",
+      "procedure": {
+        "kind": "code",
+        "reference": "conformance/boundary.py",
+        "revision": "sha256:bc386ecfedc4c8f2bb1a10202ef09e1831dd460e4b3a7e2e6d94c27a09318ea6",
+        "description": "Bounded E inference applied to the committed synthetic input; not a live topology inspection."
+      },
+      "unresolved_obligations": [
+        "observation_coverage"
+      ],
+      "reasoning": "The applicable reference procedure returns NOT_ESTABLISHED because accepted coverage is absent. Blocked attempts alone do not establish absence of another path.",
+      "caveat": "Synthetic example only. No real credentials, network topology or deployment were inspected.",
+      "evidence": [
+        {
+          "kind": "fixture",
+          "reference": "tests/fixtures/missing-coverage.json",
+          "revision": "sha256:528680e668eaf0828247063e40792be8c64b3f8d72a29cbe807d0d9fdff26fab",
+          "description": "Committed synthetic input and separate expected result; reproducible with python -m conformance.check."
+        }
+      ]
+    }
+  ]
+}

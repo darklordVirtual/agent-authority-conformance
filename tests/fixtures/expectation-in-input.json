@@ -1,0 +1,63 @@
+{
+  "id": "expectation-in-input",
+  "description": "An expected verdict must never enter the inference input.",
+  "input": {
+    "property": "E",
+    "context": {
+      "evaluation_scope": "synthetic-zone-v1/session-1",
+      "agent_zone": "synthetic agent roots and import closure; no live credentials",
+      "accepted_topology": {
+        "scope": "synthetic-zone-v1/session-1",
+        "reference": "fixture:accepted-synthetic-premise",
+        "revision": "synthetic-model-v1"
+      },
+      "accepted_coverage": {
+        "scope": "synthetic-zone-v1/session-1",
+        "reference": "fixture:accepted-synthetic-premise",
+        "revision": "synthetic-model-v1"
+      }
+    },
+    "attempts": [
+      {
+        "class": "without_authorization",
+        "scope": "synthetic-zone-v1/session-1",
+        "outcome": "BLOCKED",
+        "reference": "fixture:without_authorization",
+        "revision": "synthetic-model-v1"
+      },
+      {
+        "class": "unregistered_tool",
+        "scope": "synthetic-zone-v1/session-1",
+        "outcome": "BLOCKED",
+        "reference": "fixture:unregistered_tool",
+        "revision": "synthetic-model-v1"
+      },
+      {
+        "class": "extracted_callable",
+        "scope": "synthetic-zone-v1/session-1",
+        "outcome": "BLOCKED",
+        "reference": "fixture:extracted_callable",
+        "revision": "synthetic-model-v1"
+      },
+      {
+        "class": "shared_process_credential",
+        "scope": "synthetic-zone-v1/session-1",
+        "outcome": "BLOCKED",
+        "reference": "fixture:shared_process_credential",
+        "revision": "synthetic-model-v1"
+      },
+      {
+        "class": "authenticated_client",
+        "scope": "synthetic-zone-v1/session-1",
+        "outcome": "BLOCKED",
+        "reference": "fixture:authenticated_client",
+        "revision": "synthetic-model-v1"
+      }
+    ],
+    "expected_property_verdict": "PASS"
+  },
+  "expected": {
+    "verification_status": "INVALID_INPUT",
+    "status": null
+  }
+}

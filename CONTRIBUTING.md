@@ -30,7 +30,8 @@ Please preserve these invariants:
 
 - no aggregate scores, rankings or star ratings;
 - no transitive credit between A–G;
-- absence of evidence means `UNTESTED`, not `FAIL`;
+- absence of evidence never establishes `FAIL`; in v0.2 distinguish `UNTESTED`
+  from `NOT_ESTABLISHED` after applicable verification;
 - explicit non-claims mean `OUT_OF_SCOPE`, not `FAIL`;
 - partial passes must name both supported scope and untested remainder;
 - disagreements with implementers should be recorded, not silently rewritten.
@@ -49,3 +50,18 @@ A new property proposal should answer four questions:
 Keep changes narrow and evidence-linked. Prefer one conceptual change per pull request. If a change alters a normative property boundary, include an example or fixture that demonstrates the reason.
 
 The goal is not to make more systems pass. The goal is to make every result easier to interpret and harder to overstate.
+
+## v0.2 contributions
+
+Preserve the v0.1 specification, schema and historical assessments. New v0.2
+records belong under `examples/v0.2/`; consult `MIGRATION-v0.2.md` rather than
+automatically relabelling old results.
+
+Keep expected fixture verdicts outside checker input. Verification must read
+committed expectations and fail on disagreement without rewriting them. Include
+negative cases for missing evidence, mismatched scopes and malformed input when
+changing inference rules. Unsupported checks and verifier errors are non-verdicts.
+
+Run `python -m conformance.check` and `python -m unittest discover -s tests -v`.
+The synthetic reference rule trusts accepted upstream evidence; changes must
+not imply that it authenticates artifacts or proves live non-bypassability.

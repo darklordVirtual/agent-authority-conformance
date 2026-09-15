@@ -25,3 +25,26 @@ jobs:
 
       - name: Validate assessment examples
         run: check-jsonschema --schemafile schema/assessment.schema.json examples/*.json
+
+  evidence-v02:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install validation dependencies
+        run: python -m pip install --disable-pip-version-check -r requirements-dev.txt
+
+      - name: Validate assessments and committed fixtures
+        run: python -m conformance.check
+
+      - name: Run semantic and harness regression tests
+        run: python -m unittest discover -s tests -v
+
+      - name: Ensure checks did not rewrite tracked evidence
+        run: git diff --exit-code
