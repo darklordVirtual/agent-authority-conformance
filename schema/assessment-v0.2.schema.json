@@ -1,0 +1,705 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/darklordVirtual/agent-authority-conformance/schema/assessment-v0.2.schema.json",
+  "title": "Agent Authority Conformance Assessment v0.2",
+  "description": "Machine-readable representation of a scoped A-G authority conformance assessment. Aggregate scoring is intentionally unsupported.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "spec_version",
+    "system",
+    "system_version",
+    "revision",
+    "assessed_at",
+    "scope",
+    "properties"
+  ],
+  "properties": {
+    "spec_version": {
+      "const": "0.2"
+    },
+    "system": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S"
+    },
+    "system_version": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S"
+    },
+    "revision": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Immutable commit, release digest or other pinned revision where available.",
+      "pattern": "\\S"
+    },
+    "assessed_at": {
+      "type": "string",
+      "format": "date"
+    },
+    "assessor": {
+      "type": "string"
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "process_model",
+        "external_effects",
+        "trust_assumptions",
+        "explicit_non_claims"
+      ],
+      "properties": {
+        "process_model": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "deployment_model": {
+          "type": "string"
+        },
+        "external_effects": {
+          "type": "string",
+          "enum": [
+            "real",
+            "simulated",
+            "mixed",
+            "none"
+          ]
+        },
+        "trust_assumptions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "explicit_non_claims": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "properties": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 7,
+      "items": {
+        "$ref": "#/$defs/propertyAssessment"
+      },
+      "allOf": [
+        {
+          "contains": {
+            "properties": {
+              "id": {
+                "const": "A"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          },
+          "minContains": 0,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "id": {
+                "const": "B"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          },
+          "minContains": 0,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "id": {
+                "const": "C"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          },
+          "minContains": 0,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "id": {
+                "const": "D"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          },
+          "minContains": 0,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "id": {
+                "const": "E"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          },
+          "minContains": 0,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "id": {
+                "const": "F"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          },
+          "minContains": 0,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "id": {
+                "const": "G"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          },
+          "minContains": 0,
+          "maxContains": 1
+        }
+      ]
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "$defs": {
+    "evidenceReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "reference",
+        "description",
+        "revision"
+      ],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "test",
+            "fixture",
+            "artifact",
+            "code",
+            "ci",
+            "release",
+            "other"
+          ]
+        },
+        "reference": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "revision": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "command": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        }
+      }
+    },
+    "propertyAssessment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "property",
+        "status",
+        "evidence_tier",
+        "reasoning",
+        "caveat",
+        "evidence",
+        "verification_status"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "enum": [
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G"
+          ]
+        },
+        "property": {
+          "type": "string",
+          "enum": [
+            "Receipt Integrity",
+            "Authority Provenance",
+            "Exact-Call Integrity",
+            "Semantic Authority",
+            "Execution-Boundary Integrity",
+            "TOCTOU Resistance",
+            "Effect Verification"
+          ]
+        },
+        "status": {
+          "enum": [
+            "PASS",
+            "FAIL",
+            "NOT_ESTABLISHED",
+            "UNTESTED",
+            "OUT_OF_SCOPE",
+            null
+          ]
+        },
+        "evidence_tier": {
+          "type": "string",
+          "enum": [
+            "RESOLVED",
+            "REPORTED",
+            "NONE"
+          ]
+        },
+        "claimed_status": {
+          "type": "string"
+        },
+        "supported_scope": {
+          "type": "string"
+        },
+        "untested_remainder": {
+          "type": "string"
+        },
+        "reasoning": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "caveat": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/evidenceReference"
+          }
+        },
+        "verification_status": {
+          "enum": [
+            "COMPLETED",
+            "NOT_RUN",
+            "UNSUPPORTED",
+            "INVALID_INPUT",
+            "ERROR"
+          ]
+        },
+        "evaluation_scope": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "procedure": {
+          "$ref": "#/$defs/evidenceReference"
+        },
+        "unresolved_obligations": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S"
+          },
+          "uniqueItems": true
+        },
+        "verifier_error": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "code",
+            "message"
+          ],
+          "properties": {
+            "code": {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "\\S"
+            },
+            "message": {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "\\S"
+            }
+          }
+        },
+        "runtime_outcome": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "receipt_chain_outcome": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "execution_boundary": {
+          "$ref": "#/$defs/executionBoundary"
+        }
+      },
+      "allOf": [
+        {
+          "oneOf": [
+            {
+              "properties": {
+                "id": {
+                  "const": "A"
+                },
+                "property": {
+                  "const": "Receipt Integrity"
+                }
+              }
+            },
+            {
+              "properties": {
+                "id": {
+                  "const": "B"
+                },
+                "property": {
+                  "const": "Authority Provenance"
+                }
+              }
+            },
+            {
+              "properties": {
+                "id": {
+                  "const": "C"
+                },
+                "property": {
+                  "const": "Exact-Call Integrity"
+                }
+              }
+            },
+            {
+              "properties": {
+                "id": {
+                  "const": "D"
+                },
+                "property": {
+                  "const": "Semantic Authority"
+                }
+              }
+            },
+            {
+              "properties": {
+                "id": {
+                  "const": "E"
+                },
+                "property": {
+                  "const": "Execution-Boundary Integrity"
+                }
+              }
+            },
+            {
+              "properties": {
+                "id": {
+                  "const": "F"
+                },
+                "property": {
+                  "const": "TOCTOU Resistance"
+                }
+              }
+            },
+            {
+              "properties": {
+                "id": {
+                  "const": "G"
+                },
+                "property": {
+                  "const": "Effect Verification"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "if": {
+            "properties": {
+              "verification_status": {
+                "const": "COMPLETED"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "evaluation_scope",
+              "procedure",
+              "unresolved_obligations"
+            ],
+            "properties": {
+              "status": {
+                "enum": [
+                  "PASS",
+                  "FAIL",
+                  "NOT_ESTABLISHED"
+                ]
+              }
+            },
+            "not": {
+              "required": [
+                "verifier_error"
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "verification_status": {
+                "const": "NOT_RUN"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "status": {
+                "enum": [
+                  "UNTESTED",
+                  "OUT_OF_SCOPE"
+                ]
+              }
+            },
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "verifier_error"
+                  ]
+                },
+                {
+                  "required": [
+                    "unresolved_obligations"
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "verification_status": {
+                "enum": [
+                  "UNSUPPORTED",
+                  "INVALID_INPUT",
+                  "ERROR"
+                ]
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "verifier_error"
+            ],
+            "properties": {
+              "status": {
+                "type": "null"
+              }
+            },
+            "not": {
+              "required": [
+                "unresolved_obligations"
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "enum": [
+                  "PASS",
+                  "FAIL"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "evidence_tier": {
+                "const": "RESOLVED"
+              },
+              "evidence": {
+                "minItems": 1
+              },
+              "unresolved_obligations": {
+                "maxItems": 0
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "PASS"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "supported_scope"
+            ],
+            "properties": {
+              "supported_scope": {
+                "minLength": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "NOT_ESTABLISHED"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "unresolved_obligations": {
+                "minItems": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "id": {
+                "const": "E"
+              },
+              "status": {
+                "const": "PASS"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "execution_boundary"
+            ]
+          }
+        }
+      ]
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evaluation_scope",
+        "agent_zone",
+        "attempted_bypass_classes",
+        "topology_evidence",
+        "coverage_evidence",
+        "bypass_evidence"
+      ],
+      "properties": {
+        "evaluation_scope": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "agent_zone": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "attempted_bypass_classes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S"
+          },
+          "uniqueItems": true,
+          "allOf": [
+            {
+              "contains": {
+                "const": "without_authorization"
+              }
+            },
+            {
+              "contains": {
+                "const": "unregistered_tool"
+              }
+            },
+            {
+              "contains": {
+                "const": "extracted_callable"
+              }
+            },
+            {
+              "contains": {
+                "const": "shared_process_credential"
+              }
+            },
+            {
+              "contains": {
+                "const": "authenticated_client"
+              }
+            }
+          ]
+        },
+        "topology_evidence": {
+          "$ref": "#/$defs/evidenceReference"
+        },
+        "coverage_evidence": {
+          "$ref": "#/$defs/evidenceReference"
+        },
+        "bypass_evidence": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/evidenceReference"
+          }
+        }
+      }
+    }
+  }
+}

@@ -2,7 +2,7 @@
 
 > **Evidence before adjectives.** A vendor-neutral vocabulary for evaluating authority and execution controls in agentic systems.
 
-**Status:** Draft v0.1 · **No aggregate score** · **Not a certification** · **Not a product ranking**
+**Status:** Draft v0.2 (opt-in; v0.1 preserved) · **No aggregate score** · **Not a certification** · **Not a product ranking**
 
 When an agent runtime says *“the tool call was authorized”*, that statement hides several independent security and governance questions. Agent Authority Conformance separates those questions so implementations can state precisely what they have demonstrated, what remains untested, and what they deliberately do not claim.
 
@@ -24,12 +24,18 @@ These properties are deliberately **separable**. Evidence for one property grant
 
 ## Assessment statuses
 
-- **PASS** — direct, reproducible evidence supports the property within the declared scope.
-- **UNTESTED** — available evidence does not demonstrate the property.
-- **OUT OF SCOPE** — the implementer explicitly does not claim the property.
-- **FAIL** — reproducible evidence shows the property does not hold under a tested condition.
+v0.2 records verification execution separately from the property result:
 
-`OUT OF SCOPE` is not a deficiency. Narrow, explicit claims are preferable to broad, weak ones.
+| Verification | Property status | Meaning |
+|---|---|---|
+| `NOT_RUN` | `UNTESTED` | No applicable verification completed. |
+| `NOT_RUN` | `OUT_OF_SCOPE` | Explicit non-claim within the assessment scope. |
+| `COMPLETED` | `PASS` / `FAIL` | Resolved evidence establishes the bounded property or its violation. |
+| `COMPLETED` | `NOT_ESTABLISHED` | The procedure ran, but evidence supports neither conclusion. |
+| `UNSUPPORTED` / `INVALID_INPUT` / `ERROR` | `null` | A non-verdict with a structured verifier error. |
+
+A runtime success, valid receipt or passing test expectation is not a property
+verdict. Missing evidence alone is never a demonstrated violation.
 
 ## Evidence tiers
 
@@ -37,7 +43,8 @@ These properties are deliberately **separable**. Evidence for one property grant
 - **REPORTED** — the evidence was described but not independently resolved to an artifact.
 - **NONE** — no evidence was offered.
 
-A `PASS` requires `RESOLVED` evidence.
+In v0.2, `PASS` and `FAIL` require nonempty, pinned `RESOLVED` evidence.
+Resolving an artifact does not alone prove that it is sufficient.
 
 ## One rule matters most
 
@@ -49,45 +56,80 @@ No percentage, star rating, “5/7 conformant”, security grade or ranking is v
 
 | Path | Purpose |
 |---|---|
-| [`SPECIFICATION.md`](SPECIFICATION.md) | Normative v0.1 property definitions, statuses and evidence rules |
-| [`schema/assessment.schema.json`](schema/assessment.schema.json) | Machine-readable assessment format |
-| [`examples/`](examples/) | Bounded example assessments with explicit scope and caveats |
-| [`CONTRIBUTING.md`](CONTRIBUTING.md) | How to propose property, evidence and assessment changes |
+| [`SPECIFICATION-v0.2.md`](SPECIFICATION-v0.2.md) | Draft v0.2 semantics and bounded E evidence rules |
+| [`schema/assessment-v0.2.schema.json`](schema/assessment-v0.2.schema.json) | Opt-in v0.2 assessment schema |
+| [`MIGRATION-v0.2.md`](MIGRATION-v0.2.md) | Per-record migration and compatibility rules |
+| [`SPECIFICATION.md`](SPECIFICATION.md) | Preserved normative v0.1 specification |
+| [`schema/assessment.schema.json`](schema/assessment.schema.json) | Preserved v0.1 schema |
+| [`examples/`](examples/) | Versioned examples and historical assessments |
+| [`conformance/`](conformance/) | Validation and bounded E reference inference |
+| [`tests/fixtures/`](tests/fixtures/) | Synthetic, committed evidence-sufficiency cases |
+| [`CONTRIBUTING.md`](CONTRIBUTING.md) | Evidence and contribution discipline |
+
+## Quick start
+
+Python 3.12 or newer:
+
+```sh
+python -m venv .venv
+# Linux/macOS: . .venv/bin/activate
+# Windows PowerShell: .venv/Scripts/Activate.ps1
+python -m pip install -r requirements-dev.txt
+python -m conformance.check
+python -m unittest discover -s tests -v
+```
+
+Activate the environment with the command for your platform before installing.
+The checks run offline after dependency installation and do not invoke external
+tools or regenerate committed expectations.
+
+The E reference rule consumes **already accepted evidence**. It does not verify
+artifacts, inspect credential custody or establish coverage itself. Its synthetic
+fixtures test inference semantics, not the security of a deployed product.
+See [the input trust boundary](SPECIFICATION-v0.2.md#6-bounded-reference-rule-and-corpus).
 
 ## Minimal assessment shape
 
+This complete, schema-valid v0.2 skeleton intentionally grants no conformance
+credit. It is also committed as [`examples/v0.2/minimal.json`](examples/v0.2/minimal.json).
+
 ```json
 {
-  "spec_version": "0.1",
-  "system": "Example Runtime",
-  "system_version": "1.0.0",
-  "revision": "immutable-revision",
-  "scope": {
-    "process_model": "single-process",
-    "external_effects": "simulated",
-    "explicit_non_claims": ["multiprocess exactly-once effects"]
-  },
+  "assessed_at": "2026-09-15",
   "properties": [
     {
+      "caveat": "This is a valid assessment skeleton and grants no conformance credit.",
+      "evidence": [],
+      "evidence_tier": "NONE",
       "id": "C",
-      "status": "PASS",
-      "evidence_tier": "RESOLVED",
-      "supported_scope": "full argument binding at dispatch",
-      "caveat": "No evidence for cross-process execution",
-      "evidence": []
+      "property": "Exact-Call Integrity",
+      "reasoning": "No verification procedure has been run for this example.",
+      "status": "UNTESTED",
+      "verification_status": "NOT_RUN"
     }
-  ]
+  ],
+  "revision": "not-assessed",
+  "scope": {
+    "explicit_non_claims": [],
+    "external_effects": "none",
+    "process_model": "not-assessed",
+    "trust_assumptions": []
+  },
+  "spec_version": "0.2",
+  "system": "Example Runtime (unassessed)",
+  "system_version": "not-assessed"
 }
 ```
 
-The schema intentionally contains **no aggregate score field**.
+The schema intentionally contains **no aggregate score field**. Schema validation
+checks report structure; the assessor remains responsible for the evidence.
 
 ## Design principles
 
 1. **Separate properties.** Receipt correctness is not authority provenance; exact binding is not semantic correctness; dispatch success is not effect verification.
 2. **Resolve claims to immutable evidence.** Prefer test path + revision + command over README prose.
 3. **Declare scope.** Process model, deployment assumptions, simulated vs real effects and explicit non-claims belong in the assessment.
-4. **Treat missing evidence conservatively.** Absence of evidence is `UNTESTED`, never `FAIL`.
+4. **Treat missing evidence conservatively.** Distinguish `UNTESTED` from completed-but-inconclusive `NOT_ESTABLISHED`; neither is a demonstrated violation.
 5. **Record disagreement.** An implementer should be able to see exactly where an assessor's interpretation differs from their own claim.
 
 ## Origin
@@ -95,6 +137,14 @@ The schema intentionally contains **no aggregate score field**.
 The vocabulary emerged from execution-assurance work in [REMORA-research](https://github.com/darklordVirtual/REMORA-research) and a cross-system dialogue around AEGIS Core. This repository deliberately separates the conformance model from any one implementation so the methodology can be challenged, reproduced and applied independently.
 
 The success criterion is simple: an implementer should be able to read an assessment and say, *“yes, this describes exactly what we proved, what we did not prove, and what we are not trying to solve.”*
+
+## Standards discussion
+
+The v0.2 evidence-sufficiency distinction is informed by
+[CoSAI/OASIS WS4 RFC #189](https://github.com/cosai-oasis/ws4-secure-design-agentic-systems/issues/189),
+where contributions by `@darklordVirtual` address verifier semantics and the
+separation of evidence inputs from test expectations. This repository is an
+independent draft; the link does not imply CoSAI adoption or endorsement.
 
 ## Contributing
 

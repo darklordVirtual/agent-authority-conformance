@@ -1,0 +1,25 @@
+{
+  "spec_version": "0.2",
+  "system": "Example Runtime (unassessed)",
+  "system_version": "not-assessed",
+  "revision": "not-assessed",
+  "assessed_at": "2026-09-15",
+  "scope": {
+    "process_model": "not-assessed",
+    "external_effects": "none",
+    "trust_assumptions": [],
+    "explicit_non_claims": []
+  },
+  "properties": [
+    {
+      "id": "C",
+      "property": "Exact-Call Integrity",
+      "status": "UNTESTED",
+      "verification_status": "NOT_RUN",
+      "evidence_tier": "NONE",
+      "reasoning": "No verification procedure has been run for this example.",
+      "caveat": "This is a valid assessment skeleton and grants no conformance credit.",
+      "evidence": []
+    }
+  ]
+}
