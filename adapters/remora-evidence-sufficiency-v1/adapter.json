@@ -1,0 +1,51 @@
+{
+  "schema_version": "federation-adapter-v1",
+  "subject": {
+    "repository": "darklordVirtual/REMORA-research",
+    "revision": "31c4060630923344d43d9fac26821150262c3687"
+  },
+  "adapter": {
+    "id": "remora-evidence-sufficiency-v1-resolution",
+    "revision": "0000000000000000000000000000000000000000"
+  },
+  "artifacts": [
+    {
+      "id": "checker",
+      "path": "conformance/evidence-sufficiency-v1/checker.py",
+      "sha256": "c4ca50aee2b2918b11c6fbde1f8615ca6c6bf1e5b6fa2ac1775f49c5e8c20be0",
+      "source_class": "source_code",
+      "required": true
+    },
+    {
+      "id": "cases",
+      "path": "conformance/evidence-sufficiency-v1/cases.json",
+      "sha256": "a0048cc021ab7cd7f7d1b09a93e13c7dbdee9f7a685ea617a112da8af3c88d7e",
+      "source_class": "test_fixture",
+      "required": true
+    }
+  ],
+  "claims": [
+    {
+      "claim_id": "remora-es-v1-input-resolution",
+      "property": null,
+      "procedure": "sha256-resolution-only",
+      "artifacts": [
+        "checker",
+        "cases"
+      ],
+      "claim_ceiling": "The adapter can establish only that the local subject checkout contains the two bytes pinned for the #629 adequacy experiment. It does not establish checker correctness, corpus adequacy, any AAC A-G property, production use, external validation or independent replication."
+    }
+  ],
+  "explicit_non_claims": [
+    "AAC A-G conformance",
+    "checker correctness",
+    "corpus adequacy",
+    "production enforcement",
+    "independent validation",
+    "external replication"
+  ],
+  "review": {
+    "maintainer_review_required": true,
+    "publication_rule": "The REMORA maintainer reviews the generated bundle before it is used as a public cross-project result."
+  }
+}
