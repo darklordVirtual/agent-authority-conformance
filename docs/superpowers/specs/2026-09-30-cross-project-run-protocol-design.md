@@ -62,9 +62,10 @@ copy it.
 - **Private repositories live in a dedicated GitHub organisation** so that
   invitations can be read-only. The organisation is set in `lab.toml`
   (`org = "…"`) or with `--org`; there is no built-in default in code. The
-  maintainer's preferred name `R-research` is already taken on GitHub by an
-  unrelated user account (`r-research`, checked 2026-09-30), so the
-  organisation name must be chosen before step 6 of §12 can be shared.
+  maintainer chose **`R-research-lab`** (available on 2026-09-30; `R-research`
+  is taken by an unrelated user account). The repository's committed
+  `lab.toml` sets `org = "R-research-lab"`; the organisation itself is
+  created manually on github.com by the maintainer.
   `share` verifies that the target owner is an organisation (not a user) and
   refuses otherwise, since user-owned repositories cannot grant read-only
   invitations.
@@ -382,8 +383,8 @@ All tests use `unittest` and run offline.
 6. Reference run `runs/remora-es-v12-adequacy/`: `SELF_RUN`, pinned at
    `c1345b1f9e0f877454bf996b2160d533c5a9b16a`, reusing Rul1an's published
    v1.1 fault definitions as a `known` set with attribution. Run and
-   packaged locally; **not shared** until the organisation name is chosen and
-   the maintainer says so.
+   packaged locally; **not shared** until the `R-research-lab` organisation
+   exists and the maintainer says so.
 7. Scope templates for external targets (APS fixtures at `948f99b8`,
    AgentAvow tool-manifest-digest vectors at `4404df2c`), marked as drafts
    that cannot be frozen until `scope_agreed` is recorded.
