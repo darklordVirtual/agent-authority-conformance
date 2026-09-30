@@ -96,3 +96,8 @@ def freeze(run_dir, now, published_ref=None, workdir=None):
     with tempfile.TemporaryDirectory(prefix="aac-freeze-", dir=workdir) as tmp:
         trees, _ = pins.materialize(scope, tmp)
         return plan.freeze(run_dir, scope, trees, identity_for(scope), now, published_ref)
+
+
+def package(run_dir, now):
+    from . import package as package_module
+    package_module.build(run_dir, now)
