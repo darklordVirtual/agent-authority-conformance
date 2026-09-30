@@ -26,6 +26,9 @@ jobs:
       - name: Validate assessment examples
         run: check-jsonschema --schemafile schema/assessment.schema.json examples/*.json
 
+      - name: Validate federation adapter manifests
+        run: check-jsonschema --schemafile schema/federation-adapter-v1.schema.json adapters/*/adapter.json
+
   evidence-v02:
     runs-on: ubuntu-latest
     steps:
