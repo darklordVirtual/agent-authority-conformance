@@ -101,3 +101,82 @@ def freeze(run_dir, now, published_ref=None, workdir=None):
 def package(run_dir, now):
     from . import package as package_module
     package_module.build(run_dir, now)
+
+
+LIFECYCLE_FILES = ("STATUS.md", "CONSENT.json", "REVIEW.md", "STATE.json")
+
+
+def share(run_dir, org, invite, now):
+    """Create <org>/<run_id> as a private repository, push the package, invite read-only."""
+    from . import github
+    state.require(run_dir, "PACKAGED")
+    if not org:
+        raise GateError("no organisation: set org in lab.toml or pass --org")
+    if github.owner_type(org) != "Organization":
+        raise GateError(f"{org} is not an organisation; user-owned repositories cannot grant read-only access")
+    scope = load_scope(run_dir)
+    full_name = f"{org}/{scope['run_id']}"
+    github.create_private(full_name)
+    commit = github.push_snapshot(run_dir, full_name, f"Private delivery of {scope['run_id']}")
+    for user in invite:
+        github.invite_read_only(full_name, user)
+    state.transition(run_dir, "SHARED_PRIVATE", now, note=f"pushed {commit}; invited {', '.join(invite) or 'nobody'}",
+                     repository=full_name, delivery_commit=commit)
+    return full_name
+
+
+def review(run_dir, who, kind, ref, now):
+    """Record corrections or survivor classification. Measured values are never edited."""
+    current = state.require(run_dir, "SHARED_PRIVATE", "REVIEWED")
+    action = {"corrections": "factual_corrections", "classification": "survivor_classification"}[kind]
+    consent.add(run_dir, who, action, ref, now)
+    path = Path(run_dir) / "REVIEW.md"
+    if not path.is_file():
+        path.write_text("# Review addenda\n\nMeasured values are never edited. Corrections and survivor "
+                        "classifications are recorded here and linked to where they were made.\n\n",
+                        encoding="utf-8")
+    with open(path, "a", encoding="utf-8") as fh:
+        fh.write(f"- {now}: {action} by {who}: {ref}\n")
+    if current["state"] == "SHARED_PRIVATE":
+        state.transition(run_dir, "REVIEWED", now, note=action)
+
+
+def _set_status(run_dir, status, message):
+    """Write STATUS.md and push lifecycle files; restore STATUS.md if pushing fails."""
+    from . import github
+    from .report import render_status
+    current = state.load_state(run_dir)
+    path = Path(run_dir) / "STATUS.md"
+    previous = path.read_text(encoding="utf-8") if path.is_file() else None
+    path.write_text(render_status(status), encoding="utf-8")
+    try:
+        if current.get("repository"):
+            github.push_snapshot(run_dir, current["repository"], message,
+                                 files=[f for f in LIFECYCLE_FILES if (Path(run_dir) / f).is_file()])
+    except Exception:
+        if previous is not None:
+            path.write_text(previous, encoding="utf-8")
+        raise
+    return current
+
+
+def publish(run_dir, now):
+    from . import github
+    state.require(run_dir, "REVIEWED")
+    scope = load_scope(run_dir)
+    approvers = scope["publication"]["approvers"]
+    status = consent.publication_status(consent.load(run_dir), approvers)
+    if status != "approved":
+        raise GateError(f"publication is {status}; every approver ({', '.join(approvers)}) must approve")
+    current = _set_status(run_dir, "PUBLISHED", "Record publication approval")
+    github.make_public(current["repository"])
+    state.transition(run_dir, "PUBLISHED", now, note="every approver approved publication")
+
+
+def withhold(run_dir, now):
+    state.require(run_dir, "SHARED_PRIVATE", "REVIEWED")
+    scope = load_scope(run_dir)
+    if consent.publication_status(consent.load(run_dir), scope["publication"]["approvers"]) != "declined":
+        raise GateError("withhold needs a publication_declined or withdrawn event from an approver")
+    _set_status(run_dir, "WITHHELD", "Record withheld status")
+    state.transition(run_dir, "WITHHELD", now, note="publication declined")
