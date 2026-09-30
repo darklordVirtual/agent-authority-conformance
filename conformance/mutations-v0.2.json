@@ -1,0 +1,201 @@
+{
+  "artifact": "agent-authority-conformance mutations v0.2",
+  "subject": "conformance/boundary.py",
+  "rule": "Each mutation replaces one exact anchor in the subject's source with one replacement. The anchor must occur exactly once. A mutation is killed when at least one committed fixture disagrees with its expected result under the mutated rule, or when the mutated rule raises an exception the fixture does not expect. A surviving mutation is a gap in the fixture corpus, never a defect in the rule. Controls: the positive control must be killed and the inert control must survive, or the harness itself is wrong. An `equivalent` field records a mutation that cannot be killed under the rule's contract, with the reason; it is excluded from the survivor count but still reported.",
+  "mutations": [
+    {
+      "id": "CONTROL-positive",
+      "class": "control",
+      "control": "positive",
+      "anchor": "    return result(\"PASS\", [])\n",
+      "replacement": "    return result(\"FAIL\", [])\n"
+    },
+    {
+      "id": "CONTROL-inert",
+      "class": "control",
+      "control": "inert",
+      "anchor": "\"\"\"Return a scoped property verdict; errors are distinct non-verdicts.\"\"\"",
+      "replacement": "\"\"\"Return a scoped property verdict; errors are distinct non-verdicts (inert).\"\"\""
+    },
+    {
+      "id": "M01-schema-validation-skipped",
+      "class": "input_admission",
+      "anchor": "        INPUT_VALIDATOR.validate(document)\n",
+      "replacement": "        pass\n"
+    },
+    {
+      "id": "M02-unsupported-property-becomes-invalid-input",
+      "class": "input_admission",
+      "anchor": "        raise UnsupportedVerification(document[\"property\"])\n",
+      "replacement": "        raise InvalidInput(document[\"property\"])\n"
+    },
+    {
+      "id": "M03-property-check-inverted",
+      "class": "input_admission",
+      "anchor": "    if document[\"property\"] != \"E\":\n",
+      "replacement": "    if document[\"property\"] == \"E\":\n"
+    },
+    {
+      "id": "M04-scope-filter-removed",
+      "class": "scope",
+      "anchor": "    attempts = [a for a in document[\"attempts\"] if a[\"scope\"] == scope]\n",
+      "replacement": "    attempts = list(document[\"attempts\"])\n"
+    },
+    {
+      "id": "M05-scope-filter-inverted",
+      "class": "scope",
+      "anchor": "    attempts = [a for a in document[\"attempts\"] if a[\"scope\"] == scope]\n",
+      "replacement": "    attempts = [a for a in document[\"attempts\"] if a[\"scope\"] != scope]\n"
+    },
+    {
+      "id": "M06-result-scope-not-echoed",
+      "class": "envelope",
+      "anchor": "        return {\"property\": \"E\", \"evaluation_scope\": scope,\n",
+      "replacement": "        return {\"property\": \"E\", \"evaluation_scope\": \"E\",\n"
+    },
+    {
+      "id": "M07-result-property-wrong",
+      "class": "envelope",
+      "anchor": "        return {\"property\": \"E\", \"evaluation_scope\": scope,\n",
+      "replacement": "        return {\"property\": \"G\", \"evaluation_scope\": scope,\n"
+    },
+    {
+      "id": "M08-bypass-dominance-inverted",
+      "class": "bypass",
+      "anchor": "    if any(a[\"outcome\"] == \"REACHED_EFFECT\" for a in attempts):\n",
+      "replacement": "    if any(a[\"outcome\"] == \"BLOCKED\" for a in attempts):\n"
+    },
+    {
+      "id": "M09-bypass-needs-every-attempt",
+      "class": "bypass",
+      "anchor": "    if any(a[\"outcome\"] == \"REACHED_EFFECT\" for a in attempts):\n",
+      "replacement": "    if attempts and all(a[\"outcome\"] == \"REACHED_EFFECT\" for a in attempts):\n"
+    },
+    {
+      "id": "M10-bypass-not-decisive",
+      "class": "bypass",
+      "anchor": "        return result(\"FAIL\", [])\n",
+      "replacement": "        return result(\"NOT_ESTABLISHED\", [])\n"
+    },
+    {
+      "id": "M11-bypass-check-removed",
+      "class": "bypass",
+      "anchor": "    if any(a[\"outcome\"] == \"REACHED_EFFECT\" for a in attempts):\n        return result(\"FAIL\", [])\n",
+      "replacement": "    pass\n"
+    },
+    {
+      "id": "M12-premise-scope-ignored",
+      "class": "premises",
+      "anchor": "        if premise is None or premise[\"scope\"] != scope:\n",
+      "replacement": "        if premise is None:\n"
+    },
+    {
+      "id": "M13-premise-scope-inverted",
+      "class": "premises",
+      "anchor": "        if premise is None or premise[\"scope\"] != scope:\n",
+      "replacement": "        if premise is None or premise[\"scope\"] == scope:\n"
+    },
+    {
+      "id": "M14-coverage-premise-dropped",
+      "class": "premises",
+      "anchor": "    for key, obligation in ((\"accepted_topology\", \"credential_topology\"),\n                            (\"accepted_coverage\", \"observation_coverage\")):\n",
+      "replacement": "    for key, obligation in ((\"accepted_topology\", \"credential_topology\"),):\n"
+    },
+    {
+      "id": "M15-topology-premise-dropped",
+      "class": "premises",
+      "anchor": "    for key, obligation in ((\"accepted_topology\", \"credential_topology\"),\n                            (\"accepted_coverage\", \"observation_coverage\")):\n",
+      "replacement": "    for key, obligation in ((\"accepted_coverage\", \"observation_coverage\"),):\n"
+    },
+    {
+      "id": "M16-obligation-names-swapped",
+      "class": "premises",
+      "anchor": "    for key, obligation in ((\"accepted_topology\", \"credential_topology\"),\n                            (\"accepted_coverage\", \"observation_coverage\")):\n",
+      "replacement": "    for key, obligation in ((\"accepted_topology\", \"observation_coverage\"),\n                            (\"accepted_coverage\", \"credential_topology\")):\n"
+    },
+    {
+      "id": "M17-obligation-order-swapped",
+      "class": "premises",
+      "anchor": "    for key, obligation in ((\"accepted_topology\", \"credential_topology\"),\n                            (\"accepted_coverage\", \"observation_coverage\")):\n",
+      "replacement": "    for key, obligation in ((\"accepted_coverage\", \"observation_coverage\"),\n                            (\"accepted_topology\", \"credential_topology\")):\n"
+    },
+    {
+      "id": "M18-minimum-classes-check-inverted",
+      "class": "minimum_classes",
+      "anchor": "    if not MINIMUM_CLASSES <= attempted:\n",
+      "replacement": "    if not attempted <= MINIMUM_CLASSES:\n"
+    },
+    {
+      "id": "M19-minimum-classes-proper-subset",
+      "class": "minimum_classes",
+      "anchor": "    if not MINIMUM_CLASSES <= attempted:\n",
+      "replacement": "    if not MINIMUM_CLASSES < attempted:\n"
+    },
+    {
+      "id": "M20-minimum-classes-check-removed",
+      "class": "minimum_classes",
+      "anchor": "    if not MINIMUM_CLASSES <= attempted:\n        missing.append(\"minimum_bypass_classes\")\n",
+      "replacement": "    pass\n"
+    },
+    {
+      "id": "M21-minimum-drops-without-authorization",
+      "class": "minimum_classes",
+      "anchor": "    \"without_authorization\", \"unregistered_tool\", \"extracted_callable\",\n",
+      "replacement": "    \"unregistered_tool\", \"extracted_callable\",\n"
+    },
+    {
+      "id": "M22-minimum-drops-unregistered-tool",
+      "class": "minimum_classes",
+      "anchor": "    \"without_authorization\", \"unregistered_tool\", \"extracted_callable\",\n",
+      "replacement": "    \"without_authorization\", \"extracted_callable\",\n"
+    },
+    {
+      "id": "M23-minimum-drops-extracted-callable",
+      "class": "minimum_classes",
+      "anchor": "    \"without_authorization\", \"unregistered_tool\", \"extracted_callable\",\n",
+      "replacement": "    \"without_authorization\", \"unregistered_tool\",\n"
+    },
+    {
+      "id": "M24-minimum-drops-shared-process-credential",
+      "class": "minimum_classes",
+      "anchor": "    \"shared_process_credential\", \"authenticated_client\",\n",
+      "replacement": "    \"authenticated_client\",\n"
+    },
+    {
+      "id": "M25-minimum-drops-authenticated-client",
+      "class": "minimum_classes",
+      "anchor": "    \"shared_process_credential\", \"authenticated_client\",\n",
+      "replacement": "    \"shared_process_credential\",\n"
+    },
+    {
+      "id": "M26-unknown-outcome-check-removed",
+      "class": "outcomes",
+      "anchor": "    if any(a[\"outcome\"] == \"UNKNOWN\" for a in attempts):\n        missing.append(\"attempt_outcomes\")\n",
+      "replacement": "    pass\n"
+    },
+    {
+      "id": "M27-unknown-outcome-misread-as-blocked",
+      "class": "outcomes",
+      "anchor": "    if any(a[\"outcome\"] == \"UNKNOWN\" for a in attempts):\n",
+      "replacement": "    if any(a[\"outcome\"] == \"BLOCKED\" for a in attempts):\n"
+    },
+    {
+      "id": "M28-obligations-never-block",
+      "class": "decision",
+      "anchor": "    if missing:\n        return result(\"NOT_ESTABLISHED\", missing)\n",
+      "replacement": "    if False:\n        return result(\"NOT_ESTABLISHED\", missing)\n"
+    },
+    {
+      "id": "M29-not-established-drops-obligations",
+      "class": "decision",
+      "anchor": "        return result(\"NOT_ESTABLISHED\", missing)\n",
+      "replacement": "        return result(\"NOT_ESTABLISHED\", [])\n"
+    },
+    {
+      "id": "M30-not-established-becomes-fail",
+      "class": "decision",
+      "anchor": "        return result(\"NOT_ESTABLISHED\", missing)\n",
+      "replacement": "        return result(\"FAIL\", missing)\n"
+    }
+  ]
+}
