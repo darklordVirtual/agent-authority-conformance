@@ -91,6 +91,8 @@ def _subject_problems(i, s, require_pins):
         return [f"{w} must be an object"]
     p = [f"{w}.{key} is required" for key in ("project", "repo", "license", "attribution")
          if not _text(s.get(key))]
+    if _text(s.get("repo")) and not s["repo"].startswith("https://"):
+        p.append(f"{w}.repo must be an https URL")
     if not _texts(s.get("maintainers")):
         p.append(f"{w}.maintainers must be a nonempty list")
     if not (isinstance(s.get("commit"), str) and COMMIT.match(s["commit"])):
@@ -138,8 +140,9 @@ def _adequacy_problems(scope):
             p.append(f"{w}.cases must be unique")
         expected = row.get("expected_from")
         if expected is not None and not (isinstance(expected, dict) and all(
-                _text(expected.get(k)) for k in ("path", "list_key", "id_key", "field"))):
-            p.append(f"{w}.expected_from needs path, list_key, id_key and field")
+                _text(expected.get(k)) for k in ("path", "list_key", "id_key", "field"))
+                and _relative(expected["path"])):
+            p.append(f"{w}.expected_from needs a relative path, list_key, id_key and field")
     controls = scope.get("controls")
     controls = controls if isinstance(controls, dict) else {}
     for key in ("positive", "inert"):

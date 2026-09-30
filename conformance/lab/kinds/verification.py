@@ -10,7 +10,7 @@ import importlib.util
 from pathlib import Path
 
 from ..canonical import read_json, sha256_file, sha256_json
-from ..errors import ScopeError
+from ..errors import LabError, ScopeError
 
 RESULTS = ("ESTABLISHED", "CONTRADICTED", "NOT_ESTABLISHED")
 EXPECTED_FILE = "producer-expected.json"
@@ -82,12 +82,22 @@ def load_input(path):
 
 
 def execute(run_dir, scope, trees):
-    inputs = {item["id"]: load_input(Path(trees[item["subject"]]) / item["path"]) for item in scope["inputs"]}
+    inputs = {}
+    for item in scope["inputs"]:
+        try:
+            inputs[item["id"]] = load_input(Path(trees[item["subject"]]) / item["path"])
+        except (LabError, OSError) as exc:
+            inputs[item["id"]] = exc  # malformed input is a non-verdict for every claim on it
     context = {"reference_time": scope.get("reference_time")}
     records = []
     for claim in scope["claims"]:
         check = load_check(run_dir, claim["check"])
         for input_id in claim["inputs"]:
+            if isinstance(inputs[input_id], Exception):
+                records.append({"input": input_id, "claim": claim["id"], "evidence": [],
+                                "execution": "INVALID_INPUT", "result": None,
+                                "verifier_error": {"code": "invalid_input", "message": str(inputs[input_id])}})
+                continue
             document, digest = inputs[input_id]
             records.append(run_claim(check, claim, input_id, copy.deepcopy(document), dict(context), digest))
     return records

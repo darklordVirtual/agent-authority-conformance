@@ -13,7 +13,7 @@ import sys
 import tempfile
 from pathlib import Path
 
-from ..canonical import sha256_file
+from ..canonical import dumps, sha256_file
 from ..errors import EngineError
 from ..faults import apply_mutation, read_source, write_source
 from .base import Engine, Outcome
@@ -46,8 +46,8 @@ class NativeEngine(Engine):
         if "SYSTEMROOT" in os.environ:
             env["SYSTEMROOT"] = os.environ["SYSTEMROOT"]
         try:
-            result = subprocess.run(self._command(row, case_file), cwd=tree, env=env,
-                                    capture_output=True, text=True, timeout=self.timeout)
+            result = subprocess.run(self._command(row, case_file), cwd=tree, env=env, capture_output=True,
+                                    encoding="utf-8", errors="replace", timeout=self.timeout)
         except subprocess.TimeoutExpired:
             return CRASH
         if result.returncode != 0:
@@ -83,7 +83,7 @@ class NativeEngine(Engine):
                 if got == CRASH:
                     crashed += 1
                     diff[cid] = {"baseline": baseline[cid], "mutant": CRASH}
-                elif got != baseline[cid]:
+                elif dumps(got) != dumps(baseline[cid]):  # 1 and 1.0, or true and 1, differ
                     moved += 1
                     diff[cid] = {"baseline": baseline[cid], "mutant": got}
         return Outcome(mutation["id"], moved, crashed, None, diff)

@@ -69,7 +69,7 @@ def _counts(mutants, set_name):
 
 def execute_row(run_dir, scope, tree, row, engine):
     """Measure one row. Returns (row result, engine-native report or None)."""
-    baseline = NativeEngine().baseline(tree, row)
+    baseline = NativeEngine(timeout=scope.get("engine", {}).get("timeout_seconds", 60)).baseline(tree, row)
     check_expected(tree, row, baseline)
     controls, faults = row_mutations(run_dir, scope, row)
     measured = engine.measure(tree, row, controls, faults)

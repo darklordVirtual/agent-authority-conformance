@@ -24,7 +24,9 @@ def _git(*args, cwd=None):
 def fetch(repo, commit, dest):
     """Clone repo into dest and check out exactly commit."""
     dest = Path(dest)
-    _git("clone", "--quiet", "--no-checkout", repo, str(dest))
+    if not repo.startswith("https://"):
+        raise PinError(f"{repo!r}: subject repositories must be https URLs")
+    _git("clone", "--quiet", "--no-checkout", "--", repo, str(dest))
     _git("-c", "advice.detachedHead=false", "checkout", "--quiet", commit, cwd=dest)
     head = _git("rev-parse", "HEAD", cwd=dest)
     if head != commit:

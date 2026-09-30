@@ -5,7 +5,7 @@ import shutil
 from pathlib import Path
 
 from . import state
-from .canonical import read_json, sha256_file, write_json
+from .canonical import read_json, sha256_file, sha256_json, write_json
 from .errors import PackageError
 from .report import render_notice, render_report, render_reproduce, render_status
 
@@ -17,9 +17,9 @@ EMAIL = "e-mail address"
 LEAK_PATTERNS = (
     (re.compile(r"gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}"), "GitHub token"),
     (re.compile(r"\bsk-[A-Za-z0-9_-]{20,}"), "API key"),
-    (re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}\b"), EMAIL),
-    (re.compile(r"/Users/[A-Za-z0-9._-]+/|/home/[A-Za-z0-9._-]+/|/private/var/folders/|/var/folders/"
-                r"|[A-Za-z]:\\\\Users\\\\"), "local absolute path"),
+    (re.compile(r"\b(?!git@)[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}\b"), EMAIL),
+    (re.compile(r"/Users/[A-Za-z0-9._-]+/|/home/[A-Za-z0-9._-]+/|/root/|/Volumes/|/private/var/folders/"
+                r"|/var/folders/|(?<![A-Za-z0-9.])/tmp/|[A-Za-z]:[\\/]+Users[\\/]"), "local absolute path"),
 )
 
 RERUN_PY = '''#!/usr/bin/env python3
@@ -108,11 +108,30 @@ def _delivery_records(run_dir):
     return records
 
 
+def verify_run_integrity(run_dir, current):
+    """Results, scope and run-owned files must be exactly what run produced and froze."""
+    from .plan import run_files
+    from .runner import results_hashes
+    plan = read_json(run_dir / "RUN-PLAN-FROZEN.json")
+    problems = []
+    if sha256_json(plan["core"]) != current.get("plan_sha256"):
+        problems.append("RUN-PLAN-FROZEN.json differs from the frozen plan hash")
+    if sha256_file(run_dir / "SCOPE.json") != plan["core"]["scope_sha256"]:
+        problems.append("SCOPE.json changed after freeze")
+    if run_files(run_dir) != plan["core"]["run_files"]:
+        problems.append("faults, controls, adapter or verifier changed after freeze")
+    if results_hashes(run_dir) != current.get("results_sha256"):
+        problems.append("results/ differ from what run wrote")
+    if problems:
+        raise PackageError("refusing to package: " + "; ".join(problems))
+    return plan
+
+
 def build(run_dir, now):
-    state.require(run_dir, "RUN")
+    current = state.require(run_dir, "RUN")
     run_dir = Path(run_dir)
     scope = read_json(run_dir / "SCOPE.json")
-    plan = read_json(run_dir / "RUN-PLAN-FROZEN.json")
+    plan = verify_run_integrity(run_dir, current)
     vendor_lab(run_dir)
     (run_dir / "rerun.py").write_text(RERUN_PY, encoding="utf-8")
     python = ".".join(plan["environment"]["python"].split(".")[:2])

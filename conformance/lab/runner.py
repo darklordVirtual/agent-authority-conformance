@@ -4,7 +4,7 @@ import tempfile
 from pathlib import Path
 
 from . import pins, plan, state
-from .canonical import read_json, write_json
+from .canonical import read_json, sha256_file, write_json
 from .engines.base import get_engine, identity_for
 from .errors import PlanError
 from .kinds import adequacy, verification
@@ -33,8 +33,6 @@ def execute(run_dir, scope, trees):
             out[f"results/engine/{row['id']}.json"] = report
             if original is not None:
                 out[f".local/engine/{row['id']}.original.json"] = original
-        # Pinned bytes must be unchanged after every row.
-        pins.verify(tree, scope["subjects"][0]["files_sha256"])
         if cross:
             second, _ = adequacy.execute_row(run_dir, scope, tree, row,
                                              get_engine({**scope["engine"], "name": cross}))
@@ -46,7 +44,14 @@ def execute(run_dir, scope, trees):
                 "disagreements": [{"fault_id": f, "primary": a[f], "secondary": b.get(f)}
                                   for f in sorted(a) if a[f] != b.get(f)],
             }
+        # Pinned bytes must be unchanged after every row, cross-check included.
+        pins.verify(tree, scope["subjects"][0]["files_sha256"])
     return out
+
+
+def results_hashes(run_dir):
+    base = Path(run_dir) / "results"
+    return {p.relative_to(run_dir).as_posix(): sha256_file(p) for p in sorted(base.rglob("*.json"))}
 
 
 def has_survivors(results):
@@ -68,6 +73,7 @@ def write_results(run_dir, results):
 def run(run_dir, now, workdir=None):
     current = state.require(run_dir, "FROZEN")
     scope = load_scope(run_dir, require_pins=True)
+    plan.require_agreement(run_dir, scope)  # also re-verifies the consent chain and head
     with tempfile.TemporaryDirectory(prefix="aac-run-", dir=workdir) as tmp:
         trees, licenses = pins.materialize(scope, tmp)
         fresh = plan.build_plan(run_dir, scope, trees, identity_for(scope))
@@ -80,5 +86,5 @@ def run(run_dir, now, workdir=None):
     for i, text in licenses.items():
         if text is not None:
             (Path(run_dir) / f"UPSTREAM-LICENSE-{i}.txt").write_text(text, encoding="utf-8")
-    state.transition(run_dir, "RUN", now, note="measured")
+    state.transition(run_dir, "RUN", now, note="measured", results_sha256=results_hashes(run_dir))
     return results

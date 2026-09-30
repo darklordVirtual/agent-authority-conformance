@@ -83,11 +83,16 @@ def push_snapshot(run_dir, full_name, message, files=None):
     with tempfile.TemporaryDirectory(prefix="aac-share-") as tmp:
         work = Path(tmp) / "repo"
         git("clone", "--quiet", remote_url(full_name), str(work), cwd=tmp)
+        if files is None:
+            # A full delivery replaces the tree, so stale remote files cannot survive.
+            git("rm", "-r", "-q", "--ignore-unmatch", ".", cwd=work)
         for rel in names:
             dest = work / rel
             dest.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(src / rel, dest)
         git("add", "-A", cwd=work)
+        if subprocess.run(["git", "diff", "--cached", "--quiet"], cwd=work).returncode == 0:
+            return git("rev-parse", "HEAD", cwd=work)  # already delivered: retries are no-ops
         git("commit", "--quiet", "-m", message, cwd=work)
         git("push", "--quiet", "origin", "HEAD:main", cwd=work)
         return git("rev-parse", "HEAD", cwd=work)

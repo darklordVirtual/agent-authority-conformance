@@ -114,20 +114,32 @@ def share(run_dir, org, invite, now):
         raise GateError("no organisation: set org in lab.toml or pass --org")
     if github.owner_type(org) != "Organization":
         raise GateError(f"{org} is not an organisation; user-owned repositories cannot grant read-only access")
+    from .package import scan_for_leaks
+    from .rerun import verify_manifest
     scope = load_scope(run_dir)
+    problems = verify_manifest(Path(run_dir))
+    if problems:
+        raise GateError("package does not match MANIFEST.json: " + "; ".join(problems))
+    scan_for_leaks(run_dir)
     full_name = f"{org}/{scope['run_id']}"
     github.create_private(full_name)
     commit = github.push_snapshot(run_dir, full_name, f"Private delivery of {scope['run_id']}")
     for user in invite:
         github.invite_read_only(full_name, user)
     state.transition(run_dir, "SHARED_PRIVATE", now, note=f"pushed {commit}; invited {', '.join(invite) or 'nobody'}",
-                     repository=full_name, delivery_commit=commit)
+                     repository=full_name, delivery_commit=commit,
+                     consent_index_at_share=len(consent.load(run_dir)))
     return full_name
 
 
 def review(run_dir, who, kind, ref, now):
     """Record corrections or survivor classification. Measured values are never edited."""
     current = state.require(run_dir, "SHARED_PRIVATE", "REVIEWED")
+    scope = load_scope(run_dir)
+    reviewers = consent.handles(scope["publication"]["approvers"] + scope["agreement_parties"]
+                                + [m for s in scope["subjects"] for m in s["maintainers"]])
+    if consent.handle(who) not in reviewers:
+        raise GateError(f"{who} is not an approver, agreement party or subject maintainer of this run")
     action = {"corrections": "factual_corrections", "classification": "survivor_classification"}[kind]
     consent.add(run_dir, who, action, ref, now)
     path = Path(run_dir) / "REVIEW.md"
@@ -162,21 +174,23 @@ def _set_status(run_dir, status, message):
 
 def publish(run_dir, now):
     from . import github
-    state.require(run_dir, "REVIEWED")
+    current = state.require(run_dir, "REVIEWED")
     scope = load_scope(run_dir)
     approvers = scope["publication"]["approvers"]
-    status = consent.publication_status(consent.load(run_dir), approvers)
+    status = consent.publication_status(consent.load(run_dir), approvers, since=current["consent_index_at_share"])
     if status != "approved":
-        raise GateError(f"publication is {status}; every approver ({', '.join(approvers)}) must approve")
+        raise GateError(f"publication is {status}; every approver ({', '.join(approvers)}) must approve "
+                        "after delivery and after the latest factual correction")
     current = _set_status(run_dir, "PUBLISHED", "Record publication approval")
     github.make_public(current["repository"])
     state.transition(run_dir, "PUBLISHED", now, note="every approver approved publication")
 
 
 def withhold(run_dir, now):
-    state.require(run_dir, "SHARED_PRIVATE", "REVIEWED")
+    current = state.require(run_dir, "SHARED_PRIVATE", "REVIEWED")
     scope = load_scope(run_dir)
-    if consent.publication_status(consent.load(run_dir), scope["publication"]["approvers"]) != "declined":
+    if consent.publication_status(consent.load(run_dir), scope["publication"]["approvers"],
+                                  since=current["consent_index_at_share"]) != "declined":
         raise GateError("withhold needs a publication_declined or withdrawn event from an approver")
     _set_status(run_dir, "WITHHELD", "Record withheld status")
     state.transition(run_dir, "WITHHELD", now, note="publication declined")

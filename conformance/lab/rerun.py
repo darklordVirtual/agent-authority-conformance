@@ -43,10 +43,12 @@ def verify_manifest(pkg):
 
 def _comparable(rel, obj):
     if rel == "results/claims.json":
-        return {f"{r['input']} / {r['claim']}": [r["execution"], r["result"]] for r in obj["records"]}
+        return {f"{r['input']} / {r['claim']}": [r["execution"], r["result"], r.get("reads"),
+                                                 r.get("unresolved_obligations")] for r in obj["records"]}
     return {"status": obj["status"],
             "controls": {k: v["outcome"] for k, v in obj["controls"].items()},
-            **{f"mutant {m['fault_id']}": [m["outcome"], m["moved"], m["crashed"]] for m in obj["mutants"]}}
+            **{f"mutant {m['fault_id']}": [m["outcome"], m["moved"], m["crashed"], m.get("engine_verdict")]
+               for m in obj["mutants"]}}
 
 
 def compare(recorded, fresh):

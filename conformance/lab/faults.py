@@ -1,6 +1,6 @@
 """Fault and control definitions and the one text operation that applies them."""
 
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 from .canonical import read_json
 from .errors import PlanError, ScopeError
@@ -14,6 +14,9 @@ def _fault_problems(fault, where):
         return [f"{where} must be an object"]
     p = [f"{where}.{k} must be a nonempty string" for k in FAULT_KEYS
          if not (isinstance(fault.get(k), str) and fault[k])]
+    if not p and (PurePosixPath(fault["file"]).is_absolute() or ".." in PurePosixPath(fault["file"]).parts
+                  or "\\" in fault["file"]):
+        p.append(f"{where}.file must be a relative path inside the subject")
     if not p and fault["anchor"] == fault["replacement"]:
         p.append(f"{where}: anchor equals replacement")
     return p

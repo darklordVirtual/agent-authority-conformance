@@ -29,6 +29,7 @@ class CorpusAdequacyEngine(Engine):
     def __init__(self, config):
         self.commit = config.get("corpus_adequacy_commit", DEFAULT_COMMIT)
         self.tool_sha256 = config.get("corpus_adequacy_sha256")
+        self.timeout = config.get("corpus_adequacy_timeout_seconds", 7200)
         self.path = Path(os.environ.get("AAC_CORPUS_ADEQUACY") or config.get("corpus_adequacy_path") or ".")
 
     def _tool(self):
@@ -86,8 +87,17 @@ class CorpusAdequacyEngine(Engine):
         write_json(tree / "aac_vectors.json", {"vectors": vectors})
         manifest_path = tree / f"aac_{row['id']}.manifest.json"
         write_json(manifest_path, self.manifest(row, controls, faults))
-        result = subprocess.run([sys.executable, "-B", str(tool), str(manifest_path), "--json"],
-                                cwd=tree, capture_output=True, text=True)
+        env = {"PATH": os.environ.get("PATH", ""), "PYTHONDONTWRITEBYTECODE": "1",
+               "PYTHONHASHSEED": "0", "PYTHONIOENCODING": "utf-8"}
+        if "SYSTEMROOT" in os.environ:
+            env["SYSTEMROOT"] = os.environ["SYSTEMROOT"]
+        try:
+            # Subject code runs under corpus-adequacy: no inherited tokens, bounded time.
+            result = subprocess.run([sys.executable, "-B", str(tool), str(manifest_path), "--json"], cwd=tree,
+                                    env=env, capture_output=True, encoding="utf-8", errors="replace",
+                                    timeout=self.timeout)
+        except subprocess.TimeoutExpired as exc:
+            raise EngineError(f"corpus-adequacy did not finish within {self.timeout} seconds") from exc
         if result.returncode not in (0, 1):
             raise EngineError(f"corpus-adequacy exited {result.returncode}: {result.stderr.strip()[:500]}")
         try:

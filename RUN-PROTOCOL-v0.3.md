@@ -76,26 +76,35 @@ SCOPED ─freeze─▶ FROZEN ─run─▶ RUN ─package─▶ PACKAGED ─shar
    adequacy rows the unmutated baseline must match the subject's own published
    expectations when `expected_from` is declared; otherwise nothing runs.
    Pinned bytes are re-verified after every row.
-5. **package.** Builds the delivery package (§6). Refused if it would contain
-   a token, an e-mail address (outside upstream licence texts) or a local
-   absolute path.
+5. **package.** Builds the delivery package (§6). Refused if the scope, the
+   run-owned files or any result changed after `run` (their hashes are
+   recorded at freeze and run), or if the package would contain a token, an
+   e-mail address (outside upstream licence texts) or a local absolute path.
 6. **share.** Creates `<org>/<run_id>` as a **private** repository in a GitHub
    organisation (never a user account, which cannot grant read-only access),
-   verifies it is private before pushing, and invites reviewers with read-only
-   (`pull`) permission.
-7. **review.** Factual corrections and survivor classifications are recorded
-   in `CONSENT.json` and appended to `REVIEW.md`. Measured values are never
+   verifies the package against `MANIFEST.json` and scans it again, verifies
+   the repository is private before pushing, replaces any existing tree, and
+   invites reviewers with read-only (`pull`) permission. Retrying after a
+   partial failure is safe.
+7. **review.** Factual corrections and survivor classifications, by an
+   approver, agreement party or subject maintainer, are recorded in
+   `CONSENT.json` and appended to `REVIEW.md`. Measured values are never
    edited.
 8. **publish / withhold.** `publish` requires `publication_approved` from
-   **every** approver, with no later decline or withdrawal from any of them.
+   **every** approver, given after delivery (`share`) and after the latest
+   factual correction, with no decline or withdrawal from any of them since
+   delivery. Approvals given before anyone saw the results do not count.
    It pushes the status change as a separate commit and then makes the
    repository public. Any `publication_declined` or `withdrawn` allows
    `withhold`. A withheld or unpublished report is not citable as public
    evidence.
 
 `CONSENT.json` is append-only and hash-chained: each event carries the SHA-256
-of the canonical previous event. Any edit or deletion breaks the chain and every
-gate refuses to proceed.
+of the canonical previous event, and `STATE.json` records the event count and
+head hash after every append. Editing, deleting or truncating events is
+detected and every gate refuses to proceed. Handles are GitHub handles,
+compared case-insensitively without a leading `@`. This detects tampering in a
+copy; it is not a signature and does not stop someone who rewrites both files.
 
 ## 5. Records
 
@@ -117,7 +126,9 @@ cases, optional expected_from), `controls` (positive, inert) and `engine`
 (`native` or `corpus_adequacy`, optional `cross_check` with the other one).
 An adequacy run measures exactly one subject.
 
-Verification adds `inputs` (id, subject index, path) and `claims` (id, text,
+Subject repositories must be https URLs. Verification adds `inputs` (id,
+subject index, path; a directory path is a bundle of its `.json` files keyed by
+relative path) and `claims` (id, text,
 layer, `check` as `<module>:<function>` in `verifier/`, `reads_fields`,
 `inputs`, optional `temporal`). A temporal claim requires `reference_time`.
 
@@ -131,7 +142,8 @@ layer, `check` as `<module>:<function>` in `verifier/`, `reads_fields`,
   `reads_fields`) and `unresolved_obligations` (nonempty exactly for
   `NOT_ESTABLISHED`).
 - Anything else carries `result: null` and a `verifier_error`. A verifier
-  crash is never a finding.
+  crash is never a finding, and an input that cannot be read yields
+  `INVALID_INPUT` for every claim on it.
 
 When transcribed into a v0.2 assessment: `ESTABLISHED`↔`PASS`,
 `CONTRADICTED`↔`FAIL`, `NOT_ESTABLISHED`↔`NOT_ESTABLISHED`, and the v0.2
@@ -144,7 +156,8 @@ agreement is reported in a separate table that is not a result.
 ### 5.3 Faults and controls
 
 A fault set has `name`, `set` (`known` or `held_out`), `source` (author and
-https reference) and faults (`id`, `class`, `file`, `anchor`, `replacement`).
+https reference) and faults (`id`, `class`, `file` relative to the subject,
+`anchor`, `replacement`).
 Controls are single faults with `polarity` `positive` or `inert`. A held-out
 set becomes known once disclosed; the report says so. Faults with no pinned
 input expected to distinguish them are allowed and, if they survive, are
@@ -170,7 +183,7 @@ sets, and there is no percentage.
 | `STATUS.md` | PRIVATE, PUBLISHED or WITHHELD, and whether it is citable. |
 | `REPORT.md` | Independence label, pins, plan hash, claim ceiling, per-row or per-claim tables, controls, survivors, crash kills, cross-check, limits. |
 | `SCOPE.json`, `CONSENT.json`, `STATE.json`, `REVIEW.md` | Scope and lifecycle records. |
-| `RUN-PLAN-FROZEN.json` | Pins, run-owned file hashes, engine identity, rows; environment kept outside the hash. |
+| `RUN-PLAN-FROZEN.json` | Pins, run-owned file hashes, engine identity, SHA-256 of every lab module, rows; environment kept outside the hash. |
 | `faults/`, `controls/`, `adapter/`, `verifier/` | Exactly what ran. |
 | `results/` | Results; engine-native reports under `results/engine/`; cross-checks under `results/cross-check/`. |
 | `MANIFEST.json` | SHA-256 and size of every file except the lifecycle files and `reruns/`. |
