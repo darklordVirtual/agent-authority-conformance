@@ -91,8 +91,8 @@ def pin(run_dir, workdir=None):
 
 def freeze(run_dir, now, published_ref=None, workdir=None):
     state.require(run_dir, "SCOPED")
+    plan.require_agreement(run_dir, load_scope(run_dir))  # consent gate before any fetch
     scope = load_scope(run_dir, require_pins=True)
-    plan.require_agreement(run_dir, scope)
     with tempfile.TemporaryDirectory(prefix="aac-freeze-", dir=workdir) as tmp:
         trees, _ = pins.materialize(scope, tmp)
         return plan.freeze(run_dir, scope, trees, identity_for(scope), now, published_ref)

@@ -9,7 +9,7 @@ import copy
 import importlib.util
 from pathlib import Path
 
-from ..canonical import read_json, sha256_file
+from ..canonical import read_json, sha256_file, sha256_json
 from ..errors import ScopeError
 
 RESULTS = ("ESTABLISHED", "CONTRADICTED", "NOT_ESTABLISHED")
@@ -69,11 +69,20 @@ def run_claim(check, claim, input_id, document, context, digest):
     return record
 
 
+def load_input(path):
+    """A file is one JSON document. A directory is a bundle {relative path: document}
+    of its .json files; its digest is the hash of the canonical {path: sha256} map."""
+    path = Path(path)
+    if path.is_dir():
+        files = sorted(p for p in path.rglob("*.json") if p.is_file())
+        bundle = {p.relative_to(path).as_posix(): read_json(p) for p in files}
+        digest = sha256_json({p.relative_to(path).as_posix(): sha256_file(p) for p in files})
+        return bundle, digest
+    return read_json(path), sha256_file(path)
+
+
 def execute(run_dir, scope, trees):
-    inputs = {}
-    for item in scope["inputs"]:
-        path = Path(trees[item["subject"]]) / item["path"]
-        inputs[item["id"]] = (read_json(path), sha256_file(path))
+    inputs = {item["id"]: load_input(Path(trees[item["subject"]]) / item["path"]) for item in scope["inputs"]}
     context = {"reference_time": scope.get("reference_time")}
     records = []
     for claim in scope["claims"]:

@@ -115,6 +115,12 @@ class VerificationTest(LabTest):
                             "exact_call = signature = cap_compliance\n")
         self.assertEqual(self.records()[("within", "cap_compliance")]["execution"], "COMPLETED")
 
+    def test_directory_input_is_a_bundle(self):
+        bundle, digest = verification.load_input(FIXTURES / "toy-receipts" / "receipts")
+        self.assertEqual(sorted(bundle), ["over.json", "within.json"])
+        self.assertEqual(bundle["over.json"]["execution"]["nativeValue"], 6)
+        self.assertEqual(len(digest), 64)
+
     def test_agreement_is_reported_separately(self):
         records = verification.execute(self.run, self.scope, self.trees)
         report = verification.agreement(self.run, records)

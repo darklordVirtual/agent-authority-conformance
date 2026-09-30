@@ -1,0 +1,210 @@
+{
+  "agreement_parties": [
+    "darklordVirtual",
+    "aeoess",
+    "imokokok"
+  ],
+  "agreement_ref": null,
+  "claim_ceiling": {
+    "does_not_establish": [
+      "real chain execution",
+      "live APS currency or revocation",
+      "decision-level single use",
+      "the meaning of fixture-local narrow constraints",
+      "production adoption",
+      "endorsement of either project"
+    ],
+    "establishes": [
+      "per-claim results over the pinned synthetic offline fixtures at the fixed reference time"
+    ]
+  },
+  "claims": [
+    {
+      "check": "aps_priorseal:aps_evidence_validity",
+      "id": "aps_evidence_validity",
+      "inputs": [
+        "aps-permit",
+        "aps-narrow",
+        "aps-deny",
+        "aps-expired"
+      ],
+      "layer": "authority evidence",
+      "reads_fields": [
+        "action-intent-receipt.json",
+        "policy-decision-receipt.json",
+        "decision-evidence.json"
+      ],
+      "text": "The APS intent and decision receipts, decision evidence and delegation chain verify under independently pinned test keys."
+    },
+    {
+      "check": "aps_priorseal:aps_decision_verdict",
+      "id": "aps_decision_verdict",
+      "inputs": [
+        "aps-permit",
+        "aps-narrow",
+        "aps-deny",
+        "aps-expired"
+      ],
+      "layer": "decision",
+      "reads_fields": [
+        "policy-decision-receipt.json.result"
+      ],
+      "text": "The decision verdict, reported on its own (deny is not read as permit)."
+    },
+    {
+      "check": "aps_priorseal:aps_temporal_validity",
+      "id": "aps_temporal_validity",
+      "inputs": [
+        "aps-permit",
+        "aps-narrow",
+        "aps-deny",
+        "aps-expired"
+      ],
+      "layer": "temporal",
+      "reads_fields": [
+        "decision-evidence.json",
+        "policy-decision-receipt.json.issued_at"
+      ],
+      "temporal": true,
+      "text": "The decision is unexpired at the fixed reference time (checked by the consumer, not against issued_at)."
+    },
+    {
+      "check": "aps_priorseal:decision_ref_binding",
+      "id": "decision_ref_binding",
+      "inputs": [
+        "payment-within-limit",
+        "payment-over-limit"
+      ],
+      "layer": "correlation",
+      "reads_fields": [
+        "authorizationEvidence.authorization.intent.contextCommitments"
+      ],
+      "text": "The PriorSeal authorization references exactly one APS decision_ref, and it matches the permit decision."
+    },
+    {
+      "check": "aps_priorseal:priorseal_authorization_validity",
+      "id": "priorseal_authorization_validity",
+      "inputs": [
+        "payment-within-limit",
+        "payment-over-limit"
+      ],
+      "layer": "authorization",
+      "reads_fields": [
+        "authorizationEvidence.authorization",
+        "authorizationEvidence.acceptance"
+      ],
+      "text": "The principal-signed exact-call authorization and its acceptance receipt verify under pinned test keys."
+    },
+    {
+      "check": "aps_priorseal:exact_call_agreement",
+      "id": "exact_call_agreement",
+      "inputs": [
+        "payment-within-limit",
+        "payment-over-limit"
+      ],
+      "layer": "execution",
+      "reads_fields": [
+        "execution.nativeValue",
+        "authorizationEvidence.authorization.intent.transactionValue"
+      ],
+      "text": "The observed native value equals the signed exact-call transaction value."
+    },
+    {
+      "check": "aps_priorseal:aps_cap_compliance",
+      "id": "aps_cap_compliance",
+      "inputs": [
+        "payment-within-limit",
+        "payment-over-limit"
+      ],
+      "layer": "authority",
+      "reads_fields": [
+        "execution.nativeValue"
+      ],
+      "text": "The observed native value is within the APS per-action cap (5,000,000,000,000,000 wei)."
+    }
+  ],
+  "draft_note": "DRAFT scope template, not agreed. In #177 the independent verifier role (A1) for this pair is scoped for Frequency; use this template only for a separately agreed pilot, never to pre-empt that one. Claims, reads_fields and the verifier module must be agreed with the APS and PriorSeal maintainers, and pins recorded with `pin`, before anyone records scope_agreed. case.json carries producer expectations under `expected`; checks must not read that field.",
+  "independence": "INDEPENDENT_IMPLEMENTATION",
+  "independence_statement": "Checks are implemented in verifier/aps_priorseal.py without importing APS or PriorSeal verifier code; keys are copied into the runner's own pinned configuration.",
+  "inputs": [
+    {
+      "id": "aps-permit",
+      "path": "fixtures/priorseal-decision-binding/cases/permit",
+      "subject": 0
+    },
+    {
+      "id": "aps-narrow",
+      "path": "fixtures/priorseal-decision-binding/cases/narrow",
+      "subject": 0
+    },
+    {
+      "id": "aps-deny",
+      "path": "fixtures/priorseal-decision-binding/cases/deny",
+      "subject": 0
+    },
+    {
+      "id": "aps-expired",
+      "path": "fixtures/priorseal-decision-binding/cases/expired",
+      "subject": 0
+    },
+    {
+      "id": "payment-within-limit",
+      "path": "examples/aps-priorseal-decision-binding-v1/priorseal-inputs/payment-within-limit.json",
+      "subject": 1
+    },
+    {
+      "id": "payment-over-limit",
+      "path": "examples/aps-priorseal-decision-binding-v1/priorseal-inputs/payment-over-limit.json",
+      "subject": 1
+    }
+  ],
+  "kind": "verification",
+  "lab_version": "0.3",
+  "publication": {
+    "approvers": [
+      "aeoess",
+      "imokokok"
+    ],
+    "private_first": true,
+    "unreleased_citable": false
+  },
+  "reference_time": "2026-09-19T10:05:00.000Z",
+  "run_id": "aps-priorseal-verification",
+  "runner": {
+    "maintainers": [
+      "darklordVirtual"
+    ],
+    "project": "Agent Authority Conformance"
+  },
+  "subjects": [
+    {
+      "attribution": "aeoess/agent-passport-system, APS producer fixtures (v6.0.1)",
+      "commit": "948f99b85343bef2c6fa677c8543965caacfc087",
+      "files_sha256": {},
+      "license": "Apache-2.0",
+      "maintainers": [
+        "aeoess"
+      ],
+      "paths": [
+        "fixtures/priorseal-decision-binding"
+      ],
+      "project": "Agent Passport System (APS)",
+      "repo": "https://github.com/aeoess/agent-passport-system"
+    },
+    {
+      "attribution": "imokokok/PriorSeal, APS decision-binding offline pair",
+      "commit": "d749d2691c3e6be139de4020e7b27cdafca2c428",
+      "files_sha256": {},
+      "license": "MIT",
+      "maintainers": [
+        "imokokok"
+      ],
+      "paths": [
+        "examples/aps-priorseal-decision-binding-v1/priorseal-inputs",
+        "examples/aps-priorseal-decision-binding-v1/PAYMENT-LIMIT-REPORT.json"
+      ],
+      "project": "PriorSeal",
+      "repo": "https://github.com/imokokok/PriorSeal"
+    }
+  ]
+}
