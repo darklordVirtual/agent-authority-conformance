@@ -2,7 +2,7 @@
 
 > **Evidence before adjectives.** A vendor-neutral vocabulary for evaluating authority and execution controls in agentic systems.
 
-**Status:** Draft v0.2 (opt-in; v0.1 preserved) · **No aggregate score** · **Not a certification** · **Not a product ranking**
+**Status:** Draft v0.2 (opt-in; v0.1 preserved) · Run protocol v0.3 (draft) · **No aggregate score** · **Not a certification** · **Not a product ranking**
 
 When an agent runtime says *“the tool call was authorized”*, that statement hides several independent security and governance questions. Agent Authority Conformance separates those questions so implementations can state precisely what they have demonstrated, what remains untested, and what they deliberately do not claim.
 
@@ -57,6 +57,10 @@ No percentage, star rating, “5/7 conformant”, security grade or ranking is v
 | Path | Purpose |
 |---|---|
 | [`SPECIFICATION-v0.2.md`](SPECIFICATION-v0.2.md) | Draft v0.2 semantics and bounded E evidence rules |
+| [`RUN-PROTOCOL-v0.3.md`](RUN-PROTOCOL-v0.3.md) | Private-first runs against other projects' pinned artifacts |
+| [`conformance/lab/`](conformance/lab/) | `python -m conformance.lab`: scope, freeze, run, package, share, rerun |
+| [`schema/lab/`](schema/lab/) | Run scope, consent, fault and result schemas |
+| [`templates/scopes/`](templates/scopes/) | Draft scopes for external targets (not runnable until agreed) |
 | [`schema/assessment-v0.2.schema.json`](schema/assessment-v0.2.schema.json) | Opt-in v0.2 assessment schema |
 | [`MIGRATION-v0.2.md`](MIGRATION-v0.2.md) | Per-record migration and compatibility rules |
 | [`SPECIFICATION.md`](SPECIFICATION.md) | Preserved normative v0.1 specification |
@@ -87,6 +91,44 @@ The E reference rule consumes **already accepted evidence**. It does not verify
 artifacts, inspect credential custody or establish coverage itself. Its synthetic
 fixtures test inference semantics, not the security of a deployed product.
 See [the input trust boundary](SPECIFICATION-v0.2.md#6-bounded-reference-rule-and-corpus).
+
+## Running a pilot against another project
+
+The v0.3 run protocol turns an agreed, bounded question about another project's
+artifacts into a package that the other maintainers review privately before
+anything is published, and that anyone can rerun.
+
+```sh
+python -m conformance.lab init my-run --kind verification   # or --kind adequacy, or --template
+# complete runs/my-run/SCOPE.json with the other party, then:
+python -m conformance.lab pin my-run
+python -m conformance.lab consent my-run --who <handle> --action scope_agreed --ref <comment URL>
+python -m conformance.lab consent my-run --who <handle> --action run_authorized --ref <comment URL>
+python -m conformance.lab freeze my-run                     # prints the plan hash: publish it first
+python -m conformance.lab freeze my-run --published-ref <URL>
+python -m conformance.lab run my-run
+python -m conformance.lab package my-run
+python -m conformance.lab share my-run --invite <handle> ... # private repo in R-research-lab
+python -m conformance.lab review my-run --who <handle> --classification <URL>
+python -m conformance.lab publish my-run                    # only after every approver approved
+python -m conformance.lab rerun runs/my-run                 # or: python3 rerun.py inside a package
+```
+
+Two run kinds share one lifecycle:
+
+- **verification** reports one result per input and claim, `ESTABLISHED`,
+  `CONTRADICTED` or `NOT_ESTABLISHED`, from the runner's own implementation;
+- **adequacy** seeds agreed faults into the other party's checker and reports
+  which ones the corpus distinguishes, with mandatory positive and inert
+  controls.
+
+Each run carries an independence label (`SELF_RUN`, `SECOND_IMPLEMENTATION`,
+`INDEPENDENT_IMPLEMENTATION`) and a claim ceiling. There is still no aggregate:
+nothing is summed across rows, fault sets or claims. Consent is an append-only,
+hash-chained log; publication needs every named approver; an unreleased report
+is not citable. `runs/` is gitignored, and the delivery repositories live in
+the `R-research-lab` organisation set in [`lab.toml`](lab.toml). See
+[RUN-PROTOCOL-v0.3.md](RUN-PROTOCOL-v0.3.md).
 
 ## Minimal assessment shape
 
