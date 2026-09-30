@@ -27,6 +27,4 @@ m = load_manifest("adapters/remora-evidence-sufficiency-v1/adapter.json")
 print(resolve(m, "/path/to/REMORA-research"))
 ```
 
-The committed manifest uses a placeholder adapter revision until this branch is
-frozen. Before any public run, replace it with the exact AAC commit SHA and
-record the resulting manifest hash.
+The committed manifest pins the resolver implementation revision used by this exercise. Before any later public run, freeze the exact subject, adapter, manifest and procedure revisions together and record the resulting manifest hash.
