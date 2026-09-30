@@ -75,7 +75,7 @@ jobs:
       - name: Resolve pinned REMORA evidence without executing producer code
         working-directory: aac
         run: |
-          python scripts/run_federation_adapter.py \
+          PYTHONPATH=. python scripts/run_federation_adapter.py \
             --manifest adapters/remora-evidence-sufficiency-v1/adapter.json \
             --subject-root ../remora \
             --out /tmp/remora-evidence-bundle.json
