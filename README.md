@@ -88,6 +88,22 @@ artifacts, inspect credential custody or establish coverage itself. Its syntheti
 fixtures test inference semantics, not the security of a deployed product.
 See [the input trust boundary](SPECIFICATION-v0.2.md#6-bounded-reference-rule-and-corpus).
 
+## Cross-project federation reviews
+
+AAC can consume evidence from another repository without requiring that project
+to adopt AAC internally. The adapter layer is intentionally read-only and does
+not award A-G verdicts. It resolves pinned artifacts and preserves provenance;
+evidence admission, property inference, maintainer review and publication remain
+separate gates.
+
+The review protocol follows the practical boundaries being developed in
+`aeoess/agent-governance-vocabulary#177`: independent projects, shared
+boundaries, per-claim output, immutable inputs, attribution, explicit non-claims
+and verification without endorsement.
+
+Start with [the federation review protocol](docs/FEDERATION-REVIEW-PROTOCOL.md),
+[adapter contract](adapters/README.md) and [review checklist](docs/REVIEW-CHECKLIST.md).
+
 ## Minimal assessment shape
 
 This complete, schema-valid v0.2 skeleton intentionally grants no conformance
