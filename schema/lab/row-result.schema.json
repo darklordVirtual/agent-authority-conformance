@@ -1,0 +1,162 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/darklordVirtual/agent-authority-conformance/schema/lab/row-result.schema.json",
+  "title": "AAC lab adequacy row result (v0.3)",
+  "description": "Counts are per row and per fault set only; nothing is summed across rows or sets.",
+  "type": "object",
+  "propertyNames": {
+    "not": {
+      "enum": [
+        "overall",
+        "score",
+        "total",
+        "aggregate",
+        "grade"
+      ]
+    }
+  },
+  "required": [
+    "row",
+    "status",
+    "engine",
+    "projection",
+    "controls",
+    "counts_by_set",
+    "mutants"
+  ],
+  "properties": {
+    "row": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "enum": [
+        "MEASURED",
+        "VOID_NO_SCORE",
+        "VOID"
+      ]
+    },
+    "engine": {
+      "type": "object"
+    },
+    "projection": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "controls": {
+      "type": "object",
+      "required": [
+        "positive",
+        "inert"
+      ]
+    },
+    "counts_by_set": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "killed",
+          "killed_crash",
+          "survived",
+          "not_measured"
+        ],
+        "properties": {
+          "killed": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "killed_crash": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "survived": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "not_measured": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "mutants": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "propertyNames": {
+          "not": {
+            "enum": [
+              "overall",
+              "score",
+              "total",
+              "aggregate",
+              "grade"
+            ]
+          }
+        },
+        "required": [
+          "fault_id",
+          "set",
+          "set_name",
+          "class",
+          "outcome",
+          "moved",
+          "crashed"
+        ],
+        "properties": {
+          "fault_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "set": {
+            "enum": [
+              "known",
+              "held_out"
+            ]
+          },
+          "set_name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "class": {
+            "type": "string",
+            "minLength": 1
+          },
+          "outcome": {
+            "enum": [
+              "killed",
+              "killed_crash",
+              "survived",
+              "not_measured"
+            ]
+          },
+          "moved": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "crashed": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "engine_verdict": {
+            "type": "string",
+            "minLength": 1
+          },
+          "note": {
+            "type": "string",
+            "minLength": 1
+          },
+          "diff": {
+            "type": "object"
+          }
+        }
+      }
+    }
+  }
+}

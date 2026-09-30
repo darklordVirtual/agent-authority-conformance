@@ -1,0 +1,1 @@
+{"anchor": "return {\"status\": \"rejected\", \"reason\": \"unsigned\"}", "class": "control", "file": "checker.py", "id": "CONTROL-positive", "polarity": "positive", "replacement": "return {\"status\": \"accepted\", \"reason\": \"unsigned\"}"}

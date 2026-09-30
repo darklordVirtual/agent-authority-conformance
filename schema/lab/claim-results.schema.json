@@ -1,0 +1,143 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/darklordVirtual/agent-authority-conformance/schema/lab/claim-results.schema.json",
+  "title": "AAC lab results/claims.json (v0.3)",
+  "description": "One record per (input, claim). There is no aggregate verdict.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "records"
+  ],
+  "properties": {
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "propertyNames": {
+          "not": {
+            "enum": [
+              "overall",
+              "score",
+              "total",
+              "aggregate",
+              "grade"
+            ]
+          }
+        },
+        "required": [
+          "input",
+          "claim",
+          "execution",
+          "result",
+          "evidence"
+        ],
+        "properties": {
+          "input": {
+            "type": "string",
+            "minLength": 1
+          },
+          "claim": {
+            "type": "string",
+            "minLength": 1
+          },
+          "execution": {
+            "enum": [
+              "COMPLETED",
+              "INVALID_INPUT",
+              "UNSUPPORTED",
+              "ERROR"
+            ]
+          },
+          "result": {
+            "enum": [
+              "ESTABLISHED",
+              "CONTRADICTED",
+              "NOT_ESTABLISHED",
+              null
+            ]
+          },
+          "reads": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            }
+          },
+          "unresolved_obligations": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "verifier_error": {
+            "type": "object",
+            "required": [
+              "code",
+              "message"
+            ]
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "execution": {
+                  "const": "COMPLETED"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "result": {
+                  "enum": [
+                    "ESTABLISHED",
+                    "CONTRADICTED",
+                    "NOT_ESTABLISHED"
+                  ]
+                }
+              },
+              "required": [
+                "reads",
+                "unresolved_obligations"
+              ]
+            },
+            "else": {
+              "properties": {
+                "result": {
+                  "const": null
+                }
+              },
+              "required": [
+                "verifier_error"
+              ]
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "result": {
+                  "const": "NOT_ESTABLISHED"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "unresolved_obligations": {
+                  "minItems": 1
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

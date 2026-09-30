@@ -1,0 +1,7 @@
+{
+  "cases": [
+    {"id": "T1", "input": {"signed": true, "amount": 1, "cap": 5}, "expected": {"status": "accepted", "reason": "ok"}},
+    {"id": "T2", "input": {"signed": false, "amount": 1, "cap": 5}, "expected": {"status": "rejected", "reason": "unsigned"}},
+    {"id": "T3", "input": {"signed": true, "amount": 9, "cap": 5}, "expected": {"status": "rejected", "reason": "over_cap"}}
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "agreement_parties": ["tester"],
+  "agreement_ref": "https://example.invalid/issues/1",
+  "claim_ceiling": {
+    "does_not_establish": ["that the toy checker is correct"],
+    "establishes": ["which toy faults the three toy cases distinguish on status and reason"]
+  },
+  "controls": {"inert": "controls/inert.json", "positive": "controls/positive.json"},
+  "engine": {"cross_check": null, "name": "native"},
+  "independence": "SELF_RUN",
+  "kind": "adequacy",
+  "lab_version": "0.3",
+  "publication": {"approvers": ["tester", "maintainer"], "private_first": true, "unreleased_citable": false},
+  "rows": [
+    {
+      "cases": ["T1", "T2", "T3"],
+      "command": ["python3", "-B", "case.py", "{case}"],
+      "expected_from": {"field": "expected", "id_key": "id", "list_key": "cases", "path": "cases.json"},
+      "fault_sets": ["faults/known.json"],
+      "id": "row1",
+      "projection": ["status", "reason"]
+    }
+  ],
+  "run_id": "toy",
+  "runner": {"maintainers": ["tester"], "project": "AAC tests"},
+  "subjects": [
+    {
+      "attribution": "AAC test fixture",
+      "commit": "0000000000000000000000000000000000000000",
+      "files_sha256": {},
+      "license": "Apache-2.0",
+      "maintainers": ["maintainer"],
+      "paths": ["checker.py", "cases.json"],
+      "project": "toy",
+      "repo": "https://example.invalid/toy-subject"
+    }
+  ]
+}

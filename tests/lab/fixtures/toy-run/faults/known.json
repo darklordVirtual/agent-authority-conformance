@@ -1,0 +1,11 @@
+{
+  "faults": [
+    {"anchor": "if not case.get(\"signed\"):", "class": "guard_removal", "file": "checker.py", "id": "F1", "replacement": "if False:"},
+    {"anchor": "if case.get(\"amount\", 0) > case.get(\"cap\", 0):", "class": "guard_removal", "file": "checker.py", "id": "F2", "replacement": "if False:"},
+    {"anchor": "if case.get(\"expired\"):", "class": "guard_removal", "file": "checker.py", "id": "F3", "replacement": "if False:"},
+    {"anchor": "return {\"status\": \"accepted\", \"reason\": \"ok\"}", "class": "crash", "file": "checker.py", "id": "F4", "replacement": "raise RuntimeError(\"boom\")"}
+  ],
+  "name": "toy-known",
+  "set": "known",
+  "source": {"author": "AAC tests", "ref": "https://example.invalid/faults"}
+}
