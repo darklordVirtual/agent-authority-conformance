@@ -71,3 +71,36 @@ class LabTest(unittest.TestCase):
     def copy_fixture(self, name, dest):
         shutil.copytree(FIXTURES / name, dest, ignore=shutil.ignore_patterns("__pycache__"))
         return Path(dest)
+
+
+def prepare_run(test, fixture="toy-run", subject="toy-subject"):
+    """Copy a run fixture into test.tmp/runs/<run_id>, point it at a local subject
+    repository, and initialise empty consent and SCOPED state. Returns run_dir."""
+    from conformance.lab import consent, state
+    from conformance.lab.canonical import read_json, write_json
+
+    _, commit = test.remote_repo(subject, fixture_files(subject))
+    scope = read_json(FIXTURES / fixture / "SCOPE.json")
+    run_dir = test.copy_fixture(fixture, test.tmp / "runs" / scope["run_id"])
+    for s in scope["subjects"]:
+        s["commit"] = commit
+    write_json(run_dir / "SCOPE.json", scope)
+    write_json(run_dir / consent.FILE, {"events": []})
+    state.new_state(run_dir, NOW)
+    return run_dir
+
+
+def agree(run_dir, who="tester"):
+    from conformance.lab import consent
+    for action in ("scope_agreed", "run_authorized"):
+        consent.add(run_dir, who, action, AGREE_REF, NOW)
+
+
+def frozen_run(test, fixture="toy-run", subject="toy-subject"):
+    from conformance.lab import lifecycle
+    run_dir = prepare_run(test, fixture, subject)
+    lifecycle.pin(run_dir)
+    agree(run_dir)
+    lifecycle.freeze(run_dir, NOW)
+    lifecycle.freeze(run_dir, NOW, PLAN_REF)
+    return run_dir
