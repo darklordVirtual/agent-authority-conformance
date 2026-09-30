@@ -43,6 +43,12 @@ jobs:
       - name: Validate assessments and committed fixtures
         run: python -m conformance.check
 
+      - name: Score the fixtures against the seeded faults
+        run: python -m conformance.mutations
+
+      - name: Check the E rule's invariants over the generated space
+        run: python -m conformance.invariants
+
       - name: Run semantic and harness regression tests
         run: python -m unittest discover -s tests -v
 

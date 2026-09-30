@@ -63,6 +63,9 @@ No percentage, star rating, “5/7 conformant”, security grade or ranking is v
 | [`schema/assessment.schema.json`](schema/assessment.schema.json) | Preserved v0.1 schema |
 | [`examples/`](examples/) | Versioned examples and historical assessments |
 | [`conformance/`](conformance/) | Validation and bounded E reference inference |
+| [`conformance/mutations-v0.2.json`](conformance/mutations-v0.2.json) | Seeded faults for the E rule; `python -m conformance.mutations` scores the fixtures against them |
+| [`conformance/invariants.py`](conformance/invariants.py) | Metamorphic relations and a differential reference model for the E rule over a generated space |
+| [`MUTATIONS-AND-INVARIANTS.md`](MUTATIONS-AND-INVARIANTS.md) | What the two adequacy checks establish, and what they do not |
 | [`tests/fixtures/`](tests/fixtures/) | Synthetic, committed evidence-sufficiency cases |
 | [`CONTRIBUTING.md`](CONTRIBUTING.md) | Evidence and contribution discipline |
 
@@ -76,12 +79,17 @@ python -m venv .venv
 # Windows PowerShell: .venv/Scripts/Activate.ps1
 python -m pip install -r requirements-dev.txt
 python -m conformance.check
+python -m conformance.mutations
+python -m conformance.invariants
 python -m unittest discover -s tests -v
 ```
 
 Activate the environment with the command for your platform before installing.
 The checks run offline after dependency installation and do not invoke external
-tools or regenerate committed expectations.
+tools or regenerate committed expectations. `mutations` seeds faults into the
+E rule in memory and asks whether the fixtures notice; `invariants` checks
+relations that need no expected answer over a generated input space. Both are
+read-only; see [MUTATIONS-AND-INVARIANTS.md](MUTATIONS-AND-INVARIANTS.md).
 
 The E reference rule consumes **already accepted evidence**. It does not verify
 artifacts, inspect credential custody or establish coverage itself. Its synthetic
