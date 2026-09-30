@@ -53,6 +53,14 @@ class AdapterTests(unittest.TestCase):
         m=self.manifest(); m["artifacts"][0]["path"]="/tmp/evidence"
         with self.assertRaises(AdapterError): validate_manifest(m)
 
+    def test_rejects_duplicate_artifact_ids(self):
+        m=self.manifest(); m["artifacts"].append(dict(m["artifacts"][0]))
+        with self.assertRaises(AdapterError): validate_manifest(m)
+
+    def test_rejects_unpinned_adapter_revision(self):
+        m=self.manifest(); m["adapter"]["revision"]="main"
+        with self.assertRaises(AdapterError): validate_manifest(m)
+
     def test_rejects_short_revision(self):
         m=self.manifest(); m["subject"]["revision"]="main"
         with self.assertRaises(AdapterError): validate_manifest(m)
