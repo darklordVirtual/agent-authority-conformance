@@ -1,3 +1,7 @@
 __pycache__/
 *.py[cod]
 .venv/
+# Lab runs hold unreleased results and quoted third-party material.
+# They live in private repositories, never in this one.
+runs/*
+!runs/README.md

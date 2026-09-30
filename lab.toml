@@ -1,0 +1,3 @@
+# Settings for python -m conformance.lab. See RUN-PROTOCOL-v0.3.md.
+org = "R-research-lab"
+runs_dir = "runs"
