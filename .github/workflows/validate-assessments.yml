@@ -90,3 +90,5 @@ jobs:
           assert all(e["resolution"] == "RESOLVED" for e in x["evidence"])
           print(json.dumps(x, indent=2, sort_keys=True))
           PY
+          python -m pip install --disable-pip-version-check check-jsonschema==0.33.2
+          check-jsonschema --schemafile schema/federation-evidence-bundle-v1.schema.json /tmp/remora-evidence-bundle.json
