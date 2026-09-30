@@ -36,8 +36,15 @@ def validate_manifest(m: dict[str, Any]) -> None:
         raise AdapterError("subject repository and immutable revision are required")
     if len(subject["revision"]) != 40 or any(c not in "0123456789abcdef" for c in subject["revision"].lower()):
         raise AdapterError("subject revision must be a full 40-character commit SHA")
+    adapter = m.get("adapter", {})
+    arev = adapter.get("revision", "")
+    if not adapter.get("id") or len(arev) != 40 or any(ch not in "0123456789abcdef" for ch in arev.lower()):
+        raise AdapterError("adapter id and full 40-character revision are required")
     if not m.get("artifacts"):
         raise AdapterError("at least one pinned artifact is required")
+    ids=[a.get("id") for a in m["artifacts"]]
+    if any(not x for x in ids) or len(ids) != len(set(ids)):
+        raise AdapterError("artifact ids must be nonempty and unique")
     for a in m["artifacts"]:
         if a.get("source_class") not in ALLOWED_SOURCE_CLASSES:
             raise AdapterError(f"unsupported source_class: {a.get('source_class')}")
