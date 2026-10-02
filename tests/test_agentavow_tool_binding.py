@@ -4,7 +4,7 @@ import unittest
 
 from conformance.agentavow_tool_binding import evaluate, tool_digest, tool_key
 
-FIXTURE_PATH = Path(__file__).parent / "fixtures" / "agentavow-tool-manifest-digest-v1.json"
+FIXTURE_PATH = Path(__file__).parents[1] / "interop" / "fixtures" / "agentavow-tool-manifest-digest-v1.json"
 
 
 def fixture():
