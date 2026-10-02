@@ -30,10 +30,10 @@ jobs:
         run: check-jsonschema --schemafile schema/federation-adapter-v1.schema.json adapters/*/adapter.json
 
       - name: Validate federation run example
-        run: check-jsonschema --schemafile schema/federation-run-v1.schema.json examples/federation-run-v1.json
+        run: check-jsonschema --schemafile schema/federation-run-v1.schema.json interop/examples/federation-run-v1.json
 
       - name: Validate federation edge example
-        run: check-jsonschema --schemafile schema/federation-edge-record-v1.schema.json examples/federation-edge-record-v1.json
+        run: check-jsonschema --schemafile schema/federation-edge-record-v1.schema.json interop/examples/federation-edge-record-v1.json
 
   evidence-v02:
     runs-on: ubuntu-latest

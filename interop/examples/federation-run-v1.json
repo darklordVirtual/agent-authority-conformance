@@ -12,7 +12,7 @@
     "runner": "example-runner"
   },
   "pins": {
-    "adapter_revision": "3129a49954111904025208f4373d72e0d2d5b32b",
+    "adapter_revision": "a8c5917421a4b29a1a319fa4c1b7946053b06f3d",
     "procedure_revision": "example-verifier@0000000000000000000000000000000000000001",
     "input_manifest_sha256": "0000000000000000000000000000000000000000000000000000000000000001"
   },
