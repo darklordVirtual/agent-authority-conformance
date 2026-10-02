@@ -1,4 +1,3 @@
-import json
 import tempfile
 import unittest
 from pathlib import Path
@@ -11,9 +10,20 @@ class AdapterTests(unittest.TestCase):
             "subject":{"repository":"example/project","revision":"a"*40},
             "adapter":{"id":"example-v1","revision":"b"*40},
             "artifacts":[{"id":"e1","path":"evidence.txt","sha256":sha256_bytes(content),"source_class":"test_fixture","required":True}],
-            "claims":[{"claim_id":"c1","property":"C","procedure":"example-v1","artifacts":["e1"],"claim_ceiling":"Only the pinned fixture bytes were resolved."}],
+            "claims":[{
+                "claim_id":"c1",
+                "native_claim":{"producer":"example/project","claim_id":"native-c1","result_vocabulary":["ESTABLISHED","CONTRADICTED","NOT_ESTABLISHED"]},
+                "aac_mapping":{"property":"C","relationship":"partial","rationale":"Fixture resolution alone does not establish exact-call integrity."},
+                "procedure":"example-v1","artifacts":["e1"],
+                "claim_ceiling":"Only the pinned fixture bytes were resolved."
+            }],
             "explicit_non_claims":["production enforcement"],
-            "review":{"maintainer_review_required":True}
+            "review":{
+                "mode":"PUBLIC_AFTER_REVIEW",
+                "producer_review":"REQUIRED",
+                "review_window_days":7,
+                "unresolved_disagreement":"PUBLISH_WITH_DISAGREEMENT"
+            }
         }
 
     def test_resolved_is_not_a_property_verdict(self):
@@ -23,6 +33,22 @@ class AdapterTests(unittest.TestCase):
             self.assertEqual(out["adapter_status"],"RESOLVED")
             self.assertEqual(out["claims"][0]["evidence_resolution"],"RESOLVED")
             self.assertIsNone(out["claims"][0]["property_verdict"])
+            self.assertFalse(out["publication_authorized"])
+            self.assertEqual(out["review_state"],"PENDING_REVIEW_WINDOW")
+
+    def test_public_immediate_is_explicit_not_inferred(self):
+        with tempfile.TemporaryDirectory() as d:
+            Path(d,"evidence.txt").write_bytes(b"evidence\n")
+            m=self.manifest(); m["review"]["mode"]="PUBLIC_IMMEDIATE"; m["review"]["review_window_days"]=None
+            out=resolve(m,d)
+            self.assertTrue(out["publication_authorized"])
+            self.assertEqual(out["review_state"],"PUBLICATION_ALLOWED")
+
+    def test_legacy_review_is_private(self):
+        with tempfile.TemporaryDirectory() as d:
+            Path(d,"evidence.txt").write_bytes(b"evidence\n")
+            m=self.manifest(); m["review"]={"maintainer_review_required":True}
+            out=resolve(m,d)
             self.assertFalse(out["publication_authorized"])
             self.assertEqual(out["review_state"],"DRAFT_PRIVATE_REVIEW")
 
@@ -73,8 +99,12 @@ class AdapterTests(unittest.TestCase):
         m=self.manifest(); m["claims"][0]["artifacts"]=["missing"]
         with self.assertRaises(AdapterError): validate_manifest(m)
 
-    def test_requires_maintainer_review_gate(self):
-        m=self.manifest(); m["review"]["maintainer_review_required"]=False
+    def test_rejects_unknown_mapping_relationship(self):
+        m=self.manifest(); m["claims"][0]["aac_mapping"]["relationship"]="equivalent"
+        with self.assertRaises(AdapterError): validate_manifest(m)
+
+    def test_public_after_review_requires_window(self):
+        m=self.manifest(); m["review"]["review_window_days"]=None
         with self.assertRaises(AdapterError): validate_manifest(m)
 
 if __name__=="__main__":

@@ -110,21 +110,52 @@
             "type": "string",
             "minLength": 1
           },
-          "property": {
+          "native_claim": {
             "type": [
-              "string",
+              "object",
               "null"
             ],
-            "enum": [
-              "A",
-              "B",
-              "C",
-              "D",
-              "E",
-              "F",
-              "G",
-              null
-            ]
+            "additionalProperties": true
+          },
+          "aac_mapping": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": false,
+            "required": [
+              "property",
+              "relationship",
+              "rationale"
+            ],
+            "properties": {
+              "property": {
+                "enum": [
+                  "A",
+                  "B",
+                  "C",
+                  "D",
+                  "E",
+                  "F",
+                  "G",
+                  null
+                ]
+              },
+              "relationship": {
+                "enum": [
+                  "exact",
+                  "structural",
+                  "partial",
+                  "false_analog",
+                  "no_mapping",
+                  "not_evaluated"
+                ]
+              },
+              "rationale": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
           },
           "procedure": {
             "type": "string",
@@ -152,18 +183,53 @@
     },
     "review": {
       "type": "object",
-      "additionalProperties": true,
-      "required": [
-        "maintainer_review_required"
-      ],
+      "additionalProperties": false,
       "properties": {
         "maintainer_review_required": {
-          "const": true
+          "type": "boolean"
         },
-        "publication_rule": {
-          "type": "string"
+        "mode": {
+          "enum": [
+            "PRIVATE_UNTIL_APPROVED",
+            "PUBLIC_AFTER_REVIEW",
+            "PUBLIC_IMMEDIATE",
+            "PUBLIC_BY_MUTUAL_CONSENT"
+          ]
+        },
+        "producer_review": {
+          "enum": [
+            "REQUIRED",
+            "OPTIONAL",
+            "NOT_REQUIRED"
+          ]
+        },
+        "review_window_days": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "unresolved_disagreement": {
+          "enum": [
+            "PUBLISH_WITH_DISAGREEMENT",
+            "HOLD_PUBLICATION",
+            "SUPERSEDE_WITH_NEW_RUN"
+          ]
         }
-      }
+      },
+      "anyOf": [
+        {
+          "required": [
+            "maintainer_review_required"
+          ]
+        },
+        {
+          "required": [
+            "mode"
+          ]
+        }
+      ]
     }
   }
 }

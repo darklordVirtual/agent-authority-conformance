@@ -1,127 +1,108 @@
 # Federation review protocol v1
 
 **Status:** experimental review protocol. It is not a certification programme,
-standard, ranking system or claim of federation endorsement.
+standard, ranking system, membership registry or claim of Federation endorsement.
 
-This protocol operationalizes a narrow pattern discussed in
+The protocol operationalizes a narrow pattern from
 `aeoess/agent-governance-vocabulary#177`: independent projects keep their own
 architecture while shared boundaries use pinned artifacts, per-claim results,
 provenance and explicit claim ceilings.
 
-## 1. Respect and consent
+## 1. Project sovereignty and consent
 
 A cross-project review starts from a maintainer-proposed artifact, a public
-invitation to verify it, or explicit permission. Public availability alone is
-not treated as permission to publish an evaluative report about a project.
+verification request or explicit permission. Public artifacts may be resolved
+without executing producer code. An evaluative publication follows the review
+policy frozen for that pilot.
 
-Before an evaluative run, record:
-1. subject repository and full commit SHA;
-2. exact public artifacts and hashes;
-3. adapter and procedure revision;
-4. named claims and non-claims;
-5. synthetic, simulated, reproduced or independently observed evidence class;
-6. review recipients and publication rule;
-7. whether mutations or derived artifacts are permitted.
+Producer review is for factual corrections, scope mistakes and stronger primary
+evidence. It is not automatically a veto over a verifier conclusion. Any
+remaining technical disagreement is preserved in the public record when the
+frozen policy permits publication.
 
-No private artifact is made public by AAC. A private first review remains private
-until the agreed release condition is satisfied.
+## 2. Five separate stages
 
-## 2. Four separate stages
+1. **Resolution**: did the assessor obtain the exact declared bytes?
+2. **Admission**: are those bytes relevant, provenance-bound and applicable?
+3. **Inference**: what does the named procedure establish?
+4. **Review**: did the producer identify factual/scope corrections or disagreement?
+5. **Publication**: does the frozen policy permit release?
 
-**Resolution** answers whether the exact declared bytes were obtained.
-**Admission** answers whether those bytes are relevant, provenance-bound,
-applicable and trusted enough for a named procedure.
-**Inference** answers only the named AAC property question.
-**Review/publication** gives the producer a chance to identify factual errors,
-scope mistakes or stronger primary evidence before release.
+No stage inherits credit automatically. `RESOLVED` is not `ADMITTED`.
+`ADMITTED` is not `PASS`. A valid signature is not execution evidence.
+A successful dispatch is not effect verification.
 
-These stages MUST NOT inherit credit automatically.
+## 3. Review and publication policy
 
-`RESOLVED` is not `ADMITTED`. `ADMITTED` is not `PASS`. A valid signature
-is not execution evidence. A successful dispatch is not effect verification.
-Silence from a maintainer is not approval.
+Every adapter freezes one policy:
 
-## 3. Run freeze
+- `PRIVATE_UNTIL_APPROVED`
+- `PUBLIC_AFTER_REVIEW`
+- `PUBLIC_IMMEDIATE`
+- `PUBLIC_BY_MUTUAL_CONSENT`
 
-The run manifest is frozen before execution. A material change to subject bytes,
-adapter logic, procedure, expected semantics or scope creates a new run identity.
+For time-bounded review, record `review_window_days`. Record whether producer
+review is `REQUIRED`, `OPTIONAL` or `NOT_REQUIRED`, and what happens to an
+unresolved disagreement: publish it, hold publication, or supersede with a new
+run. Silence is never rewritten as endorsement.
 
-Expected fixture answers stay outside inference input. If the procedure cannot
-run, report `UNSUPPORTED`, `INVALID_INPUT` or `ERROR` rather than a property
-failure. If it runs but evidence cannot decide the claim, use
-`NOT_ESTABLISHED` and name the unresolved obligation.
+## 4. Run identity and independence
 
-## 4. Source classes and independence
+A material change to subject bytes, adapter logic, procedure, scope or expected
+semantics creates a new run identity. A `federation-run-v1` record separates:
+
+- producer;
+- fixture author;
+- verifier implementation maintainer;
+- runner/operator;
+- subject, adapter and procedure pins;
+- exact command and runtime environment;
+- blinded/non-blinded state;
+- independence classification.
+
+Supported classifications are `AUTHOR_RUN`, `REPRODUCTION`,
+`SECOND_IMPLEMENTATION` and `INDEPENDENT_IMPLEMENTATION`. The classification
+describes provenance. It does not itself make a claim correct.
+
+## 5. Native claims are preserved
+
+AAC does not force every foreign claim into A-G. An adapter may preserve a
+producer's native claim and separately describe its relationship to an AAC
+property as `exact`, `structural`, `partial`, `false_analog`,
+`no_mapping` or `not_evaluated`.
+
+A mapping is metadata, not transitive credit. Foreign result vocabularies remain
+the producer's vocabulary unless a separately versioned inference procedure
+explicitly evaluates an AAC property.
+
+## 6. Source classes
 
 At minimum distinguish producer artifact, source code, test fixture, run record,
 review record and independent observation. Re-running producer-authored fixtures
-is a reproduction or second implementation when appropriate, not automatically
-independent validation.
+is not automatically independent validation.
 
-Evidence created by the project under review may be excellent evidence of
-internal consistency while still being insufficient for an external-effect or
-observation-completeness claim.
+## 7. Output and edge records
 
-## 5. Output package
+A publishable run contains immutable pins, a machine-readable evidence bundle,
+run manifest, command, per-claim results, unresolved obligations, explicit
+non-claims, claim ceiling, evidence source classes, review record and lineage.
 
-A publishable run should contain:
-- immutable subject and adapter pins;
-- machine-readable evidence bundle;
-- exact procedure and reproduction command;
-- one result per named claim;
-- unresolved obligations;
-- explicit non-claims and claim ceiling;
-- source class for every material evidence item;
-- disagreements/corrections from maintainer review;
-- run lineage when a rerun supersedes or extends an earlier result.
+A `federation-edge-record-v1` may summarize one producer-to-consumer technical
+edge. It is descriptive only: it does not establish membership, endorsement,
+commercial status or governance authority.
 
-Never replace per-claim output with an aggregate score.
+## 8. Mutation and adequacy
 
-## 6. Maintainer review
-
-The default state is `DRAFT_PRIVATE_REVIEW`. Review asks the producer to check
-facts, artifact interpretation, scope and terminology. It does not ask the
-producer to approve AAC's conclusion.
-
-Corrections to facts are incorporated with lineage. Technical disagreement is
-recorded rather than silently rewritten. New producer evidence creates a new
-evidence revision if it changes the basis of inference.
-
-Publication must state whether the producer reviewed the report and whether any
-remaining disagreement exists. "Reviewed" does not mean "endorsed".
-
-## 7. Mutation and adequacy
-
-Mutation testing is a separate experiment. It tests whether the pinned corpus can
-distinguish agreed seeded faults. A surviving mutant is a corpus discrimination
-limit unless stronger analysis establishes another classification. It is not by
-itself proof that the producer checker is wrong.
-
-Positive and inert controls, exact mutant diffs and all survivors are retained.
-Do not curate away inconvenient survivors after seeing the result.
-
-## 8. REMORA as a metatest subject
-
-REMORA may be used to test AAC's adapter and evidence semantics because it has
-explicit claim/capability registers, deterministic conformance artifacts and
-documented negative results. This does not grant REMORA privileged status.
-
-In particular, REMORA's evidence-sufficiency work requires synthetic accepted
-premises to stay visibly synthetic and forbids production adapters from treating
-caller-controlled completeness booleans as proof. AAC adopts that lesson as a
-general adapter invariant: accepted-premise fields require provenance and an
-admission step outside the producer-controlled payload.
-
-REMORA results used here retain their own maturity labels. Internal benchmarks,
-regression tests and author-run synthetic corpora are not relabelled as field
-validation or independent replication.
+Mutation testing is a separate experiment. It measures whether a pinned corpus
+distinguishes agreed seeded faults. Survivors are retained and described as
+discrimination limits unless stronger analysis establishes another result.
 
 ## 9. Stop conditions
 
-Stop and return to review when the subject pin changes, an artifact cannot be
-resolved, a claim depends on an undeclared trust assumption, expected results
-leak into verifier input, an adapter needs broader access than agreed, or the
-output would support a stronger public interpretation than the evidence ceiling.
+Stop and return to review if a pin changes, an artifact cannot be resolved,
+expected answers leak into verifier input, a procedure needs broader access than
+agreed, a trust assumption is undeclared, or public wording would exceed the
+claim ceiling.
 
 The objective is useful disagreement and reproducible learning, not making more
 projects pass.

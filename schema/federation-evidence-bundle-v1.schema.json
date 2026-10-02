@@ -11,6 +11,7 @@
     "evidence",
     "claims",
     "explicit_non_claims",
+    "review_policy",
     "review_state",
     "publication_authorized",
     "manifest_sha256",
@@ -84,7 +85,8 @@
         "additionalProperties": false,
         "required": [
           "claim_id",
-          "property",
+          "native_claim",
+          "aac_mapping",
           "procedure",
           "artifacts",
           "evidence_resolution",
@@ -96,9 +98,15 @@
           "claim_id": {
             "type": "string"
           },
-          "property": {
+          "native_claim": {
             "type": [
-              "string",
+              "object",
+              "null"
+            ]
+          },
+          "aac_mapping": {
+            "type": [
+              "object",
               "null"
             ]
           },
@@ -138,11 +146,19 @@
         "type": "string"
       }
     },
+    "review_policy": {
+      "type": "object"
+    },
     "review_state": {
-      "const": "DRAFT_PRIVATE_REVIEW"
+      "enum": [
+        "DRAFT_PRIVATE_REVIEW",
+        "PENDING_REVIEW_WINDOW",
+        "PENDING_MUTUAL_CONSENT",
+        "PUBLICATION_ALLOWED"
+      ]
     },
     "publication_authorized": {
-      "const": false
+      "type": "boolean"
     },
     "manifest_sha256": {
       "type": "string",

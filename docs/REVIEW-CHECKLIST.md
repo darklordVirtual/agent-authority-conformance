@@ -1,47 +1,43 @@
 # Cross-project review checklist
 
-Use this checklist for every federation-style AAC run.
-
 ## Before the run
-- [ ] Maintainer invitation, public verification request or explicit permission recorded.
-- [ ] Full subject commit SHA frozen.
-- [ ] Exact artifact bytes and hashes frozen.
+- [ ] Subject repository and full commit SHA frozen.
+- [ ] Artifact bytes and SHA-256 values frozen.
 - [ ] Adapter and procedure revisions frozen.
-- [ ] Named claims and explicit non-claims agreed or clearly proposed.
-- [ ] Source class and independence level recorded for each artifact.
-- [ ] Expected results kept outside verifier input.
-- [ ] Mutation permission recorded separately.
-- [ ] Private/public review and release rule recorded.
+- [ ] Native claims and explicit non-claims recorded.
+- [ ] AAC mapping is absent or explicitly classified.
+- [ ] Producer, fixture author, verifier implementation and runner are separate fields.
+- [ ] Independence and blinded/non-blinded state recorded.
+- [ ] Expected results remain outside verifier input.
+- [ ] Review/publication policy is frozen before evaluative execution.
 
 ## Mechanical review
-- [ ] No path traversal or mutable branch reference.
-- [ ] Every required artifact resolves to the expected SHA-256.
-- [ ] Adapter does not execute producer code unless the procedure explicitly requires and sandboxes it.
+- [ ] No mutable branch reference or path traversal.
+- [ ] Required artifacts resolve to expected hashes.
+- [ ] Producer code is not executed unless explicitly scoped.
 - [ ] Missing/mismatched input produces a non-verdict.
-- [ ] Output contains no aggregate score.
-- [ ] Output is deterministic where the procedure permits.
-- [ ] A rerun has lineage to the earlier run rather than overwriting it.
+- [ ] Output has no aggregate score.
+- [ ] Reruns carry lineage rather than overwrite history.
 
 ## Evidence review
 - [ ] Resolution is not confused with admission.
-- [ ] Producer-authored evidence is labelled as such.
+- [ ] Producer-authored evidence is labelled.
 - [ ] Synthetic premises remain synthetic.
-- [ ] Completeness/coverage claims have evidence outside caller-controlled booleans.
-- [ ] Runtime success is not used as effect evidence.
-- [ ] Signature validity is not used as authority/effect evidence without the required additional premises.
+- [ ] Completeness claims have evidence beyond caller-controlled booleans.
+- [ ] Runtime success is not effect evidence.
+- [ ] Signature validity is not treated as semantic authority or effect evidence.
 - [ ] Partial scope names the untested remainder.
 - [ ] NOT_ESTABLISHED names unresolved obligations.
 
-## Maintainer review
-- [ ] Factual interpretation sent to producer before publication when required.
-- [ ] Corrections are incorporated with provenance.
-- [ ] Technical disagreement is retained, not silently normalized away.
-- [ ] Review is not described as endorsement.
-- [ ] Publication permission satisfies the frozen rule.
-- [ ] Public text repeats the claim ceiling and material non-claims.
+## Review and publication
+- [ ] Factual interpretation is sent to producer when the frozen policy requires it.
+- [ ] Corrections retain provenance.
+- [ ] Technical disagreement is retained.
+- [ ] "Reviewed" is never described as "endorsed".
+- [ ] Publication follows the frozen mode/window.
+- [ ] Public text repeats claim ceiling and material non-claims.
 
 ## Adequacy follow-up
 - [ ] Mutation experiment is separately scoped.
 - [ ] Positive and inert controls are present.
 - [ ] All survivors are retained.
-- [ ] Survivors are described as discrimination limits unless stronger evidence supports another classification.

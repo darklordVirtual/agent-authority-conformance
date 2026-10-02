@@ -27,7 +27,19 @@
   "claims": [
     {
       "claim_id": "remora-es-v1-input-resolution",
-      "property": null,
+      "native_claim": {
+        "producer": "REMORA-research",
+        "claim_id": "evidence-sufficiency-v1-input-resolution",
+        "result_vocabulary": [
+          "RESOLVED",
+          "INCOMPLETE"
+        ]
+      },
+      "aac_mapping": {
+        "property": null,
+        "relationship": "no_mapping",
+        "rationale": "This metatest resolves bytes only and deliberately grants no A-G property credit."
+      },
       "procedure": "sha256-resolution-only",
       "artifacts": [
         "checker",
@@ -45,7 +57,9 @@
     "external replication"
   ],
   "review": {
-    "maintainer_review_required": true,
-    "publication_rule": "The REMORA maintainer reviews the generated bundle before it is used as a public cross-project result."
+    "mode": "PUBLIC_AFTER_REVIEW",
+    "producer_review": "REQUIRED",
+    "review_window_days": 7,
+    "unresolved_disagreement": "PUBLISH_WITH_DISAGREEMENT"
   }
 }
