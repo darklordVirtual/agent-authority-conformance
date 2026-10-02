@@ -7,12 +7,12 @@ This directory records a Python implementation of the derivation published by Ag
 - Producer: `AgentAvow/AgentAvow`
 - Commit: `36426cfd5152bba6a27766febfac8aaef47b6f34`
 - Upstream vector path: `docs/standards/tool-manifest-digest-vectors-v1/tool-manifest-digest-v1-vectors.json`
-- Local fixture: `tests/fixtures/agentavow-tool-manifest-digest-v1.json`
+- Local fixture: `interop/fixtures/agentavow-tool-manifest-digest-v1.json`
 
 Run:
 
 ```bash
-python -m pytest -q tests/test_agentavow_tool_binding.py
+python -m unittest tests.test_agentavow_tool_binding -v
 ```
 
 ## Claim ceiling
