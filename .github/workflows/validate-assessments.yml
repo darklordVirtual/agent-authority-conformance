@@ -26,6 +26,15 @@ jobs:
       - name: Validate assessment examples
         run: check-jsonschema --schemafile schema/assessment.schema.json examples/*.json
 
+      - name: Validate federation adapter manifests
+        run: check-jsonschema --schemafile schema/federation-adapter-v1.schema.json adapters/*/adapter.json
+
+      - name: Validate federation run example
+        run: check-jsonschema --schemafile schema/federation-run-v1.schema.json interop/examples/federation-run-v1.json
+
+      - name: Validate federation edge example
+        run: check-jsonschema --schemafile schema/federation-edge-record-v1.schema.json interop/examples/federation-edge-record-v1.json
+
   evidence-v02:
     runs-on: ubuntu-latest
     steps:
@@ -54,3 +63,44 @@ jobs:
 
       - name: Ensure checks did not rewrite tracked evidence
         run: git diff --exit-code
+
+  remora-adapter-metatest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out AAC
+        uses: actions/checkout@v4
+        with:
+          path: aac
+
+      - name: Check out pinned REMORA subject
+        uses: actions/checkout@v4
+        with:
+          repository: darklordVirtual/REMORA-research
+          ref: 31c4060630923344d43d9fac26821150262c3687
+          path: remora
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Resolve pinned REMORA evidence without executing producer code
+        working-directory: aac
+        run: |
+          PYTHONPATH=. python scripts/run_federation_adapter.py \
+            --manifest adapters/remora-evidence-sufficiency-v1/adapter.json \
+            --subject-root ../remora \
+            --out /tmp/remora-evidence-bundle.json
+          python - <<'PY'
+          import json
+          p="/tmp/remora-evidence-bundle.json"
+          x=json.load(open(p, encoding="utf-8"))
+          assert x["adapter_status"] == "RESOLVED"
+          assert x["review_state"] == "PENDING_REVIEW_WINDOW"
+          assert x["publication_authorized"] is False
+          assert all(c["property_verdict"] is None for c in x["claims"])
+          assert all(e["resolution"] == "RESOLVED" for e in x["evidence"])
+          print(json.dumps(x, indent=2, sort_keys=True))
+          PY
+          python -m pip install --disable-pip-version-check check-jsonschema==0.33.2
+          check-jsonschema --schemafile schema/federation-evidence-bundle-v1.schema.json /tmp/remora-evidence-bundle.json

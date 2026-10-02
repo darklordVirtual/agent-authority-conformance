@@ -1,0 +1,54 @@
+{
+  "schema_version": "federation-adapter-v1",
+  "subject": {
+    "repository": "haroldmalikfrimpong-ops/agentid",
+    "revision": "6f20943ff855a984a6bcfe220793e68f08eb75fe"
+  },
+  "adapter": {
+    "id": "agentid-verifier-attestation-battery-resolution",
+    "revision": "48bc37d73a00be5506f345a8ec1cabb9be969537"
+  },
+  "artifacts": [
+    {
+      "id": "expected-output",
+      "path": "conformance/verifier-attestation-mutations/EXPECTED_OUTPUT.txt",
+      "sha256": "b47602b3a4b4720a0fb7465cf9773d9907887c9ef8a280c8d8d308260e02b1cf",
+      "source_class": "run_record",
+      "required": true
+    }
+  ],
+  "claims": [
+    {
+      "claim_id": "agentid-verifier-attestation-run-record-resolution",
+      "native_claim": {
+        "producer": "AgentID",
+        "claim_id": "verifier_attestation_negative_battery",
+        "result_vocabulary": [
+          "producer-reported baseline/mutation counts"
+        ]
+      },
+      "aac_mapping": {
+        "property": "B",
+        "relationship": "structural",
+        "rationale": "The published battery concerns signed identity/trust attestation verification, but resolution of its output is not Authority Provenance evidence by itself."
+      },
+      "procedure": "sha256-resolution-only",
+      "artifacts": [
+        "expected-output"
+      ],
+      "claim_ceiling": "This adapter establishes only byte identity for the pinned AgentID published run record. It does not independently reproduce the 60 mutations, authenticate the fixture key, establish AAC property B or imply endorsement."
+    }
+  ],
+  "explicit_non_claims": [
+    "independent reproduction",
+    "fixture-key trust",
+    "AAC A-G conformance",
+    "Federation endorsement"
+  ],
+  "review": {
+    "mode": "PUBLIC_IMMEDIATE",
+    "producer_review": "OPTIONAL",
+    "review_window_days": null,
+    "unresolved_disagreement": "PUBLISH_WITH_DISAGREEMENT"
+  }
+}

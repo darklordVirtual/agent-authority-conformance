@@ -1,0 +1,55 @@
+{
+  "schema_version": "federation-adapter-v1",
+  "subject": {
+    "repository": "AgentAvow/AgentAvow",
+    "revision": "644fbb7bd8ed509ec91dea0c1b859e30574f15c4"
+  },
+  "adapter": {
+    "id": "agentavow-e1-tool-digest-v1-resolution",
+    "revision": "48bc37d73a00be5506f345a8ec1cabb9be969537"
+  },
+  "artifacts": [
+    {
+      "id": "vectors",
+      "path": "docs/standards/tool-manifest-digest-vectors-v1/tool-manifest-digest-v1-vectors.json",
+      "sha256": "488496079155830caf83593be0cafcb21367f72cd70ea363c2400f40eda72647",
+      "source_class": "test_fixture",
+      "required": true
+    }
+  ],
+  "claims": [
+    {
+      "claim_id": "agentavow-e1-vectors-byte-resolution",
+      "native_claim": {
+        "producer": "AgentAvow",
+        "claim_id": "tool_manifest_digest_v1",
+        "result_vocabulary": [
+          "producer-defined in pinned vector set"
+        ]
+      },
+      "aac_mapping": {
+        "property": "C",
+        "relationship": "partial",
+        "rationale": "The vector set contains exact tool-definition digest binding evidence, but byte resolution alone does not establish AAC Exact-Call Integrity."
+      },
+      "procedure": "sha256-resolution-only",
+      "artifacts": [
+        "vectors"
+      ],
+      "claim_ceiling": "This adapter establishes only byte identity for the pinned AgentAvow E1 vector set. It does not establish signature validity, runtime behavior, gate admission, AAC property C, independent verification or Federation endorsement."
+    }
+  ],
+  "explicit_non_claims": [
+    "AAC A-G conformance",
+    "runtime behavior",
+    "gate admission",
+    "independent verification",
+    "Federation endorsement"
+  ],
+  "review": {
+    "mode": "PUBLIC_IMMEDIATE",
+    "producer_review": "OPTIONAL",
+    "review_window_days": null,
+    "unresolved_disagreement": "PUBLISH_WITH_DISAGREEMENT"
+  }
+}

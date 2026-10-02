@@ -2,6 +2,8 @@
 
 > **Evidence before adjectives.** A vendor-neutral vocabulary for evaluating authority and execution controls in agentic systems.
 
+> **Project identity:** this repository is independent. It is not `Agent-Authority-Conformance/aps-conformance-suite`, not a Federation authority, and not a membership or certification body.
+
 **Status:** Draft v0.2 (opt-in; v0.1 preserved) · **No aggregate score** · **Not a certification** · **Not a product ranking**
 
 When an agent runtime says *“the tool call was authorized”*, that statement hides several independent security and governance questions. Agent Authority Conformance separates those questions so implementations can state precisely what they have demonstrated, what remains untested, and what they deliberately do not claim.
