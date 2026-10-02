@@ -29,6 +29,12 @@ jobs:
       - name: Validate federation adapter manifests
         run: check-jsonschema --schemafile schema/federation-adapter-v1.schema.json adapters/*/adapter.json
 
+      - name: Validate federation run example
+        run: check-jsonschema --schemafile schema/federation-run-v1.schema.json examples/federation-run-v1.json
+
+      - name: Validate federation edge example
+        run: check-jsonschema --schemafile schema/federation-edge-record-v1.schema.json examples/federation-edge-record-v1.json
+
   evidence-v02:
     runs-on: ubuntu-latest
     steps:
@@ -84,7 +90,7 @@ jobs:
           p="/tmp/remora-evidence-bundle.json"
           x=json.load(open(p, encoding="utf-8"))
           assert x["adapter_status"] == "RESOLVED"
-          assert x["review_state"] == "DRAFT_PRIVATE_REVIEW"
+          assert x["review_state"] == "PENDING_REVIEW_WINDOW"
           assert x["publication_authorized"] is False
           assert all(c["property_verdict"] is None for c in x["claims"])
           assert all(e["resolution"] == "RESOLVED" for e in x["evidence"])
