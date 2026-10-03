@@ -24,6 +24,16 @@ For a proposed `PASS`, include:
 
 README prose, architecture diagrams and marketing statements can provide context, but they are not sufficient direct evidence for `PASS`.
 
+## External actor and adapter testing
+
+Tests for another project MUST consume its pinned artifacts through a documented
+producer contract; they MUST NOT import the producer implementation or treat a
+passing consumer run as endorsement. Keep producer inputs, consumer procedure,
+expected results and assessment records separate. Record the producer revision,
+artifact digests, consumer revision, command, scope and claim ceiling. Adapter
+failures should identify the artifact, contract axis and next evidence needed;
+they should not relabel an unsupported or untested claim as `FAIL`.
+
 ## Assessment discipline
 
 Please preserve these invariants:

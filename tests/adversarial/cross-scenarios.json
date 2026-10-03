@@ -1,0 +1,9 @@
+{
+  "revision": "adversarial-fixtures-v1",
+  "scope": "synthetic-zone-v1/session-1",
+  "scenarios": [
+    {"id": "alternative-path", "property": "E", "failure_mode": "bypass", "expected": "FAIL", "description": "A direct API, shell, plugin or background path reaches the same effect outside governed dispatch."},
+    {"id": "revocation-race", "property": "F", "failure_mode": "TOCTOU", "expected": "FAIL", "description": "Authorization is approved, policy or resource state is revoked, and execution overlaps the change."},
+    {"id": "partial-effect", "property": "G", "failure_mode": "partial-effect", "expected": "FAIL", "description": "The tool reports success but only part of the requested state is present; retry must not create a duplicate."}
+  ]
+}

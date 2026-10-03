@@ -1,0 +1,17 @@
+{
+  "spec_version": "0.2",
+  "system": "Adversarial Fixture Runtime",
+  "system_version": "1.0",
+  "revision": "adversarial-fixtures-v1",
+  "assessed_at": "2026-10-03",
+  "scope": {"process_model": "single synthetic process", "external_effects": "simulated", "trust_assumptions": [], "explicit_non_claims": ["No applicable adversarial procedure has been completed"]},
+  "properties": [
+    {"id": "A", "property": "Receipt Integrity", "status": "UNTESTED", "verification_status": "NOT_RUN", "evidence_tier": "NONE", "reasoning": "No receipt adversarial procedure has been completed.", "caveat": "No conclusion about receipt integrity is claimed.", "evidence": []},
+    {"id": "B", "property": "Authority Provenance", "status": "UNTESTED", "verification_status": "NOT_RUN", "evidence_tier": "NONE", "reasoning": "No provenance adversarial procedure has been completed.", "caveat": "No conclusion about authority provenance is claimed.", "evidence": []},
+    {"id": "C", "property": "Exact-Call Integrity", "status": "UNTESTED", "verification_status": "NOT_RUN", "evidence_tier": "NONE", "reasoning": "No exact-call adversarial procedure has been completed.", "caveat": "No conclusion about exact-call integrity is claimed.", "evidence": []},
+    {"id": "D", "property": "Semantic Authority", "status": "UNTESTED", "verification_status": "NOT_RUN", "evidence_tier": "NONE", "reasoning": "No semantic authority adversarial procedure has been completed.", "caveat": "No conclusion about semantic authority is claimed.", "evidence": []},
+    {"id": "E", "property": "Execution-Boundary Integrity", "status": "UNTESTED", "verification_status": "NOT_RUN", "evidence_tier": "NONE", "reasoning": "No execution-boundary adversarial procedure has been completed.", "caveat": "No conclusion about execution-boundary integrity is claimed.", "evidence": []},
+    {"id": "F", "property": "TOCTOU Resistance", "status": "UNTESTED", "verification_status": "NOT_RUN", "evidence_tier": "NONE", "reasoning": "No TOCTOU adversarial procedure has been completed.", "caveat": "No conclusion about TOCTOU resistance is claimed.", "evidence": []},
+    {"id": "G", "property": "Effect Verification", "status": "UNTESTED", "verification_status": "NOT_RUN", "evidence_tier": "NONE", "reasoning": "No effect-verification adversarial procedure has been completed.", "caveat": "No conclusion about effect verification is claimed.", "evidence": []}
+  ]
+}

@@ -250,6 +250,32 @@ class BoundaryTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual({p: p.read_bytes() for p in paths}, before)
 
+    def test_external_assessment_corpus_gets_structured_failure_report(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            fixture_root = root / "fixtures"
+            fixture_root.mkdir()
+            assessment = root / "external-assessment.json"
+            assessment.write_text(
+                (ROOT / "examples/v0.2/minimal.json").read_text(encoding="utf-8"),
+                encoding="utf-8",
+            )
+            fixture = json.loads((ROOT / "tests/fixtures/missing-coverage.json").read_text(encoding="utf-8"))
+            fixture["expected"]["status"] = "PASS"
+            fixture_path = fixture_root / "external-fixture.json"
+            fixture_path.write_text(json.dumps(fixture), encoding="utf-8")
+            report_path = root / "report.json"
+            result = subprocess.run(
+                [sys.executable, "-m", "conformance.check", "--assessments", str(assessment),
+                 "--fixtures", str(fixture_root), "--report", str(report_path)],
+                cwd=ROOT, capture_output=True, text=True,
+            )
+            self.assertNotEqual(result.returncode, 0)
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+            self.assertEqual(report["failures"][0]["kind"], "fixture")
+            self.assertEqual(report["failures"][0]["path"], str(fixture_path))
+            self.assertIn("external-fixture", result.stderr)
+
 
 if __name__ == "__main__":
     unittest.main()

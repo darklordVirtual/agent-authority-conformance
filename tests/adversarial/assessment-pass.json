@@ -1,0 +1,122 @@
+{
+  "spec_version": "0.2",
+  "system": "Adversarial Fixture Runtime",
+  "system_version": "1.0",
+  "revision": "adversarial-fixtures-v1",
+  "assessed_at": "2026-10-03",
+  "scope": {
+    "process_model": "single synthetic process with governed tool dispatch",
+    "deployment_model": "local deterministic fixture runner",
+    "external_effects": "simulated",
+    "trust_assumptions": ["fixture runner and assessor resolve committed artifacts"],
+    "explicit_non_claims": ["distributed queues and live external integrations"]
+  },
+  "properties": [
+    {
+      "id": "A",
+      "property": "Receipt Integrity",
+      "status": "PASS",
+      "verification_status": "COMPLETED",
+      "evidence_tier": "RESOLVED",
+      "reasoning": "Replay, expiry, nonce, signature and ordering mutations are rejected.",
+      "caveat": "This covers the synthetic receipt implementation and not a distributed clock.",
+      "evidence": [{"kind": "test", "reference": "tests/test_adversarial.py::AdversarialAssessmentTests::test_each_property_has_pass_fail_and_untested_fixture", "revision": "adversarial-fixtures-v1", "command": "python -m unittest tests.test_adversarial", "description": "Receipt mutation vectors."}],
+      "supported_scope": "synthetic receipt verifier",
+      "evaluation_scope": "synthetic-zone-v1/session-1",
+      "procedure": {"kind": "test", "reference": "tests/test_adversarial.py::AdversarialAssessmentTests::test_each_property_has_pass_fail_and_untested_fixture", "revision": "adversarial-fixtures-v1", "command": "python -m unittest tests.test_adversarial", "description": "Adversarial property procedure."},
+      "unresolved_obligations": []
+    },
+    {
+      "id": "B",
+      "property": "Authority Provenance",
+      "status": "PASS",
+      "verification_status": "COMPLETED",
+      "evidence_tier": "RESOLVED",
+      "reasoning": "Role, delegation revocation, delegation direction and identity binding mutations are rejected.",
+      "caveat": "This does not establish provenance across an external identity provider.",
+      "evidence": [{"kind": "test", "reference": "tests/test_adversarial.py::AdversarialAssessmentTests::test_each_property_has_pass_fail_and_untested_fixture", "revision": "adversarial-fixtures-v1", "command": "python -m unittest tests.test_adversarial", "description": "Delegation and identity vectors."}],
+      "supported_scope": "synthetic authority graph",
+      "evaluation_scope": "synthetic-zone-v1/session-1",
+      "procedure": {"kind": "test", "reference": "tests/test_adversarial.py::AdversarialAssessmentTests::test_each_property_has_pass_fail_and_untested_fixture", "revision": "adversarial-fixtures-v1", "command": "python -m unittest tests.test_adversarial", "description": "Adversarial property procedure."},
+      "unresolved_obligations": []
+    },
+    {
+      "id": "C",
+      "property": "Exact-Call Integrity",
+      "status": "PASS",
+      "verification_status": "COMPLETED",
+      "evidence_tier": "RESOLVED",
+      "reasoning": "Argument, alias, Unicode, numeric-string, default and extra-argument mutations are rejected.",
+      "caveat": "Canonicalization is tested only for the declared synthetic serializer.",
+      "evidence": [{"kind": "test", "reference": "tests/test_adversarial.py::AdversarialAssessmentTests::test_each_property_has_pass_fail_and_untested_fixture", "revision": "adversarial-fixtures-v1", "command": "python -m unittest tests.test_adversarial", "description": "Exact-call mutation vectors."}],
+      "supported_scope": "synthetic tool-call serializer",
+      "evaluation_scope": "synthetic-zone-v1/session-1",
+      "procedure": {"kind": "test", "reference": "tests/test_adversarial.py::AdversarialAssessmentTests::test_each_property_has_pass_fail_and_untested_fixture", "revision": "adversarial-fixtures-v1", "command": "python -m unittest tests.test_adversarial", "description": "Adversarial property procedure."},
+      "unresolved_obligations": []
+    },
+    {
+      "id": "D",
+      "property": "Semantic Authority",
+      "status": "PASS",
+      "verification_status": "COMPLETED",
+      "evidence_tier": "RESOLVED",
+      "reasoning": "User, resource, amount, purpose and tool-result instruction mutations are rejected.",
+      "caveat": "The policy vocabulary is synthetic and does not cover every business meaning.",
+      "evidence": [{"kind": "test", "reference": "tests/test_adversarial.py::AdversarialAssessmentTests::test_each_property_has_pass_fail_and_untested_fixture", "revision": "adversarial-fixtures-v1", "command": "python -m unittest tests.test_adversarial", "description": "Semantic policy vectors."}],
+      "supported_scope": "synthetic policy context",
+      "evaluation_scope": "synthetic-zone-v1/session-1",
+      "procedure": {"kind": "test", "reference": "tests/test_adversarial.py::AdversarialAssessmentTests::test_each_property_has_pass_fail_and_untested_fixture", "revision": "adversarial-fixtures-v1", "command": "python -m unittest tests.test_adversarial", "description": "Adversarial property procedure."},
+      "unresolved_obligations": []
+    },
+    {
+      "id": "E",
+      "property": "Execution-Boundary Integrity",
+      "status": "PASS",
+      "verification_status": "COMPLETED",
+      "evidence_tier": "RESOLVED",
+      "reasoning": "All five minimum bypass classes are blocked in the declared synthetic zone.",
+      "caveat": "This does not establish absence of bypasses outside the declared topology and coverage.",
+      "evidence": [{"kind": "test", "reference": "tests/test_adversarial.py::AdversarialAssessmentTests::test_each_property_has_pass_fail_and_untested_fixture", "revision": "adversarial-fixtures-v1", "command": "python -m unittest tests.test_adversarial", "description": "Execution-boundary bypass vectors."}],
+      "supported_scope": "synthetic zone and five declared bypass classes",
+      "evaluation_scope": "synthetic-zone-v1/session-1",
+      "procedure": {"kind": "test", "reference": "tests/test_adversarial.py::AdversarialAssessmentTests::test_each_property_has_pass_fail_and_untested_fixture", "revision": "adversarial-fixtures-v1", "command": "python -m unittest tests.test_adversarial", "description": "Adversarial property procedure."},
+      "unresolved_obligations": [],
+      "execution_boundary": {
+        "evaluation_scope": "synthetic-zone-v1/session-1",
+        "agent_zone": "synthetic agent roots and import closure; no live credentials",
+        "attempted_bypass_classes": ["without_authorization", "unregistered_tool", "extracted_callable", "shared_process_credential", "authenticated_client"],
+        "topology_evidence": {"kind": "fixture", "reference": "tests/adversarial/assessment-pass.json", "revision": "adversarial-fixtures-v1", "description": "Committed synthetic topology."},
+        "coverage_evidence": {"kind": "fixture", "reference": "tests/adversarial/assessment-pass.json", "revision": "adversarial-fixtures-v1", "description": "Committed synthetic coverage."},
+        "bypass_evidence": [{"kind": "test", "reference": "tests/test_adversarial.py::AdversarialAssessmentTests::test_each_property_has_pass_fail_and_untested_fixture", "revision": "adversarial-fixtures-v1", "command": "python -m unittest tests.test_adversarial", "description": "Committed bypass attempts."}]
+      }
+    },
+    {
+      "id": "F",
+      "property": "TOCTOU Resistance",
+      "status": "PASS",
+      "verification_status": "COMPLETED",
+      "evidence_tier": "RESOLVED",
+      "reasoning": "Permission, resource, policy and target changes between approval and execution are detected.",
+      "caveat": "The concurrency schedule is deterministic and simulated.",
+      "evidence": [{"kind": "test", "reference": "tests/test_adversarial.py::AdversarialAssessmentTests::test_each_property_has_pass_fail_and_untested_fixture", "revision": "adversarial-fixtures-v1", "command": "python -m unittest tests.test_adversarial", "description": "TOCTOU interleaving vectors."}],
+      "supported_scope": "synthetic approval/execution interleavings",
+      "evaluation_scope": "synthetic-zone-v1/session-1",
+      "procedure": {"kind": "test", "reference": "tests/test_adversarial.py::AdversarialAssessmentTests::test_each_property_has_pass_fail_and_untested_fixture", "revision": "adversarial-fixtures-v1", "command": "python -m unittest tests.test_adversarial", "description": "Adversarial property procedure."},
+      "unresolved_obligations": []
+    },
+    {
+      "id": "G",
+      "property": "Effect Verification",
+      "status": "PASS",
+      "verification_status": "COMPLETED",
+      "evidence_tier": "RESOLVED",
+      "reasoning": "Simulated success, partial effect, duplicate retry and contradictory readback vectors are detected.",
+      "caveat": "Readback is simulated and does not establish behavior of a live external system.",
+      "evidence": [{"kind": "test", "reference": "tests/test_adversarial.py::AdversarialAssessmentTests::test_each_property_has_pass_fail_and_untested_fixture", "revision": "adversarial-fixtures-v1", "command": "python -m unittest tests.test_adversarial", "description": "Effect verification vectors."}],
+      "supported_scope": "synthetic effect ledger and readback",
+      "evaluation_scope": "synthetic-zone-v1/session-1",
+      "procedure": {"kind": "test", "reference": "tests/test_adversarial.py::AdversarialAssessmentTests::test_each_property_has_pass_fail_and_untested_fixture", "revision": "adversarial-fixtures-v1", "command": "python -m unittest tests.test_adversarial", "description": "Adversarial property procedure."},
+      "unresolved_obligations": []
+    }
+  ]
+}
