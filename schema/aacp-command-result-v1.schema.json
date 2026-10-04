@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AACP onboarding command result v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "command", "status", "verification_status", "property_verdict", "data", "errors", "next_action", "claim_ceiling"],
+  "properties": {
+    "schema_version": {"const": "aacp-command-result-v1"},
+    "command": {"type": "string"},
+    "status": {"enum": ["OK", "INVALID_INPUT", "ERROR"]},
+    "verification_status": {"const": "NOT_RUN"},
+    "property_verdict": {"type": "null"},
+    "data": {"type": "object"},
+    "errors": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["code", "message"],
+        "properties": {"code": {"type": "string"}, "message": {"type": "string"}}
+      }
+    },
+    "next_action": {
+      "type": "object", "additionalProperties": false,
+      "required": ["action", "command", "output_schema"],
+      "properties": {
+        "action": {"type": "string"},
+        "command": {"type": ["string", "null"]},
+        "output_schema": {"type": "string"}
+      }
+    },
+    "claim_ceiling": {"type": "string", "minLength": 1}
+  },
+  "allOf": [
+    {"if": {"properties": {"status": {"const": "OK"}}}, "then": {"properties": {"errors": {"maxItems": 0}}}, "else": {"properties": {"errors": {"minItems": 1}}}}
+  ]
+}

@@ -91,6 +91,10 @@ python -m unittest discover -s tests -v
 ```
 
 Activate the environment with the command for your platform before installing.
+For the first installer-backed self-service commands (`aacp init`, `validate`
+and `inspect`, each with `--json`), see
+[CLI onboarding](docs/CLI-ONBOARDING.md). They validate project configuration
+and inspect local pins only; they do not award property verdicts.
 The checks run offline after dependency installation and do not invoke external
 tools or regenerate committed expectations. `mutations` seeds faults into the
 E rule in memory and asks whether the fixtures notice; `invariants` checks
