@@ -58,6 +58,8 @@ def build_parser():
     p = sub.add_parser("freeze", help="write the plan and print its hash; then record where it was published")
     p.add_argument("run_id")
     p.add_argument("--published-ref")
+    p.add_argument("--not-preregistered", action="store_true",
+                   help="self-service only: freeze without publishing the plan hash first (reported)")
     p = sub.add_parser("share", help="create a private repository and invite read-only reviewers")
     p.add_argument("run_id")
     p.add_argument("--org")
@@ -94,10 +96,12 @@ def main(argv=None, config=None):
                         decision=args.decision, rationale=args.rationale, **_provenance_args(args))
             print(f"recorded admission of {args.input}: {args.decision} by {args.who}")
         elif args.command == "freeze":
-            digest, frozen = lifecycle.freeze(run_dir, now, args.published_ref)
+            digest, frozen = lifecycle.freeze(run_dir, now, args.published_ref,
+                                              not_preregistered=args.not_preregistered)
             print(f"plan sha256: {digest}")
             if not frozen:
-                print("Publish this hash (commit or issue comment), then: freeze --published-ref <URL>")
+                print("Publish this hash (commit or issue comment), then: freeze --published-ref <URL>"
+                      " (self-service runs may instead pass --not-preregistered)")
         elif args.command == "run":
             results = runner.run(run_dir, now)
             if runner.has_survivors(results):

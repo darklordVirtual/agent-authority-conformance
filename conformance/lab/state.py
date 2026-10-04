@@ -11,7 +11,7 @@ TRANSITIONS = {
     "FROZEN": {"RUN"},
     "RUN": {"PACKAGED"},
     "PACKAGED": {"SHARED_PRIVATE"},
-    "SHARED_PRIVATE": {"REVIEWED", "WITHHELD"},
+    "SHARED_PRIVATE": {"REVIEWED", "WITHHELD", "PUBLISHED"},  # PUBLISHED directly: self-service only
     "REVIEWED": {"PUBLISHED", "WITHHELD"},
     "PUBLISHED": set(),
     "WITHHELD": set(),

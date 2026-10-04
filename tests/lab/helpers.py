@@ -171,3 +171,19 @@ def producer_with_offer(test, name="toy-receipts", branch="main", **overrides):
     ref = {"repo": repo, "commit": offer_commit, "path": OFFER_PATH, "offer_id": "toy-receipts-v1",
            "sha256": hashlib.sha256(text.encode("utf-8")).hexdigest()}
     return ref, subject_commit, test.remotes / name
+
+
+def self_service_run(test, **offer_overrides):
+    """Copy toy-offer-run, publish an offer in a local producer repository and point the
+    scope at it. Returns (run_dir, producer repository path) in state SCOPED."""
+    from conformance.lab import consent, state
+    from conformance.lab.canonical import read_json, write_json
+    ref, subject_commit, producer = producer_with_offer(test, **offer_overrides)
+    scope = read_json(FIXTURES / "toy-offer-run" / "SCOPE.json")
+    run_dir = test.copy_fixture("toy-offer-run", test.tmp / "runs" / scope["run_id"])
+    scope["offer"] = ref
+    scope["subjects"][0]["commit"] = subject_commit
+    write_json(run_dir / "SCOPE.json", scope)
+    write_json(run_dir / consent.FILE, {"events": []})
+    state.new_state(run_dir, NOW)
+    return run_dir, producer

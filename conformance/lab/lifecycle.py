@@ -80,6 +80,13 @@ def pin(run_dir, workdir=None):
     path = Path(run_dir) / "SCOPE.json"
     scope = read_json(path)
     validate_scope(scope)
+    if scope.get("track") == "self_service":
+        from .offer import check_scope_against, fetch_pinned
+        entry = fetch_pinned(scope["offer"], workdir)
+        check_scope_against(scope, entry)
+        # The terms the run relies on, frozen into SCOPE.json (and so into the plan hash).
+        scope["offer_terms"] = {"publication": entry["publication"],
+                                "maintainers": entry["producer"]["maintainers"], "expires": entry["expires"]}
     with tempfile.TemporaryDirectory(prefix="aac-pin-", dir=workdir) as tmp:
         for i, subject in enumerate(scope["subjects"]):
             clone = pins.fetch(subject["repo"], subject["commit"], Path(tmp) / f"clone-{i}")
@@ -89,13 +96,13 @@ def pin(run_dir, workdir=None):
     return scope
 
 
-def freeze(run_dir, now, published_ref=None, workdir=None):
+def freeze(run_dir, now, published_ref=None, workdir=None, not_preregistered=False):
     state.require(run_dir, "SCOPED")
-    plan.require_agreement(run_dir, load_scope(run_dir))  # consent gate before any fetch
+    plan.require_agreement(run_dir, load_scope(run_dir), now, workdir)  # gate before any subject fetch
     scope = load_scope(run_dir, require_pins=True)
     with tempfile.TemporaryDirectory(prefix="aac-freeze-", dir=workdir) as tmp:
         trees, _ = pins.materialize(scope, tmp)
-        return plan.freeze(run_dir, scope, trees, identity_for(scope), now, published_ref)
+        return plan.freeze(run_dir, scope, trees, identity_for(scope), now, published_ref, not_preregistered)
 
 
 def package(run_dir, now):
@@ -127,7 +134,7 @@ def share(run_dir, org, invite, now):
     for user in invite:
         github.invite_read_only(full_name, user)
     state.transition(run_dir, "SHARED_PRIVATE", now, note=f"pushed {commit}; invited {', '.join(invite) or 'nobody'}",
-                     repository=full_name, delivery_commit=commit,
+                     repository=full_name, delivery_commit=commit, shared_at=now,
                      consent_index_at_share=len(consent.load(run_dir)))
     return full_name
 
@@ -136,7 +143,9 @@ def review(run_dir, who, kind, ref, now):
     """Record corrections or survivor classification. Measured values are never edited."""
     current = state.require(run_dir, "SHARED_PRIVATE", "REVIEWED")
     scope = load_scope(run_dir)
-    reviewers = consent.handles(scope["publication"]["approvers"] + scope["agreement_parties"]
+    reviewers = consent.handles(scope.get("publication", {}).get("approvers", [])
+                                + scope.get("agreement_parties", [])
+                                + scope.get("offer_terms", {}).get("maintainers", [])
                                 + [m for s in scope["subjects"] for m in s["maintainers"]])
     if consent.handle(who) not in reviewers:
         raise GateError(f"{who} is not an approver, agreement party or subject maintainer of this run")
@@ -153,14 +162,14 @@ def review(run_dir, who, kind, ref, now):
         state.transition(run_dir, "REVIEWED", now, note=action)
 
 
-def _set_status(run_dir, status, message):
+def _set_status(run_dir, status, message, notes=()):
     """Write STATUS.md and push lifecycle files; restore STATUS.md if pushing fails."""
     from . import github
     from .report import render_status
     current = state.load_state(run_dir)
     path = Path(run_dir) / "STATUS.md"
     previous = path.read_text(encoding="utf-8") if path.is_file() else None
-    path.write_text(render_status(status), encoding="utf-8")
+    path.write_text(render_status(status, notes), encoding="utf-8")
     try:
         if current.get("repository"):
             github.push_snapshot(run_dir, current["repository"], message,
@@ -172,8 +181,58 @@ def _set_status(run_dir, status, message):
     return current
 
 
+def _days_since(start, now):
+    from datetime import datetime
+    fmt = "%Y-%m-%dT%H:%M:%SZ"
+    return (datetime.strptime(now, fmt) - datetime.strptime(start, fmt)).total_seconds() / 86400
+
+
+def _producer_declines(run_dir, scope, since):
+    maintainers = consent.handles(scope["offer_terms"]["maintainers"])
+    return [e for e in consent.load(run_dir)[since:]
+            if e["action"] in ("publication_declined", "withdrawn") and consent.handle(e["who"]) in maintainers]
+
+
+def _publish_self_service(run_dir, now, workdir=None):
+    """Publish under the producer's offer: no approval is required, but the offer must
+    still stand, an after-review window must have elapsed, and a producer decline under
+    HOLD blocks. Silence is recorded as no correction, never as agreement."""
+    from . import github
+    from .offer import check_tip
+    current = state.require(run_dir, "SHARED_PRIVATE", "REVIEWED")
+    scope = load_scope(run_dir, require_pins=True)
+    check_tip(scope["offer"], now, workdir)
+    terms = scope["offer_terms"]["publication"]
+    offer_id = scope["offer"]["offer_id"]
+    notes = [f"Published under the producer's offer `{offer_id}` ({terms['mode']}); not reviewed and "
+             "not endorsed by the producer."]
+    if terms["mode"] == "PUBLIC_AFTER_REVIEW":
+        elapsed = _days_since(current["shared_at"], now)
+        if elapsed < 0:
+            raise GateError(f"the clock ({now}) is before the share time ({current['shared_at']}); refusing")
+        if elapsed < terms["review_window_days"]:
+            raise GateError(f"the {terms['review_window_days']}-day review window has not elapsed "
+                            f"since {current['shared_at']}")
+    declines = _producer_declines(run_dir, scope, current["consent_index_at_share"])
+    if declines and terms["unresolved_disagreement"] == "HOLD":
+        raise GateError("a producer maintainer declined publication and the offer says HOLD; use withhold "
+                        "or resolve the disagreement")
+    notes += [f"Producer maintainer {e['who']} declined publication ({e['ref']}); published with this "
+              "disagreement as the offer allows." for e in declines]
+    reviewed = any(e["action"] in ("factual_corrections", "survivor_classification", "review_ack")
+                   for e in consent.load(run_dir)[current["consent_index_at_share"]:])
+    if terms["mode"] == "PUBLIC_AFTER_REVIEW" and not reviewed and not declines:
+        notes.append(f"No producer response within the {terms['review_window_days']}-day window. "
+                     "Silence is recorded as no correction received, not agreement.")
+    current = _set_status(run_dir, "PUBLISHED_SELF_SERVICE", "Record self-service publication", notes)
+    github.make_public(current["repository"])
+    state.transition(run_dir, "PUBLISHED", now, note=f"published under offer {offer_id}")
+
+
 def publish(run_dir, now):
     from . import github
+    if load_scope(run_dir).get("track") == "self_service":
+        return _publish_self_service(run_dir, now)
     current = state.require(run_dir, "REVIEWED")
     scope = load_scope(run_dir)
     approvers = scope["publication"]["approvers"]
@@ -189,6 +248,12 @@ def publish(run_dir, now):
 def withhold(run_dir, now):
     current = state.require(run_dir, "SHARED_PRIVATE", "REVIEWED")
     scope = load_scope(run_dir)
+    if scope.get("track") == "self_service":
+        if not _producer_declines(run_dir, scope, current["consent_index_at_share"]):
+            raise GateError("withhold needs a publication_declined or withdrawn event from a producer maintainer")
+        _set_status(run_dir, "WITHHELD", "Record withheld status")
+        state.transition(run_dir, "WITHHELD", now, note="producer declined publication")
+        return
     if consent.publication_status(consent.load(run_dir), scope["publication"]["approvers"],
                                   since=current["consent_index_at_share"]) != "declined":
         raise GateError("withhold needs a publication_declined or withdrawn event from an approver")

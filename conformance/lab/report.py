@@ -18,6 +18,8 @@ STATUS_TEXT = {
     "PUBLISHED": "PUBLISHED. Every named approver approved publication (see CONSENT.json). The "
                  "measured results are unchanged since delivery.",
     "WITHHELD": "WITHHELD. Publication was declined. Not citable as public evidence.",
+    "PUBLISHED_SELF_SERVICE": "PUBLISHED (self-service, unreviewed). Published by the runner under the "
+                              "producer's open verification offer; not reviewed and not endorsed.",
 }
 LIMITS = (
     "Verification is not endorsement, adoption, dependency or transfer of ownership.",
@@ -35,7 +37,7 @@ def _bullets(items):
     return "\n".join(f"- {item}" for item in items) if items else "- none"
 
 
-def render_report(scope, plan, results, conditions=None):
+def render_report(scope, plan, results, conditions=None, preregistered=True):
     lines = [f"# {scope['run_id']}", "",
              f"**Independence:** {INDEPENDENCE_TEXT[scope['independence']]}", "",
              f"Reads as `{FEDERATION[scope['independence']]}` in federation-run-v1 and "
@@ -45,16 +47,25 @@ def render_report(scope, plan, results, conditions=None):
     if scope.get("previous_run"):
         prev = scope["previous_run"]
         lines += [f"Follow-up of `{prev['run_id']}` (plan `{prev['plan_sha256']}`); earlier results are unchanged.", ""]
+    if scope.get("track") == "self_service":
+        ref = scope["offer"]
+        lines += [f"**Track:** self-service under the producer's offer `{ref['offer_id']}` "
+                  f"({ref['repo']} at `{ref['commit']}`, `{ref['path']}` SHA-256 `{ref['sha256']}`). "
+                  "No per-run human gate; inputs are admitted by the offer.", ""]
+    else:
+        lines += ["**Track:** manual. Scope agreement, run authorisation and admission are in CONSENT.json.", ""]
     lines += ["Publication status: see STATUS.md. Agreement: " + str(scope.get("agreement_ref")), "",
               "## Pinned inputs", "", "| Project | Repository | Commit | Licence |", "|---|---|---|---|"]
     lines += [f"| {s['project']} | {s['repo']} | `{s['commit']}` | {s['license']} |" for s in scope["subjects"]]
     lines += ["", f"Frozen plan SHA-256: `{sha256_json(plan['core'])}` (Python {plan['environment']['python']}).",
+              "", f"Preregistered: {'yes' if preregistered else 'no'}.",
               "", "## Claim ceiling", "", "Establishes:", "", _bullets(scope["claim_ceiling"]["establishes"]),
               "", "Does not establish:", "", _bullets(scope["claim_ceiling"]["does_not_establish"]), ""]
     if scope["kind"] == "adequacy":
         lines += _adequacy_sections(scope, results)
     else:
         lines += _verification_sections(results)
+    lines += _claim_ceiling_sections(scope)
     lines += _independence_section(scope)
     lines += _condition_sections(scope, conditions or [])
     lines += ["## Limits", "", _bullets(LIMITS), "",
@@ -109,6 +120,17 @@ def _verification_sections(results):
     return out + [""]
 
 
+def _claim_ceiling_sections(scope):
+    claims = [c for c in scope.get("claims", []) if "claim_ceiling" in c]
+    if not claims:
+        return []
+    out = ["## Per-claim ceilings", ""]
+    for c in claims:
+        out += [f"`{c['id']}` establishes:", "", _bullets(c["claim_ceiling"]["establishes"]), "",
+                f"`{c['id']}` does not establish:", "", _bullets(c["claim_ceiling"]["does_not_establish"]), ""]
+    return out
+
+
 def _independence_section(scope):
     rows = per_claim(scope)
     authored = scope.get("runner_authored") or []
@@ -133,8 +155,9 @@ def _condition_sections(scope, conditions):
     return out
 
 
-def render_status(status):
-    return f"# Status\n\n**{STATUS_TEXT[status]}**\n"
+def render_status(status, notes=()):
+    text = f"# Status\n\n**{STATUS_TEXT[status]}**\n"
+    return text + ("\n" + _bullets(notes) + "\n" if notes else "")
 
 
 def render_notice(scope):

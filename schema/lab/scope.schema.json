@@ -19,13 +19,10 @@
     "lab_version",
     "run_id",
     "kind",
-    "agreement_ref",
     "independence",
     "runner",
-    "agreement_parties",
     "subjects",
-    "claim_ceiling",
-    "publication"
+    "claim_ceiling"
   ],
   "properties": {
     "lab_version": {
@@ -457,6 +454,32 @@
           "not_independent_reason": {
             "type": "string",
             "pattern": "\\S"
+          },
+          "claim_ceiling": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "establishes",
+              "does_not_establish"
+            ],
+            "properties": {
+              "establishes": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "string",
+                  "pattern": "\\S"
+                }
+              },
+              "does_not_establish": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "string",
+                  "pattern": "\\S"
+                }
+              }
+            }
           }
         },
         "allOf": [
@@ -499,6 +522,50 @@
         "type": "string",
         "pattern": "\\S"
       }
+    },
+    "track": {
+      "enum": [
+        "manual",
+        "self_service"
+      ],
+      "description": "Absent means manual."
+    },
+    "offer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repo",
+        "commit",
+        "path",
+        "offer_id",
+        "sha256"
+      ],
+      "properties": {
+        "repo": {
+          "type": "string",
+          "pattern": "^https://"
+        },
+        "commit": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "path": {
+          "type": "string",
+          "pattern": "^(?!/)(?!.*(^|/)\\.\\.(/|$)).+$"
+        },
+        "offer_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._-]+$"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    },
+    "offer_terms": {
+      "type": "object",
+      "description": "Written by pin from the pinned offer: publication, maintainers, expires."
     }
   },
   "allOf": [
@@ -558,6 +625,43 @@
         "required": [
           "inputs",
           "claims"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "track": {
+            "const": "self_service"
+          }
+        },
+        "required": [
+          "track"
+        ]
+      },
+      "then": {
+        "required": [
+          "offer"
+        ],
+        "properties": {
+          "kind": {
+            "const": "verification"
+          },
+          "subjects": {
+            "maxItems": 1
+          }
+        },
+        "not": {
+          "required": [
+            "publication"
+          ]
+        }
+      },
+      "else": {
+        "required": [
+          "agreement_ref",
+          "agreement_parties",
+          "publication"
         ]
       }
     }

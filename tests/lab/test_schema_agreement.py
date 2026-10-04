@@ -32,8 +32,21 @@ class SchemaAgreementTest(unittest.TestCase):
     def variants(self):
         base = json.loads((FIXTURES / "toy-run" / "SCOPE.json").read_text(encoding="utf-8"))
         ver = json.loads((FIXTURES / "toy-verification-run" / "SCOPE.json").read_text(encoding="utf-8"))
+        offer_run = json.loads((FIXTURES / "toy-offer-run" / "SCOPE.json").read_text(encoding="utf-8"))
         yield "adequacy", base
         yield "verification", ver
+        yield "self-service", offer_run
+        for label, edit in {
+            "self-service adequacy": lambda s: s.__setitem__("kind", "adequacy"),
+            "self-service with publication": lambda s: s.__setitem__("publication", ver["publication"]),
+            "self-service without offer": lambda s: s.pop("offer"),
+        }.items():
+            scope = copy.deepcopy(offer_run)
+            edit(scope)
+            yield label, scope
+        manual_without_parties = copy.deepcopy(ver)
+        manual_without_parties.pop("agreement_parties")
+        yield "manual without parties", manual_without_parties
         edits = {
             "no ceiling": lambda s: s.pop("claim_ceiling"),
             "score key": lambda s: s.__setitem__("score", 3),

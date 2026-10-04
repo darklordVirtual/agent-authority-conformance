@@ -17,7 +17,15 @@ ADMISSION_NOTE = ("Admission decisions recorded before inference. A claim over a
 
 
 def admission_record(run_dir, scope):
-    """Manual-track admission: every input needs a decision in CONSENT.json before run."""
+    """Manual track: every input needs a decision in CONSENT.json before run.
+    Self-service: the producer's offer pre-admits exactly the inputs it lists."""
+    if scope.get("track", "manual") == "self_service":
+        ref = scope["offer"]
+        source = f"{ref['repo']}/blob/{ref['commit']}/{ref['path']}"
+        return {"note": ADMISSION_NOTE, "inputs": {
+            i["id"]: {"decision": "ADMITTED", "rationale": f"pre-admitted by offer {ref['offer_id']}",
+                      "who": f"offer:{ref['offer_id']}", "ref": source, "consent_index": None}
+            for i in scope["inputs"]}}
     latest = consent.admissions(consent.load(run_dir))
     missing = [i["id"] for i in scope["inputs"] if i["id"] not in latest]
     if missing:
@@ -91,7 +99,7 @@ def write_results(run_dir, results):
 def run(run_dir, now, workdir=None):
     current = state.require(run_dir, "FROZEN")
     scope = load_scope(run_dir, require_pins=True)
-    plan.require_agreement(run_dir, scope)  # also re-verifies the consent chain and head
+    plan.require_agreement(run_dir, scope, now, workdir)  # consent chain and head, or the offer
     admission = admission_record(run_dir, scope) if scope["kind"] == "verification" else None
     with tempfile.TemporaryDirectory(prefix="aac-run-", dir=workdir) as tmp:
         trees, licenses = pins.materialize(scope, tmp)

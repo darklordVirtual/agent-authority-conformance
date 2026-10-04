@@ -151,7 +151,8 @@ def build(run_dir, now):
     workflow.write_text(WORKFLOW.replace("{python}", python), encoding="utf-8")
     results = {p.relative_to(run_dir).as_posix(): read_json(p)
                for p in sorted((run_dir / "results").rglob("*.json"))}
-    (run_dir / "REPORT.md").write_text(render_report(scope, plan, results, conditions), encoding="utf-8")
+    (run_dir / "REPORT.md").write_text(render_report(scope, plan, results, conditions,
+                                                         current.get("preregistered", True)), encoding="utf-8")
     (run_dir / "STATUS.md").write_text(render_status("PRIVATE"), encoding="utf-8")
     (run_dir / "NOTICE").write_text(render_notice(scope), encoding="utf-8")
     (run_dir / "REPRODUCE.md").write_text(render_reproduce(scope, plan), encoding="utf-8")

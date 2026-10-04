@@ -10,7 +10,7 @@ import sys
 from pathlib import Path
 
 from . import LAB_VERSION, consent, state
-from .canonical import read_json, sha256_file, sha256_json, write_json
+from .canonical import read_json, sha256_file, sha256_json, utc_now, write_json
 from .errors import GateError, PlanError
 from .faults import apply_mutation, read_source, row_mutations
 
@@ -80,7 +80,14 @@ def plan_hash(plan):
     return sha256_json(plan["core"])
 
 
-def require_agreement(run_dir, scope):
+def require_agreement(run_dir, scope, now=None, workdir=None):
+    """Manual: every agreement party agreed the scope and authorised the run.
+    Self-service: the producer's offer is still listed, unrevoked and unexpired."""
+    if scope.get("track", "manual") == "self_service":
+        from .offer import check_tip
+        consent.load(run_dir)  # the log may hold reviews or declines; it must still verify
+        check_tip(scope["offer"], now or utc_now(), workdir)
+        return
     if not (isinstance(scope.get("agreement_ref"), str) and scope["agreement_ref"].startswith("https://")):
         raise GateError("agreement_ref must link the issue or comment where the scope was agreed")
     events = consent.load(run_dir)
@@ -90,11 +97,19 @@ def require_agreement(run_dir, scope):
             raise GateError(f"{action} is missing from: {', '.join(missing)}")
 
 
-def freeze(run_dir, scope, trees, engine_identity, now, published_ref=None):
+def freeze(run_dir, scope, trees, engine_identity, now, published_ref=None, not_preregistered=False):
     """First call writes the plan and returns its hash. Publish the hash, then call
-    again with published_ref to move to FROZEN. Returns (hash, frozen)."""
+    again with published_ref to move to FROZEN. Returns (hash, frozen).
+
+    Self-service runs may instead freeze without publishing the hash first
+    (not_preregistered); the report then says the plan was not preregistered."""
     current = state.require(run_dir, "SCOPED")
-    require_agreement(run_dir, scope)
+    self_service = scope.get("track", "manual") == "self_service"
+    if not_preregistered and not self_service:
+        raise GateError("--not-preregistered is only for self-service runs; manual runs publish the plan hash first")
+    if not_preregistered and published_ref is not None:
+        raise GateError("pass either --published-ref or --not-preregistered")
+    require_agreement(run_dir, scope, now)
     plan = build_plan(run_dir, scope, trees, engine_identity)
     digest = plan_hash(plan)
     if current.get("plan_sha256") is None:
@@ -103,12 +118,20 @@ def freeze(run_dir, scope, trees, engine_identity, now, published_ref=None):
         write_json(Path(run_dir) / FILE, plan)
         current["plan_sha256"] = digest
         state.save(run_dir, current)
-        return digest, False
+        if not not_preregistered:
+            return digest, False
+    if not_preregistered:
+        if digest != current["plan_sha256"] or plan_hash(read_json(Path(run_dir) / FILE)) != digest:
+            raise PlanError("the plan changed after its hash was printed; start a new run")
+        state.transition(run_dir, "FROZEN", now, note="frozen without preregistration (self-service)",
+                         preregistered=False)
+        return digest, True
     if digest != current["plan_sha256"] or plan_hash(read_json(Path(run_dir) / FILE)) != digest:
         raise PlanError("the plan changed after its hash was printed; start a new run")
     if published_ref is None:
         return digest, False
     if not published_ref.startswith("https://"):
         raise GateError("--published-ref must be an https URL")
-    state.transition(run_dir, "FROZEN", now, note="plan hash published", plan_published_ref=published_ref)
+    state.transition(run_dir, "FROZEN", now, note="plan hash published", plan_published_ref=published_ref,
+                     preregistered=True)
     return digest, True

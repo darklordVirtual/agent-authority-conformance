@@ -12,6 +12,7 @@ from .canonical import find_forbidden_keys, read_json
 from .errors import ScopeError
 
 KINDS = ("adequacy", "verification")
+TRACKS = ("manual", "self_service")
 INDEPENDENCE = ("SELF_RUN", "REPRODUCTION", "SECOND_IMPLEMENTATION", "INDEPENDENT_IMPLEMENTATION")
 ENGINES = ("native", "corpus_adequacy")
 COMMIT = re.compile(r"^[0-9a-f]{40}$")
@@ -31,6 +32,15 @@ def _texts(value):
 def _relative(path):
     pure = PurePosixPath(path)
     return not pure.is_absolute() and ".." not in pure.parts
+
+
+def track(scope):
+    """No track means manual: every run written before tracks existed stays manual."""
+    return scope.get("track", "manual")
+
+
+def _ceiling_ok(ceiling):
+    return isinstance(ceiling, dict) and _texts(ceiling.get("establishes")) and _texts(ceiling.get("does_not_establish"))
 
 
 def validate_scope(scope, *, require_pins=False):
@@ -63,13 +73,20 @@ def validate_scope(scope, *, require_pins=False):
             p.append(f"{w}: independent false requires not_independent_reason")
         elif item["independent"] is True and independence != "INDEPENDENT_IMPLEMENTATION":
             p.append(f"{w}: a claim cannot be more independent than the run label {independence}")
+    selected = track(scope)
+    if selected not in TRACKS:
+        p.append(f"track must be one of {', '.join(TRACKS)}")
     ref = scope.get("agreement_ref")
     if ref is not None and not (isinstance(ref, str) and ref.startswith("https://")):
         p.append("agreement_ref must be null or an https URL")
     runner = scope.get("runner")
     if not (isinstance(runner, dict) and _text(runner.get("project")) and _texts(runner.get("maintainers"))):
         p.append("runner needs project and maintainers")
-    if not _texts(scope.get("agreement_parties")):
+    if selected == "self_service":
+        p.extend(_self_service_problems(scope))
+        if require_pins and not isinstance(scope.get("offer_terms"), dict):
+            p.append("offer_terms is missing; run pin to read the offer")
+    elif not _texts(scope.get("agreement_parties")):
         p.append("agreement_parties must be a nonempty list of handles")
     subjects = scope.get("subjects")
     if not (isinstance(subjects, list) and subjects):
@@ -82,14 +99,15 @@ def validate_scope(scope, *, require_pins=False):
     for key in ("establishes", "does_not_establish"):
         if not _texts(ceiling.get(key)):
             p.append(f"claim_ceiling.{key} must be a nonempty list")
-    pub = scope.get("publication")
-    pub = pub if isinstance(pub, dict) else {}
-    if pub.get("private_first") is not True:
-        p.append("publication.private_first must be true")
-    if pub.get("unreleased_citable") is not False:
-        p.append("publication.unreleased_citable must be false")
-    if not _texts(pub.get("approvers")):
-        p.append("publication.approvers must be a nonempty list of handles")
+    if selected != "self_service":
+        pub = scope.get("publication")
+        pub = pub if isinstance(pub, dict) else {}
+        if pub.get("private_first") is not True:
+            p.append("publication.private_first must be true")
+        if pub.get("unreleased_citable") is not False:
+            p.append("publication.unreleased_citable must be false")
+        if not _texts(pub.get("approvers")):
+            p.append("publication.approvers must be a nonempty list of handles")
     if kind == "adequacy":
         p.extend(_adequacy_problems(scope))
     elif kind == "verification":
@@ -97,6 +115,22 @@ def validate_scope(scope, *, require_pins=False):
     if p:
         raise ScopeError("; ".join(p))
     return scope
+
+
+def _self_service_problems(scope):
+    from .offer import validate_ref
+    p = []
+    try:
+        validate_ref(scope.get("offer"))
+    except ScopeError as exc:
+        p.append(f"self_service needs an offer: {exc}")
+    if scope.get("kind") != "verification":
+        p.append("self_service allows only kind verification; adequacy and mutation need the manual track")
+    if len(scope.get("subjects") or []) != 1:
+        p.append("self_service runs measure exactly one subject, the offer's")
+    if "publication" in scope:
+        p.append("self_service takes its publication policy from the offer; remove publication")
+    return p
 
 
 def _subject_problems(i, s, require_pins):
@@ -209,6 +243,8 @@ def _verification_problems(scope):
             p.append(f"{w}.reads_fields must be a nonempty list")
         if not (_texts(claim.get("inputs")) and set(claim["inputs"]) <= ids):
             p.append(f"{w}.inputs must name declared inputs")
+        if "claim_ceiling" in claim and not _ceiling_ok(claim["claim_ceiling"]):
+            p.append(f"{w}.claim_ceiling needs nonempty establishes and does_not_establish")
         if claim.get("temporal") is True and not _text(scope.get("reference_time")):
             p.append(f"{w} is temporal; reference_time is required")
     return p
