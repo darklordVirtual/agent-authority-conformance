@@ -18,7 +18,7 @@ aacp = "aacp.cli:main"
 Repository = "https://github.com/darklordVirtual/agent-authority-conformance"
 
 [tool.setuptools]
-packages = ["aacp", "aacp.schemas"]
+packages = ["aacp", "aacp.schemas", "conformance", "conformance.lab", "conformance.lab.kinds", "conformance.lab.engines"]
 
 [tool.setuptools.package-dir]
 "aacp.schemas" = "schema"
