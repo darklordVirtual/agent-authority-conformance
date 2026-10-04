@@ -66,14 +66,14 @@ describes provenance. It does not itself make a claim correct.
 
 ## 5. Native claims are preserved
 
-AAC does not force every foreign claim into A-G. An adapter may preserve a
-producer's native claim and separately describe its relationship to an AAC
+AACP does not force every foreign claim into A-G. An adapter may preserve a
+producer's native claim and separately describe its relationship to an AACP
 property as `exact`, `structural`, `partial`, `false_analog`,
 `no_mapping` or `not_evaluated`.
 
 A mapping is metadata, not transitive credit. Foreign result vocabularies remain
 the producer's vocabulary unless a separately versioned inference procedure
-explicitly evaluates an AAC property.
+explicitly evaluates an AACP property.
 
 ## 6. Source classes
 

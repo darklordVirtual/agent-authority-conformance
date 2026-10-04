@@ -1,1 +1,1 @@
-# AgentID verifier-attestation battery adapter\n\nResolution-only adapter over AgentID's published mutation-battery run record. It does not independently reproduce the battery and grants no AAC property verdict.\n
+# AgentID verifier-attestation battery adapter\n\nResolution-only adapter over AgentID's published mutation-battery run record. It does not independently reproduce the battery and grants no AACP property verdict.\n

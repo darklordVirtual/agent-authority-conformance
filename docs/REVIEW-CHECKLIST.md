@@ -5,7 +5,7 @@
 - [ ] Artifact bytes and SHA-256 values frozen.
 - [ ] Adapter and procedure revisions frozen.
 - [ ] Native claims and explicit non-claims recorded.
-- [ ] AAC mapping is absent or explicitly classified.
+- [ ] AACP mapping is absent or explicitly classified.
 - [ ] Producer, fixture author, verifier implementation and runner are separate fields.
 - [ ] Independence and blinded/non-blinded state recorded.
 - [ ] Expected results remain outside verifier input.

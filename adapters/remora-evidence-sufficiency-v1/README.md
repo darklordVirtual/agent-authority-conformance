@@ -4,13 +4,13 @@ This is deliberately a **resolution-only metatest**, not a REMORA assessment.
 
 The subject pin and two artifact hashes are the frozen inputs agreed for the
 seeded-fault adequacy experiment in REMORA issue #629. The adapter demonstrates
-that AAC can consume a foreign repository through immutable bytes without
+that AACP can consume a foreign repository through immutable bytes without
 granting that repository A-G credit.
 
 Why REMORA is useful here: its evidence-sufficiency suite explicitly separates
 runtime outcome, authored case result and evidence verdict, and documents a
 synthetic-premise trust boundary. Those constraints are useful adversarial tests
-for AAC's own evidence model.
+for AACP's own evidence model.
 
 A successful resolution establishes only byte identity for the two pinned
 artifacts. The adequacy result remains a separate corpus-adequacy experiment.
@@ -19,7 +19,7 @@ claim and capability registers before any broader statement is made.
 
 ## Reproduction
 
-Clone REMORA at the exact subject SHA, then from AAC run:
+Clone REMORA at the exact subject SHA, then from AACP run:
 
 ```python
 from conformance.adapter import load_manifest, resolve

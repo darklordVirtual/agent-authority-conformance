@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/darklordVirtual/agent-authority-conformance/schema/federation-producer-package-v1.schema.json",
+  "$id": "https://github.com/darklordVirtual/agent-authority-conformance-profiles/schema/federation-producer-package-v1.schema.json",
   "title": "Federation Producer Package v1",
   "description": "A manifest for a consumer to pin producer artifacts without importing the producer implementation.",
   "type": "object",
