@@ -40,5 +40,10 @@ procedure and publication rules before the first evaluative run.
 
 See `docs/FEDERATION-REVIEW-PROTOCOL.md`.
 
+For a runnable local command, role checklists, hash-bound output and a manual
+GitHub Actions entry point, see
+[the self-service guide](../docs/INTEROP-SELF-SERVICE.md). AI agents start at
+[AGENTS.md](../AGENTS.md).
+
 
 Run provenance belongs in `schema/federation-run-v1.schema.json`. Preserve foreign native claims before any optional A-G crosswalk; see `docs/NATIVE-CLAIM-MAPPING.md`.

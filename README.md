@@ -78,6 +78,12 @@ No percentage, star rating, “5/7 conformant”, security grade or ranking is v
 
 ## Quick start
 
+For producer, consumer, verifier or reproduction work, start with
+[the self-service interop guide](docs/INTEROP-SELF-SERVICE.md). AI agents enter
+through [AGENTS.md](AGENTS.md). The **Federation self-service** GitHub Action
+resolves committed adapters and prepares hash-bound run evidence, with result
+details and uploads gated by the frozen publication policy.
+
 Python 3.12 or newer:
 
 ```sh

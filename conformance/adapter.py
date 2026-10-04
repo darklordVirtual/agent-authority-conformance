@@ -178,3 +178,57 @@ def resolve(manifest: dict[str, Any], subject_root: str | Path) -> dict[str, Any
 
 def write_bundle(manifest_path: str | Path, subject_root: str | Path, out: str | Path) -> None:
     Path(out).write_bytes(canonical_json(resolve(load_manifest(manifest_path), subject_root)))
+
+def write_run_package(manifest: dict[str, Any], bundle: dict[str, Any], out: str | Path,
+                      *, revision: str, runner: str, fixture_author: str,
+                      classification: str, command: str,
+                      environment: dict[str, Any]) -> dict[str, Any]:
+    from conformance.validation import load_validator
+
+    if classification not in {"AUTHOR_RUN", "REPRODUCTION"}:
+        raise AdapterError("resolution-only runs cannot establish implementation independence")
+    bundle_bytes = canonical_json(bundle)
+    policy = bundle["review_policy"]
+    record = {
+        "schema_version": "federation-run-v1",
+        "subject": manifest["subject"],
+        "roles": {
+            "producer": manifest["subject"]["repository"],
+            "fixture_author": fixture_author,
+            "verifier_implementer": "AACP resolution-only adapter",
+            "runner": runner,
+        },
+        "pins": {
+            "adapter_revision": revision,
+            "procedure_revision": revision,
+            "input_manifest_sha256": sha256_bytes(canonical_json(manifest)),
+        },
+        "command": command,
+        "environment": environment,
+        "independence": {
+            "classification": classification,
+            "blinding": "NOT_APPLICABLE",
+            "notes": "Artifact resolution only; not independent property validation.",
+        },
+        "publication_policy": {
+            key: policy[key] for key in
+            ("mode", "review_window_days", "unresolved_disagreement")
+        },
+        "lineage": None,
+        "output_sha256": sha256_bytes(bundle_bytes),
+    }
+    record["run_id"] = "resolution-sha256:" + sha256_bytes(canonical_json(record))
+    load_validator("federation-run-v1.schema.json").validate(record)
+    load_validator("federation-evidence-bundle-v1.schema.json").validate(bundle)
+    destination = Path(out)
+    destination.mkdir(parents=True, exist_ok=False)
+    files = {
+        "adapter.json": canonical_json(manifest),
+        "bundle.json": bundle_bytes,
+        "run.json": canonical_json(record),
+    }
+    for name, content in files.items():
+        (destination / name).write_bytes(content)
+    checksums = "".join(f"{sha256_bytes(files[name])}  {name}\n" for name in sorted(files))
+    (destination / "SHA256SUMS").write_text(checksums, encoding="ascii")
+    return record
