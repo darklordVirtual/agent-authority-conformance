@@ -19,6 +19,12 @@ claim and capability registers before any broader statement is made.
 
 ## Reproduction
 
+For the complete clone, resolver and hash-bound run-package commands, use
+[the self-service quick start](../../docs/INTEROP-SELF-SERVICE.md#resolution-quick-start).
+The current resolver records its actual procedure revision separately from
+this historical manifest's declared adapter revision. Review-pending results
+are not automatically uploaded or printed by CI.
+
 Clone REMORA at the exact subject SHA, then from AACP run:
 
 ```python

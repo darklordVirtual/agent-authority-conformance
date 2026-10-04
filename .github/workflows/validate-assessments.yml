@@ -71,6 +71,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           path: aac
+          persist-credentials: false
 
       - name: Check out pinned REMORA subject
         uses: actions/checkout@v4
@@ -78,6 +79,7 @@ jobs:
           repository: darklordVirtual/REMORA-research
           ref: 31c4060630923344d43d9fac26821150262c3687
           path: remora
+          persist-credentials: false
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -87,20 +89,23 @@ jobs:
       - name: Resolve pinned REMORA evidence without executing producer code
         working-directory: aac
         run: |
-          PYTHONPATH=. python scripts/run_federation_adapter.py \
+          python -m pip install --disable-pip-version-check -r requirements-dev.txt
+          python -m scripts.run_federation_adapter \
             --manifest adapters/remora-evidence-sufficiency-v1/adapter.json \
             --subject-root ../remora \
-            --out /tmp/remora-evidence-bundle.json
+            --record-dir "$RUNNER_TEMP/remora-resolution" \
+            --runner "$GITHUB_ACTOR" \
+            --fixture-author REMORA-research \
+            --classification AUTHOR_RUN \
+            --summary "$GITHUB_STEP_SUMMARY"
           python - <<'PY'
           import json
-          p="/tmp/remora-evidence-bundle.json"
+          import os
+          p=os.path.join(os.environ["RUNNER_TEMP"], "remora-resolution", "bundle.json")
           x=json.load(open(p, encoding="utf-8"))
           assert x["adapter_status"] == "RESOLVED"
           assert x["review_state"] == "PENDING_REVIEW_WINDOW"
           assert x["publication_authorized"] is False
           assert all(c["property_verdict"] is None for c in x["claims"])
           assert all(e["resolution"] == "RESOLVED" for e in x["evidence"])
-          print(json.dumps(x, indent=2, sort_keys=True))
           PY
-          python -m pip install --disable-pip-version-check check-jsonschema==0.33.2
-          check-jsonschema --schemafile schema/federation-evidence-bundle-v1.schema.json /tmp/remora-evidence-bundle.json

@@ -1,0 +1,133 @@
+name: Federation self-service
+
+on:
+  workflow_dispatch:
+    inputs:
+      adapter:
+        description: Reviewed committed adapter
+        type: choice
+        required: true
+        default: adapters/remora-evidence-sufficiency-v1/adapter.json
+        options:
+          - adapters/remora-evidence-sufficiency-v1/adapter.json
+          - adapters/agentavow-e1-tool-digest-v1/adapter.json
+          - adapters/agentid-verifier-attestation-battery/adapter.json
+      fixture_author:
+        description: Actual fixture author identity (REMORA-research for the default exercise)
+        type: string
+        required: true
+      classification:
+        description: Operator provenance; neither option grants independent property validation
+        type: choice
+        required: true
+        default: AUTHOR_RUN
+        options:
+          - AUTHOR_RUN
+          - REPRODUCTION
+
+permissions:
+  contents: read
+
+jobs:
+  resolve:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out consumer procedure
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install validation dependencies
+        run: python -m pip install --disable-pip-version-check -r requirements-dev.txt
+
+      - name: Validate committed manifest and extract immutable subject pin
+        id: subject
+        env:
+          ADAPTER: ${{ inputs.adapter }}
+        run: |
+          python - <<'PY'
+          import os
+          import re
+          from pathlib import Path
+          from conformance.adapter import load_manifest
+          from conformance.validation import load_validator
+          allowed = {
+              "adapters/remora-evidence-sufficiency-v1/adapter.json",
+              "adapters/agentavow-e1-tool-digest-v1/adapter.json",
+              "adapters/agentid-verifier-attestation-battery/adapter.json",
+          }
+          path = os.environ["ADAPTER"]
+          if path not in allowed:
+              raise ValueError("adapter must be a reviewed committed choice")
+          manifest = load_manifest(path)
+          load_validator("federation-adapter-v1.schema.json").validate(manifest)
+          repository = manifest["subject"]["repository"]
+          if not re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", repository):
+              raise ValueError("subject must be a public GitHub owner/repository")
+          with Path(os.environ["GITHUB_OUTPUT"]).open("a", encoding="utf-8") as output:
+              output.write(f"repository={repository}\nrevision={manifest['subject']['revision']}\n")
+          PY
+
+      - name: Check out pinned subject as data only
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ steps.subject.outputs.repository }}
+          ref: ${{ steps.subject.outputs.revision }}
+          path: .federation-subject
+          persist-credentials: false
+
+      - name: Resolve and record without executing producer code
+        id: resolution
+        env:
+          ADAPTER: ${{ inputs.adapter }}
+          FIXTURE_AUTHOR: ${{ inputs.fixture_author }}
+          CLASSIFICATION: ${{ inputs.classification }}
+        run: |
+          python -m scripts.run_federation_adapter \
+            --manifest "$ADAPTER" \
+            --subject-root .federation-subject \
+            --record-dir "$RUNNER_TEMP/federation-run" \
+            --runner "$GITHUB_ACTOR" \
+            --fixture-author "$FIXTURE_AUTHOR" \
+            --classification "$CLASSIFICATION" \
+            --summary "$GITHUB_STEP_SUMMARY"
+
+      - name: Check file commitments and publication gate even on incomplete resolution
+        id: publication
+        if: ${{ always() && (steps.resolution.outcome == 'success' || steps.resolution.outcome == 'failure') }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          from conformance.adapter import sha256_bytes
+          root = Path(os.environ["RUNNER_TEMP"]) / "federation-run"
+          allowed = False
+          if (root / "SHA256SUMS").is_file():
+              for line in (root / "SHA256SUMS").read_text(encoding="ascii").splitlines():
+                  digest, name = line.split("  ")
+                  if name not in {"adapter.json", "bundle.json", "run.json"}:
+                      raise ValueError("unexpected output file")
+                  if sha256_bytes((root / name).read_bytes()) != digest:
+                      raise ValueError("output commitment mismatch")
+              bundle = json.loads((root / "bundle.json").read_text(encoding="utf-8"))
+              record = json.loads((root / "run.json").read_text(encoding="utf-8"))
+              allowed = bundle["publication_authorized"] and not record["environment"]["consumer_worktree_dirty"]
+          with Path(os.environ["GITHUB_OUTPUT"]).open("a", encoding="utf-8") as output:
+              output.write(f"allowed={str(allowed).lower()}\n")
+          PY
+
+      - name: Retain evidence only when publication is explicitly allowed
+        if: ${{ always() && steps.publication.outputs.allowed == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: federation-resolution-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/federation-run/
+          if-no-files-found: error
+          retention-days: 14

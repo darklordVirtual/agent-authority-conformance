@@ -71,11 +71,18 @@ No percentage, star rating, “5/7 conformant”, security grade or ranking is v
 | [`conformance/`](conformance/) | Validation and bounded E reference inference |
 | [`conformance/mutations-v0.2.json`](conformance/mutations-v0.2.json) | Seeded faults for the E rule; `python -m conformance.mutations` scores the fixtures against them |
 | [`conformance/invariants.py`](conformance/invariants.py) | Metamorphic relations and a differential reference model for the E rule over a generated space |
+| [`conformance/coverage.py`](conformance/coverage.py) | Strict, score-free A–G component matrix for cross-platform assessment comparison |
 | [`MUTATIONS-AND-INVARIANTS.md`](MUTATIONS-AND-INVARIANTS.md) | What the two adequacy checks establish, and what they do not |
 | [`tests/fixtures/`](tests/fixtures/) | Synthetic, committed evidence-sufficiency cases |
 | [`CONTRIBUTING.md`](CONTRIBUTING.md) | Evidence and contribution discipline |
 
 ## Quick start
+
+For producer, consumer, verifier or reproduction work, start with
+[the self-service interop guide](docs/INTEROP-SELF-SERVICE.md). AI agents enter
+through [AGENTS.md](AGENTS.md). The **Federation self-service** GitHub Action
+resolves committed adapters and prepares hash-bound run evidence, with result
+details and uploads gated by the frozen publication policy.
 
 Python 3.12 or newer:
 
@@ -87,6 +94,7 @@ python -m pip install -r requirements-dev.txt
 python -m conformance.check
 python -m conformance.mutations
 python -m conformance.invariants
+python -m conformance.coverage tests/adversarial/assessment-pass.json
 python -m unittest discover -s tests -v
 ```
 
@@ -96,6 +104,12 @@ tools or regenerate committed expectations. `mutations` seeds faults into the
 E rule in memory and asks whether the fixtures notice; `invariants` checks
 relations that need no expected answer over a generated input space. Both are
 read-only; see [MUTATIONS-AND-INVARIANTS.md](MUTATIONS-AND-INVARIANTS.md).
+
+For cross-platform runs, export each platform's assessment in the v0.2 format
+and pass the files to `python -m conformance.coverage`. The command requires
+one explicit row for every REMORA core component A–G and emits only a
+component matrix. It never computes a score, ranks platforms, or upgrades
+self-reported evidence.
 
 The E reference rule consumes **already accepted evidence**. It does not verify
 artifacts, inspect credential custody or establish coverage itself. Its synthetic
