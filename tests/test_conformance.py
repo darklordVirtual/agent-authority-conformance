@@ -11,6 +11,7 @@ from jsonschema import ValidationError
 
 from conformance.boundary import InvalidInput, UnsupportedVerification, evaluate
 from conformance.check import check_fixture
+from conformance.coverage import COMPONENTS, CoverageError, component_matrix
 from conformance.validation import ROOT, load_validator, validate_assessment
 
 
@@ -21,6 +22,36 @@ def read(path):
 def reference():
     return {"kind": "fixture", "reference": "fixture:synthetic",
             "revision": "synthetic-model-v1", "description": "Schema test only"}
+
+
+class CoverageTests(unittest.TestCase):
+    def test_complete_matrix_preserves_each_component_without_scoring(self):
+        document = read("tests/adversarial/assessment-pass.json")
+        matrix = component_matrix(document)
+        self.assertEqual([row["id"] for row in matrix["components"]], list(COMPONENTS))
+        self.assertEqual(
+            [row["property"] for row in matrix["components"]],
+            list(COMPONENTS.values()),
+        )
+        self.assertNotIn("score", matrix)
+
+    def test_subset_assessment_is_rejected_for_interop_matrix(self):
+        document = read("examples/v0.2/minimal.json")
+        with self.assertRaises(CoverageError) as context:
+            component_matrix(document)
+        self.assertIn("missing component IDs", str(context.exception))
+
+    def test_cli_can_compare_multiple_platform_assessments(self):
+        command = [
+            sys.executable,
+            "-m",
+            "conformance.coverage",
+            "tests/adversarial/assessment-pass.json",
+            "tests/adversarial/assessment-fail.json",
+        ]
+        result = subprocess.run(command, capture_output=True, text=True, check=False)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("2 assessment(s)", result.stdout)
 
 
 def completed(status="PASS", property_id="C"):

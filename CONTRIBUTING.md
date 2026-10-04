@@ -34,6 +34,11 @@ artifact digests, consumer revision, command, scope and claim ceiling. Adapter
 failures should identify the artifact, contract axis and next evidence needed;
 they should not relabel an unsupported or untested claim as `FAIL`.
 
+For a cross-platform comparison, export the platform's complete v0.2
+assessment and run `python -m conformance.coverage <assessment>`. This is a
+coverage and shape check: it requires explicit A–G rows but deliberately
+produces no aggregate score and does not authenticate the platform's evidence.
+
 ## Assessment discipline
 
 Please preserve these invariants:
