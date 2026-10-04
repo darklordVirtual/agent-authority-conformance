@@ -1,12 +1,13 @@
 """python -m conformance.lab: run protocol commands (see RUN-PROTOCOL-v0.3.md)."""
 
 import argparse
+import platform
 import subprocess
 import sys
 from pathlib import Path
 
 from . import consent, lifecycle, runner
-from .canonical import utc_now
+from .canonical import read_json, utc_now, write_json
 from .config import load_config
 from .errors import LabError
 from .state import load_state
@@ -72,14 +73,57 @@ def build_parser():
     group.add_argument("--classification", metavar="URL")
     p = sub.add_parser("rerun", help="rerun a package with its own vendored lab code")
     p.add_argument("package", type=Path)
+    p = sub.add_parser("selftest", help="negative runner self-test: nonzero exit, no results, no success line")
+    p.add_argument("--json", action="store_true")
     return parser
 
 
+CAPTURE_FILE = "RUN-CAPTURE.json"
+
+
+def _capture(run_dir, argv, started, code, error):
+    """Append one run attempt, as it happened, to RUN-CAPTURE.json in the run directory.
+    Arguments are kept as given (run ids and flags); absolute paths are not recorded."""
+    if run_dir is None or not (run_dir / "STATE.json").is_file():
+        return
+    path = run_dir / CAPTURE_FILE
+    doc = read_json(path) if path.is_file() else {
+        "note": "Every run attempt with its arguments, start and end time and exit status.", "attempts": []}
+    safe = [a if not Path(a).is_absolute() else "<absolute path omitted>" for a in argv]
+    entry = {"argv": safe, "started_at": started, "ended_at": utc_now(), "exit_status": code,
+             "python": platform.python_version(), "platform": platform.system()}
+    if error:
+        entry["error"] = error
+    doc["attempts"].append(entry)
+    write_json(path, doc)
+
+
 def main(argv=None, config=None):
+    argv = sys.argv[1:] if argv is None else list(argv)
     args = build_parser().parse_args(argv)
     cfg = config or load_config()
-    runs, now = Path(cfg["runs_dir"]), utc_now()
+    runs = Path(cfg["runs_dir"])
     run_dir = runs / args.run_id if getattr(args, "run_id", None) else None
+    if args.command != "run":
+        return _dispatch(args, cfg, runs, run_dir)
+    started, error, code = utc_now(), None, None
+    try:
+        code = _dispatch(args, cfg, runs, run_dir, capture_error=True)
+    except _Failed as failed:
+        code, error = failed.code, failed.message
+    finally:
+        _capture(run_dir, argv, started, 1 if code is None else code, error)
+    return code
+
+
+class _Failed(Exception):
+    def __init__(self, code, message):
+        super().__init__(message)
+        self.code, self.message = code, message
+
+
+def _dispatch(args, cfg, runs, run_dir, capture_error=False):
+    now = utc_now()
     try:
         if args.command == "init":
             print(lifecycle.init(runs, args.run_id, args.kind, now, args.template, args.follow_up, args.commit))
@@ -125,10 +169,15 @@ def main(argv=None, config=None):
             print("withheld")
         elif args.command == "status":
             print(load_state(run_dir)["state"])
+        elif args.command == "selftest":
+            from .selftest import main as selftest_main
+            return selftest_main(["--json"] if args.json else [])
         elif args.command == "rerun":
             return subprocess.run([sys.executable, "-B", str(args.package / "rerun.py")]).returncode
     except LabError as exc:
         print(f"error: {exc}", file=sys.stderr)
+        if capture_error:
+            raise _Failed(exc.exit_code, str(exc)) from exc
         return exc.exit_code
     return 0
 

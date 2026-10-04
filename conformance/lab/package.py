@@ -48,6 +48,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "{python}"
+      - name: Negative runner self-test (nonzero exit, no results, no success line; reported separately)
+        run: PYTHONPATH=lab python3 -m conformance.lab selftest
       - name: Rerun from pinned inputs (CI is not network isolation)
         run: python3 rerun.py
 '''

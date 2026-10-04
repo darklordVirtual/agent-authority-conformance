@@ -10,7 +10,7 @@ import importlib.util
 from pathlib import Path
 
 from ..canonical import read_json, sha256_file, sha256_json
-from ..errors import LabError, ScopeError
+from ..errors import EngineError, LabError, ScopeError
 
 RESULTS = ("ESTABLISHED", "CONTRADICTED", "NOT_ESTABLISHED")
 EXPECTED_FILE = "producer-expected.json"
@@ -23,7 +23,10 @@ def load_check(run_dir, spec):
         raise ScopeError(f"check {spec!r} must name <module>:<function> in verifier/")
     module_spec = importlib.util.spec_from_file_location(f"aac_verifier_{module_name}", path)
     module = importlib.util.module_from_spec(module_spec)
-    module_spec.loader.exec_module(module)
+    try:
+        module_spec.loader.exec_module(module)
+    except Exception as exc:  # the run stops; a verifier that cannot load produces no results
+        raise EngineError(f"verifier module {path.name} failed to load: {type(exc).__name__}: {exc}") from exc
     check = getattr(module, function, None)
     if not callable(check):
         raise ScopeError(f"check {spec!r}: {function} is not a function in {path.name}")
