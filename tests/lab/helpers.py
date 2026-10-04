@@ -96,11 +96,25 @@ def agree(run_dir, who="tester"):
         consent.add(run_dir, who, action, AGREE_REF, NOW)
 
 
-def frozen_run(test, fixture="toy-run", subject="toy-subject"):
-    from conformance.lab import lifecycle
+def admit_all(run_dir, who="tester", decision="ADMITTED"):
+    """Record an admission decision for every input of a verification run."""
+    from conformance.lab import consent
+    from conformance.lab.canonical import read_json
+    scope = read_json(Path(run_dir) / "SCOPE.json")
+    for item in scope.get("inputs", []):
+        consent.add(run_dir, who, "admission", AGREE_REF, NOW, input=item["id"], decision=decision,
+                    rationale="test fixture admitted")
+
+
+def frozen_run(test, fixture="toy-run", subject="toy-subject", admit=True, conditions=None):
+    from conformance.lab import consent, lifecycle
     run_dir = prepare_run(test, fixture, subject)
     lifecycle.pin(run_dir)
+    if conditions:
+        consent.add(run_dir, "tester", "scope_agreed", AGREE_REF, NOW, conditions=conditions)
     agree(run_dir)
     lifecycle.freeze(run_dir, NOW)
     lifecycle.freeze(run_dir, NOW, PLAN_REF)
+    if admit:
+        admit_all(run_dir)
     return run_dir

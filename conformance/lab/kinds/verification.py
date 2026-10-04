@@ -81,7 +81,11 @@ def load_input(path):
     return read_json(path), sha256_file(path)
 
 
-def execute(run_dir, scope, trees):
+def execute(run_dir, scope, trees, admission=None):
+    """admission: {"inputs": {id: {"decision", "rationale", ...}}} or None (all admitted).
+    A claim over an input that is not ADMITTED is a non-verdict and its check never runs."""
+    refused = {} if admission is None else {
+        i: a for i, a in admission["inputs"].items() if a["decision"] != "ADMITTED"}
     inputs = {}
     for item in scope["inputs"]:
         try:
@@ -93,6 +97,13 @@ def execute(run_dir, scope, trees):
     for claim in scope["claims"]:
         check = load_check(run_dir, claim["check"])
         for input_id in claim["inputs"]:
+            if input_id in refused:
+                records.append({"input": input_id, "claim": claim["id"], "evidence": [],
+                                "execution": "NOT_ADMITTED", "result": None,
+                                "verifier_error": {"code": "not_admitted",
+                                                   "message": f"{refused[input_id]['decision']}: "
+                                                              f"{refused[input_id]['rationale']}"}})
+                continue
             if isinstance(inputs[input_id], Exception):
                 records.append({"input": input_id, "claim": claim["id"], "evidence": [],
                                 "execution": "INVALID_INPUT", "result": None,

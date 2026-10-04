@@ -32,7 +32,7 @@ def _bullets(items):
     return "\n".join(f"- {item}" for item in items) if items else "- none"
 
 
-def render_report(scope, plan, results):
+def render_report(scope, plan, results, conditions=None):
     lines = [f"# {scope['run_id']}", "",
              f"**Independence:** {INDEPENDENCE_TEXT[scope['independence']]}", ""]
     if scope.get("independence_statement"):
@@ -50,6 +50,7 @@ def render_report(scope, plan, results):
         lines += _adequacy_sections(scope, results)
     else:
         lines += _verification_sections(results)
+    lines += _condition_sections(scope, conditions or [])
     lines += ["## Limits", "", _bullets(LIMITS), "",
               "Prepared with the Agent Authority Conformance lab; see CONSENT.json for who agreed to what.", ""]
     return "\n".join(lines)
@@ -100,6 +101,20 @@ def _verification_sections(results):
         out += [f"| {a['input']} | {a['claim']} | {a['ours']} | {a['producer']} | {'yes' if a['agree'] else 'no'} |"
                 for a in agree["rows"]]
     return out + [""]
+
+
+def _condition_sections(scope, conditions):
+    if not conditions:
+        return []
+    ids = [c["id"] for c in scope.get("claims", [])] + [r["id"] for r in scope.get("rows", [])]
+    out = ["## Claim conditions", "",
+           "Conditions attached to scope confirmations. They qualify the ceiling of the named claims.", ""]
+    for claim_id in ids:
+        attached = [c for c in conditions if claim_id in c["claims"]]
+        if attached:
+            out += [f"`{claim_id}`:", "", _bullets(f"{c['text']} (scope confirmation by {c['who']})"
+                                                   for c in attached), ""]
+    return out
 
 
 def render_status(status):

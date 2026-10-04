@@ -45,7 +45,8 @@
               "COMPLETED",
               "INVALID_INPUT",
               "UNSUPPORTED",
-              "ERROR"
+              "ERROR",
+              "NOT_ADMITTED"
             ]
           },
           "result": {

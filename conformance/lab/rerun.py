@@ -42,6 +42,8 @@ def verify_manifest(pkg):
 
 
 def _comparable(rel, obj):
+    if rel == "results/admission.json":
+        return {i: a["decision"] for i, a in obj["inputs"].items()}
     if rel == "results/claims.json":
         return {f"{r['input']} / {r['claim']}": [r["execution"], r["result"], r.get("reads"),
                                                  r.get("unresolved_obligations")] for r in obj["records"]}
@@ -86,7 +88,9 @@ def rerun(pkg, workdir=None):
             if plan.plan_hash(fresh_plan) != plan.plan_hash(recorded_plan):
                 return "NOT_REPRODUCIBLE", {"problems": ["recomputed plan hash differs from RUN-PLAN-FROZEN.json"],
                                             "warnings": warnings}
-            fresh = execute(pkg, scope, trees)
+            recorded_admission = pkg / "results" / "admission.json"
+            admission = read_json(recorded_admission) if recorded_admission.is_file() else None
+            fresh = execute(pkg, scope, trees, admission)
         except LabError as exc:
             return "NOT_REPRODUCIBLE", {"problems": [str(exc)], "warnings": warnings}
     recorded = {p.relative_to(pkg).as_posix(): read_json(p) for p in sorted((pkg / "results").rglob("*.json"))}

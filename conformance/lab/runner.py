@@ -3,20 +3,38 @@
 import tempfile
 from pathlib import Path
 
-from . import pins, plan, state
+from . import consent, pins, plan, state
 from .canonical import read_json, sha256_file, write_json
 from .engines.base import get_engine, identity_for
-from .errors import PlanError
+from .errors import GateError, PlanError
 from .kinds import adequacy, verification
 from .scope import load_scope
 
 
-def execute(run_dir, scope, trees):
+ADMISSION_FILE = "results/admission.json"
+ADMISSION_NOTE = ("Admission decisions recorded before inference. A claim over an input that is not "
+                  "ADMITTED is a non-verdict; its check did not run.")
+
+
+def admission_record(run_dir, scope):
+    """Manual-track admission: every input needs a decision in CONSENT.json before run."""
+    latest = consent.admissions(consent.load(run_dir))
+    missing = [i["id"] for i in scope["inputs"] if i["id"] not in latest]
+    if missing:
+        raise GateError(f"admission is missing for input(s): {', '.join(missing)}; record it with admit")
+    return {"note": ADMISSION_NOTE, "inputs": {
+        i["id"]: {k: latest[i["id"]][k] for k in ("decision", "rationale", "who", "ref")}
+        | {"consent_index": latest[i["id"]]["index"]} for i in scope["inputs"]}}
+
+
+def execute(run_dir, scope, trees, admission=None):
     """Run every row or claim. Returns {relative path: JSON object}; writes nothing."""
     out = {}
     if scope["kind"] == "verification":
-        records = verification.execute(run_dir, scope, trees)
+        records = verification.execute(run_dir, scope, trees, admission)
         out["results/claims.json"] = {"records": records}
+        if admission is not None:
+            out[ADMISSION_FILE] = admission
         agree = verification.agreement(run_dir, records)
         if agree is not None:
             out["results/agreement.json"] = agree
@@ -74,12 +92,13 @@ def run(run_dir, now, workdir=None):
     current = state.require(run_dir, "FROZEN")
     scope = load_scope(run_dir, require_pins=True)
     plan.require_agreement(run_dir, scope)  # also re-verifies the consent chain and head
+    admission = admission_record(run_dir, scope) if scope["kind"] == "verification" else None
     with tempfile.TemporaryDirectory(prefix="aac-run-", dir=workdir) as tmp:
         trees, licenses = pins.materialize(scope, tmp)
         fresh = plan.build_plan(run_dir, scope, trees, identity_for(scope))
         if plan.plan_hash(fresh) != current["plan_sha256"]:
             raise PlanError("run inputs no longer match the frozen plan hash")
-        results = execute(run_dir, scope, trees)
+        results = execute(run_dir, scope, trees, admission)
         if plan.run_files(run_dir) != read_json(Path(run_dir) / plan.FILE)["core"]["run_files"]:
             raise PlanError("run-owned files changed during the run")
     write_results(run_dir, results)

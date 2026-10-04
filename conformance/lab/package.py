@@ -4,7 +4,7 @@ import re
 import shutil
 from pathlib import Path
 
-from . import state
+from . import consent, state
 from .canonical import read_json, sha256_file, sha256_json, write_json
 from .errors import PackageError
 from .report import render_notice, render_report, render_reproduce, render_status
@@ -127,11 +127,22 @@ def verify_run_integrity(run_dir, current):
     return plan
 
 
+def claim_conditions(run_dir, scope):
+    """Conditions from scope confirmations; each must name claims (or rows) of this run."""
+    known = {c["id"] for c in scope.get("claims", [])} | {r["id"] for r in scope.get("rows", [])}
+    conditions = consent.conditions(consent.load(run_dir))
+    unknown = sorted({c for cond in conditions for c in cond["claims"]} - known)
+    if unknown:
+        raise PackageError("refusing to package: scope conditions name unknown claim(s): " + ", ".join(unknown))
+    return conditions
+
+
 def build(run_dir, now):
     current = state.require(run_dir, "RUN")
     run_dir = Path(run_dir)
     scope = read_json(run_dir / "SCOPE.json")
     plan = verify_run_integrity(run_dir, current)
+    conditions = claim_conditions(run_dir, scope)
     vendor_lab(run_dir)
     (run_dir / "rerun.py").write_text(RERUN_PY, encoding="utf-8")
     python = ".".join(plan["environment"]["python"].split(".")[:2])
@@ -140,7 +151,7 @@ def build(run_dir, now):
     workflow.write_text(WORKFLOW.replace("{python}", python), encoding="utf-8")
     results = {p.relative_to(run_dir).as_posix(): read_json(p)
                for p in sorted((run_dir / "results").rglob("*.json"))}
-    (run_dir / "REPORT.md").write_text(render_report(scope, plan, results), encoding="utf-8")
+    (run_dir / "REPORT.md").write_text(render_report(scope, plan, results, conditions), encoding="utf-8")
     (run_dir / "STATUS.md").write_text(render_status("PRIVATE"), encoding="utf-8")
     (run_dir / "NOTICE").write_text(render_notice(scope), encoding="utf-8")
     (run_dir / "REPRODUCE.md").write_text(render_reproduce(scope, plan), encoding="utf-8")
