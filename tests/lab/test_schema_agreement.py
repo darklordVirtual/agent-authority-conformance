@@ -85,6 +85,24 @@ class SchemaAgreementTest(unittest.TestCase):
         bad["events"][2]["conditions"] = [{"text": "x", "claims": ["c1"]}]
         self.assertFalse(schema.is_valid(bad))
 
+    def test_offers_schema_and_validator_agree(self):
+        from conformance.lab import offer
+        from tests.lab.helpers import offer_entry, offers_doc
+        schema = validator("offers")
+        example = json.loads((Path(__file__).resolve().parents[2] / "templates" / "offers"
+                              / "aacp-offers.example.json").read_text(encoding="utf-8"))
+        good = json.loads(offers_doc(offer_entry("https://example.invalid/p", "a" * 40)))
+        for doc in (example, good):
+            schema.validate(doc)
+            offer.validate_offers(doc)
+        for overrides in ({"kinds": ["adequacy"]}, {"executes_producer_code": True}, {"expires": "soon"},
+                          {"publication": {"mode": "PUBLIC_AFTER_REVIEW", "review_window_days": None,
+                                           "unresolved_disagreement": "HOLD"}}):
+            bad = json.loads(offers_doc(offer_entry("https://example.invalid/p", "a" * 40, **overrides)))
+            self.assertFalse(schema.is_valid(bad), overrides)
+            with self.assertRaises(ScopeError):
+                offer.validate_offers(bad)
+
     def test_remaining_schemas_are_valid_schemas(self):
         for name in ("consent", "claim-results", "row-result"):
             validator(name)

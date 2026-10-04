@@ -1,0 +1,54 @@
+{
+  "schema_version": "aacp-offers-v1",
+  "offers": [
+    {
+      "offer_id": "example-tool-digest-v1",
+      "revoked": false,
+      "expires": "2027-04-01",
+      "producer": {
+        "project": "Example Producer",
+        "maintainers": [
+          "example-maintainer"
+        ]
+      },
+      "subject": {
+        "repo": "https://github.com/example/producer",
+        "commit": "0123456789abcdef0123456789abcdef01234567",
+        "paths": [
+          "fixtures/tool-digest-v1"
+        ]
+      },
+      "inputs": [
+        {
+          "id": "vectors",
+          "path": "fixtures/tool-digest-v1/vectors.json"
+        }
+      ],
+      "claims": [
+        {
+          "id": "tool_digest_binds",
+          "text": "The per-tool digest recomputed from the served definition equals the signed digest.",
+          "claim_ceiling": {
+            "establishes": [
+              "digest recomputation over the pinned served definitions"
+            ],
+            "does_not_establish": [
+              "runtime behaviour of the tool",
+              "production identity of the signing key",
+              "any A-G property"
+            ]
+          }
+        }
+      ],
+      "kinds": [
+        "verification"
+      ],
+      "executes_producer_code": false,
+      "publication": {
+        "mode": "PUBLIC_AFTER_REVIEW",
+        "review_window_days": 7,
+        "unresolved_disagreement": "PUBLISH_WITH_DISAGREEMENT"
+      }
+    }
+  ]
+}

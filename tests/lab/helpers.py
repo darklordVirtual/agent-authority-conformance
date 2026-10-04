@@ -20,11 +20,19 @@ def git(*args, cwd):
     return result.stdout.strip()
 
 
-def make_repo(root, files):
+def make_repo(root, files, branch="main"):
     """Create a git repository with files ({relpath: str|bytes}); return its commit."""
     root = Path(root)
     root.mkdir(parents=True, exist_ok=True)
-    git("init", "--quiet", "-b", "main", cwd=root)
+    git("init", "--quiet", "-b", branch, cwd=root)
+    return commit_files(root, files)
+
+
+def commit_files(root, files, remove=()):
+    """Write files and remove paths in an existing repository; commit and return the commit."""
+    root = Path(root)
+    for rel in remove:
+        (root / rel).unlink()
     for rel, content in files.items():
         path = root / rel
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -63,9 +71,9 @@ class LabTest(unittest.TestCase):
     def tearDown(self):
         self._tmp.cleanup()
 
-    def remote_repo(self, name, files):
+    def remote_repo(self, name, files, branch="main"):
         """Create a local repository reachable as https://example.invalid/<name>."""
-        commit = make_repo(self.remotes / name, files)
+        commit = make_repo(self.remotes / name, files, branch)
         return REMOTE_PREFIX + name, commit
 
     def copy_fixture(self, name, dest):
@@ -118,3 +126,48 @@ def frozen_run(test, fixture="toy-run", subject="toy-subject", admit=True, condi
     if admit:
         admit_all(run_dir)
     return run_dir
+
+
+OFFER_PATH = "aacp-offers.json"
+
+
+def offer_entry(repo, commit, **overrides):
+    """An open verification offer over the toy-receipts subject at `commit`."""
+    entry = {
+        "offer_id": "toy-receipts-v1", "revoked": False, "expires": "2099-01-01",
+        "producer": {"project": "toy-receipts", "maintainers": ["maintainer"]},
+        "subject": {"repo": repo, "commit": commit, "paths": ["receipts"]},
+        "inputs": [{"id": "within", "path": "receipts/within.json"},
+                   {"id": "over", "path": "receipts/over.json"}],
+        "claims": [
+            {"id": "cap_compliance", "text": "The observed value is within the delegated cap.",
+             "claim_ceiling": {"establishes": ["numeric comparison with the cap"],
+                               "does_not_establish": ["units", "cumulative spend"]}},
+            {"id": "exact_call", "text": "The observed value equals the authorized exact call.",
+             "claim_ceiling": {"establishes": ["value comparison"], "does_not_establish": ["live execution"]}},
+            {"id": "signature", "text": "The receipt signature verifies under a pinned key.",
+             "claim_ceiling": {"establishes": ["fixture signature"], "does_not_establish": ["key control"]}},
+        ],
+        "kinds": ["verification"], "executes_producer_code": False,
+        "publication": {"mode": "PUBLIC_IMMEDIATE", "review_window_days": None,
+                        "unresolved_disagreement": "PUBLISH_WITH_DISAGREEMENT"},
+    }
+    entry.update(overrides)
+    return entry
+
+
+def offers_doc(*entries):
+    import json
+    return json.dumps({"schema_version": "aacp-offers-v1", "offers": list(entries)}, indent=2) + "\n"
+
+
+def producer_with_offer(test, name="toy-receipts", branch="main", **overrides):
+    """A producer repository: commit 1 holds the subject files, commit 2 adds an offer
+    over commit 1. Returns (offer ref, subject commit, repo path)."""
+    import hashlib
+    repo, subject_commit = test.remote_repo(name, fixture_files("toy-receipts"), branch)
+    text = offers_doc(offer_entry(repo, subject_commit, **overrides))
+    offer_commit = commit_files(test.remotes / name, {OFFER_PATH: text})
+    ref = {"repo": repo, "commit": offer_commit, "path": OFFER_PATH, "offer_id": "toy-receipts-v1",
+           "sha256": hashlib.sha256(text.encode("utf-8")).hexdigest()}
+    return ref, subject_commit, test.remotes / name
