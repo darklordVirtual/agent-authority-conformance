@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/darklordVirtual/agent-authority-conformance/schema/execution-boundary-input-v0.2.schema.json",
+  "$id": "https://github.com/darklordVirtual/agent-authority-conformance-profiles/schema/execution-boundary-input-v0.2.schema.json",
   "title": "Accepted evidence inputs for the bounded E reference rule",
   "type": "object",
   "additionalProperties": false,

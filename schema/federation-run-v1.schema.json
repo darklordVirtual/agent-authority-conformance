@@ -1,0 +1,177 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AACP federation run manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "run_id",
+    "subject",
+    "roles",
+    "pins",
+    "command",
+    "environment",
+    "independence",
+    "publication_policy"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "federation-run-v1"
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repository",
+        "revision"
+      ],
+      "properties": {
+        "repository": {
+          "type": "string",
+          "minLength": 3
+        },
+        "revision": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{40}$"
+        }
+      }
+    },
+    "roles": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "producer",
+        "fixture_author",
+        "verifier_implementer",
+        "runner"
+      ],
+      "properties": {
+        "producer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fixture_author": {
+          "type": "string",
+          "minLength": 1
+        },
+        "verifier_implementer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "runner": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "pins": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "adapter_revision",
+        "procedure_revision",
+        "input_manifest_sha256"
+      ],
+      "properties": {
+        "adapter_revision": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{40}$"
+        },
+        "procedure_revision": {
+          "type": "string",
+          "minLength": 1
+        },
+        "input_manifest_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{64}$"
+        }
+      }
+    },
+    "command": {
+      "type": "string",
+      "minLength": 1
+    },
+    "environment": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "independence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "classification",
+        "blinding"
+      ],
+      "properties": {
+        "classification": {
+          "enum": [
+            "AUTHOR_RUN",
+            "REPRODUCTION",
+            "SECOND_IMPLEMENTATION",
+            "INDEPENDENT_IMPLEMENTATION"
+          ]
+        },
+        "blinding": {
+          "enum": [
+            "BLINDED",
+            "NOT_BLINDED",
+            "NOT_APPLICABLE"
+          ]
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "publication_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode",
+        "unresolved_disagreement"
+      ],
+      "properties": {
+        "mode": {
+          "enum": [
+            "PRIVATE_UNTIL_APPROVED",
+            "PUBLIC_AFTER_REVIEW",
+            "PUBLIC_IMMEDIATE",
+            "PUBLIC_BY_MUTUAL_CONSENT"
+          ]
+        },
+        "review_window_days": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "unresolved_disagreement": {
+          "enum": [
+            "PUBLISH_WITH_DISAGREEMENT",
+            "HOLD_PUBLICATION",
+            "SUPERSEDE_WITH_NEW_RUN"
+          ]
+        }
+      }
+    },
+    "lineage": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": true
+    },
+    "output_sha256": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[0-9a-fA-F]{64}$"
+    }
+  }
+}

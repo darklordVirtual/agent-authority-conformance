@@ -1,6 +1,6 @@
 # Contributing
 
-Agent Authority Conformance is intentionally conservative. The project improves when a contribution makes a claim boundary sharper, an assessment more reproducible, or the model less dependent on one architecture.
+AACP is intentionally conservative. The project improves when a contribution makes a claim boundary sharper, an assessment more reproducible, or the model less dependent on one architecture.
 
 ## High-value contributions
 
@@ -23,6 +23,21 @@ For a proposed `PASS`, include:
 6. a caveat describing what the evidence does **not** establish.
 
 README prose, architecture diagrams and marketing statements can provide context, but they are not sufficient direct evidence for `PASS`.
+
+## External actor and adapter testing
+
+Tests for another project MUST consume its pinned artifacts through a documented
+producer contract; they MUST NOT import the producer implementation or treat a
+passing consumer run as endorsement. Keep producer inputs, consumer procedure,
+expected results and assessment records separate. Record the producer revision,
+artifact digests, consumer revision, command, scope and claim ceiling. Adapter
+failures should identify the artifact, contract axis and next evidence needed;
+they should not relabel an unsupported or untested claim as `FAIL`.
+
+For a cross-platform comparison, export the platform's complete v0.2
+assessment and run `python -m conformance.coverage <assessment>`. This is a
+coverage and shape check: it requires explicit A–G rows but deliberately
+produces no aggregate score and does not authenticate the platform's evidence.
 
 ## Assessment discipline
 
@@ -62,7 +77,12 @@ committed expectations and fail on disagreement without rewriting them. Include
 negative cases for missing evidence, mismatched scopes and malformed input when
 changing inference rules. Unsupported checks and verifier errors are non-verdicts.
 
-Run `python -m conformance.check` and `python -m unittest discover -s tests -v`.
+Run `python -m conformance.check`, `python -m conformance.mutations`,
+`python -m conformance.invariants` and `python -m unittest discover -s tests -v`.
+A change to the E rule or its fixtures must leave no surviving mutation and no
+failing relation; a mutation that cannot be killed under the rule's contract is
+declared `equivalent` with its reason in `conformance/mutations-v0.2.json`,
+never deleted. A new fixture that kills a mutation names it in its description.
 The synthetic reference rule trusts accepted upstream evidence; changes must
 not imply that it authenticates artifacts or proves live non-bypassability.
 

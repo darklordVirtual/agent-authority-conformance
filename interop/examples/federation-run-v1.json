@@ -1,0 +1,36 @@
+{
+  "schema_version": "federation-run-v1",
+  "run_id": "example-e7-independent-run",
+  "subject": {
+    "repository": "darklordVirtual/REMORA-research",
+    "revision": "dc5f10e87ea546137d00b09d01d147f2ab6972e0"
+  },
+  "roles": {
+    "producer": "REMORA-research",
+    "fixture_author": "REMORA-research",
+    "verifier_implementer": "example-verifier",
+    "runner": "example-runner"
+  },
+  "pins": {
+    "adapter_revision": "a8c5917421a4b29a1a319fa4c1b7946053b06f3d",
+    "procedure_revision": "example-verifier@0000000000000000000000000000000000000001",
+    "input_manifest_sha256": "0000000000000000000000000000000000000000000000000000000000000001"
+  },
+  "command": "python verify.py fixtures.json",
+  "environment": {
+    "python": "3.12",
+    "os": "linux"
+  },
+  "independence": {
+    "classification": "INDEPENDENT_IMPLEMENTATION",
+    "blinding": "NOT_BLINDED",
+    "notes": "Example record only."
+  },
+  "publication_policy": {
+    "mode": "PUBLIC_AFTER_REVIEW",
+    "review_window_days": 7,
+    "unresolved_disagreement": "PUBLISH_WITH_DISAGREEMENT"
+  },
+  "lineage": null,
+  "output_sha256": null
+}

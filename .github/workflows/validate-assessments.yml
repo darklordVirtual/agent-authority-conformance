@@ -26,6 +26,15 @@ jobs:
       - name: Validate assessment examples
         run: check-jsonschema --schemafile schema/assessment.schema.json examples/*.json
 
+      - name: Validate federation adapter manifests
+        run: check-jsonschema --schemafile schema/federation-adapter-v1.schema.json adapters/*/adapter.json
+
+      - name: Validate federation run example
+        run: check-jsonschema --schemafile schema/federation-run-v1.schema.json interop/examples/federation-run-v1.json
+
+      - name: Validate federation edge example
+        run: check-jsonschema --schemafile schema/federation-edge-record-v1.schema.json interop/examples/federation-edge-record-v1.json
+
   evidence-v02:
     runs-on: ubuntu-latest
     steps:
@@ -43,6 +52,12 @@ jobs:
       - name: Validate assessments and committed fixtures
         run: python -m conformance.check
 
+      - name: Score the fixtures against the seeded faults
+        run: python -m conformance.mutations
+
+      - name: Check the E rule's invariants over the generated space
+        run: python -m conformance.invariants
+
       - name: Run semantic and harness regression tests
         run: python -m unittest discover -s tests -v
 
@@ -56,3 +71,90 @@ jobs:
 
       - name: Ensure checks did not rewrite tracked evidence
         run: git diff --exit-code
+
+  cli-package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build wheel
+        run: python -m pip wheel --no-deps . --wheel-dir "$RUNNER_TEMP/wheels"
+
+      - name: Install wheel into isolated environment
+        run: |
+          python -m venv "$RUNNER_TEMP/cli-venv"
+          "$RUNNER_TEMP/cli-venv/bin/python" -m pip install "$RUNNER_TEMP"/wheels/*.whl
+
+      - name: Exercise installed CLI outside source checkout
+        run: |
+          mkdir "$RUNNER_TEMP/subject"
+          cd "$RUNNER_TEMP/subject"
+          CLI="$RUNNER_TEMP/cli-venv/bin/aacp"
+          "$CLI" init --name package-smoke --json > init.json
+          "$CLI" validate --json > validate.json
+          "$CLI" inspect --json > inspect.json
+          "$RUNNER_TEMP/cli-venv/bin/python" - <<'PY'
+          import json
+          from pathlib import Path
+          from aacp.cli import validator
+          for name in ("init", "validate", "inspect"):
+              result = json.loads(Path(f"{name}.json").read_text(encoding="utf-8"))
+              validator("aacp-command-result-v1.schema.json").validate(result)
+              assert result["status"] == "OK"
+              assert result["verification_status"] == "NOT_RUN"
+              assert result["property_verdict"] is None
+          PY
+
+  remora-adapter-metatest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out AACP
+        uses: actions/checkout@v4
+        with:
+          path: aac
+          persist-credentials: false
+
+      - name: Check out pinned REMORA subject
+        uses: actions/checkout@v4
+        with:
+          repository: darklordVirtual/REMORA-research
+          ref: 31c4060630923344d43d9fac26821150262c3687
+          path: remora
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Resolve pinned REMORA evidence without executing producer code
+        working-directory: aac
+        run: |
+          python -m pip install --disable-pip-version-check -r requirements-dev.txt
+          python -m scripts.run_federation_adapter \
+            --manifest adapters/remora-evidence-sufficiency-v1/adapter.json \
+            --subject-root ../remora \
+            --record-dir "$RUNNER_TEMP/remora-resolution" \
+            --runner "$GITHUB_ACTOR" \
+            --fixture-author REMORA-research \
+            --classification AUTHOR_RUN \
+            --summary "$GITHUB_STEP_SUMMARY"
+          python - <<'PY'
+          import json
+          import os
+          p=os.path.join(os.environ["RUNNER_TEMP"], "remora-resolution", "bundle.json")
+          x=json.load(open(p, encoding="utf-8"))
+          assert x["adapter_status"] == "RESOLVED"
+          assert x["review_state"] == "PENDING_REVIEW_WINDOW"
+          assert x["publication_authorized"] is False
+          assert all(c["property_verdict"] is None for c in x["claims"])
+          assert all(e["resolution"] == "RESOLVED" for e in x["evidence"])
+          PY

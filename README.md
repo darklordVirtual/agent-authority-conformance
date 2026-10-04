@@ -1,12 +1,14 @@
-# Agent Authority Conformance
+# Agent Authority Conformance Profiles (AACP)
 
 > **Evidence before adjectives.** A vendor-neutral vocabulary for evaluating authority and execution controls in agentic systems.
 
+> **Project identity:** this repository is independent. It is not the LF Decentralized Trust *Agent Authority Conformance* lab and not `Agent-Authority-Conformance/aps-conformance-suite`; it is not a Federation authority, and not a membership or certification body. The project was published as "Agent Authority Conformance" until 2026-10 and gave that name up because the lab holds it; see [TERMINOLOGY.md](TERMINOLOGY.md#names).
+
 **Status:** Draft v0.2 (opt-in; v0.1 preserved) · Run protocol v0.3 (draft) · **No aggregate score** · **Not a certification** · **Not a product ranking**
 
-When an agent runtime says *“the tool call was authorized”*, that statement hides several independent security and governance questions. Agent Authority Conformance separates those questions so implementations can state precisely what they have demonstrated, what remains untested, and what they deliberately do not claim.
+When an agent runtime says *“the tool call was authorized”*, that statement hides several independent security and governance questions. AACP separates those questions so implementations can state precisely what they have demonstrated, what remains untested, and what they deliberately do not claim.
 
-The project evaluates **evidence**, not marketing language.
+The project evaluates **evidence**, not marketing language. Profiles are the unit: one bounded property an implementation can try to demonstrate, with fixtures that would fail it. Results are recorded with Bounded Claim Reproduction ([METHOD.md](METHOD.md)), which states who ran what against which revisions and what the result does not establish. The seven principles that bind both are in [CHARTER.md](CHARTER.md).
 
 ## The seven properties
 
@@ -56,6 +58,10 @@ No percentage, star rating, “5/7 conformant”, security grade or ranking is v
 
 | Path | Purpose |
 |---|---|
+| [`CHARTER.md`](CHARTER.md) | The seven principles, including implementation neutrality |
+| [`METHOD.md`](METHOD.md) | Bounded Claim Reproduction: the chain, levels BCR-0 to BCR-4, result vocabulary |
+| [`TERMINOLOGY.md`](TERMINOLOGY.md) | Names, the four distinctions (conformance, interoperability, validation, certification), properties A to G, profile identity |
+| [`GOVERNANCE.md`](GOVERNANCE.md) | How profiles and runs are proposed, frozen and reviewed |
 | [`SPECIFICATION-v0.2.md`](SPECIFICATION-v0.2.md) | Draft v0.2 semantics and bounded E evidence rules |
 | [`RUN-PROTOCOL-v0.3.md`](RUN-PROTOCOL-v0.3.md) | Private-first runs against other projects' pinned artifacts |
 | [`conformance/lab/`](conformance/lab/) | `python -m conformance.lab`: scope, freeze, run, package, share, rerun |
@@ -67,10 +73,20 @@ No percentage, star rating, “5/7 conformant”, security grade or ranking is v
 | [`schema/assessment.schema.json`](schema/assessment.schema.json) | Preserved v0.1 schema |
 | [`examples/`](examples/) | Versioned examples and historical assessments |
 | [`conformance/`](conformance/) | Validation and bounded E reference inference |
+| [`conformance/mutations-v0.2.json`](conformance/mutations-v0.2.json) | Seeded faults for the E rule; `python -m conformance.mutations` scores the fixtures against them |
+| [`conformance/invariants.py`](conformance/invariants.py) | Metamorphic relations and a differential reference model for the E rule over a generated space |
+| [`conformance/coverage.py`](conformance/coverage.py) | Strict, score-free A–G component matrix for cross-platform assessment comparison |
+| [`MUTATIONS-AND-INVARIANTS.md`](MUTATIONS-AND-INVARIANTS.md) | What the two adequacy checks establish, and what they do not |
 | [`tests/fixtures/`](tests/fixtures/) | Synthetic, committed evidence-sufficiency cases |
 | [`CONTRIBUTING.md`](CONTRIBUTING.md) | Evidence and contribution discipline |
 
 ## Quick start
+
+For producer, consumer, verifier or reproduction work, start with
+[the self-service interop guide](docs/INTEROP-SELF-SERVICE.md). AI agents enter
+through [AGENTS.md](AGENTS.md). The **Federation self-service** GitHub Action
+resolves committed adapters and prepares hash-bound run evidence, with result
+details and uploads gated by the frozen publication policy.
 
 Python 3.12 or newer:
 
@@ -80,12 +96,28 @@ python -m venv .venv
 # Windows PowerShell: .venv/Scripts/Activate.ps1
 python -m pip install -r requirements-dev.txt
 python -m conformance.check
+python -m conformance.mutations
+python -m conformance.invariants
+python -m conformance.coverage tests/adversarial/assessment-pass.json
 python -m unittest discover -s tests -v
 ```
 
 Activate the environment with the command for your platform before installing.
+For the first installer-backed self-service commands (`aacp init`, `validate`
+and `inspect`, each with `--json`), see
+[CLI onboarding](docs/CLI-ONBOARDING.md). They validate project configuration
+and inspect local pins only; they do not award property verdicts.
 The checks run offline after dependency installation and do not invoke external
-tools or regenerate committed expectations.
+tools or regenerate committed expectations. `mutations` seeds faults into the
+E rule in memory and asks whether the fixtures notice; `invariants` checks
+relations that need no expected answer over a generated input space. Both are
+read-only; see [MUTATIONS-AND-INVARIANTS.md](MUTATIONS-AND-INVARIANTS.md).
+
+For cross-platform runs, export each platform's assessment in the v0.2 format
+and pass the files to `python -m conformance.coverage`. The command requires
+one explicit row for every REMORA core component A–G and emits only a
+component matrix. It never computes a score, ranks platforms, or upgrades
+self-reported evidence.
 
 The E reference rule consumes **already accepted evidence**. It does not verify
 artifacts, inspect credential custody or establish coverage itself. Its synthetic

@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AACP federation edge record v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "edge_id",
+    "producer",
+    "consumer",
+    "claim",
+    "artifact",
+    "status",
+    "claim_ceiling"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "federation-edge-record-v1"
+    },
+    "edge_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "producer": {
+      "type": "string",
+      "minLength": 1
+    },
+    "consumer": {
+      "type": "string",
+      "minLength": 1
+    },
+    "claim": {
+      "type": "string",
+      "minLength": 1
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repository",
+        "revision",
+        "sha256"
+      ],
+      "properties": {
+        "repository": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{40}$"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{64}$"
+        }
+      }
+    },
+    "status": {
+      "enum": [
+        "PROPOSED",
+        "SCOPED",
+        "PINNED",
+        "REPRODUCED",
+        "INDEPENDENTLY_VERIFIED",
+        "SUPERSEDED"
+      ]
+    },
+    "claim_ceiling": {
+      "type": "string",
+      "minLength": 1
+    },
+    "run_records": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "explicit_non_claims": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

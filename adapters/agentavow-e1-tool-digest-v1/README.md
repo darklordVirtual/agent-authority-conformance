@@ -1,0 +1,1 @@
+# AgentAvow E1 tool-digest v1 adapter\n\nResolution-only adapter over the producer-published E1 vector set. It grants no AACP property verdict and does not execute AgentAvow code.\n

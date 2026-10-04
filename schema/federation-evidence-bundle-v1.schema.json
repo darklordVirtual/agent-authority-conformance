@@ -1,0 +1,172 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AACP federation evidence bundle v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "subject",
+    "adapter",
+    "adapter_status",
+    "evidence",
+    "claims",
+    "explicit_non_claims",
+    "review_policy",
+    "review_state",
+    "publication_authorized",
+    "manifest_sha256",
+    "claim_ceiling"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "federation-evidence-bundle-v1"
+    },
+    "subject": {
+      "type": "object"
+    },
+    "adapter": {
+      "type": "object"
+    },
+    "adapter_status": {
+      "enum": [
+        "RESOLVED",
+        "INVALID_INPUT"
+      ]
+    },
+    "evidence": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "artifact_id",
+          "path",
+          "source_class",
+          "expected_sha256",
+          "actual_sha256",
+          "resolution"
+        ],
+        "properties": {
+          "artifact_id": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "source_class": {
+            "type": "string"
+          },
+          "expected_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "actual_sha256": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "resolution": {
+            "enum": [
+              "RESOLVED",
+              "MISSING",
+              "HASH_MISMATCH"
+            ]
+          }
+        }
+      }
+    },
+    "claims": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "claim_id",
+          "native_claim",
+          "aac_mapping",
+          "procedure",
+          "artifacts",
+          "evidence_resolution",
+          "claim_ceiling",
+          "property_verdict",
+          "note"
+        ],
+        "properties": {
+          "claim_id": {
+            "type": "string"
+          },
+          "native_claim": {
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "aac_mapping": {
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "procedure": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "artifacts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "evidence_resolution": {
+            "enum": [
+              "RESOLVED",
+              "INCOMPLETE"
+            ]
+          },
+          "claim_ceiling": {
+            "type": "string"
+          },
+          "property_verdict": {
+            "type": "null"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "explicit_non_claims": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "review_policy": {
+      "type": "object"
+    },
+    "review_state": {
+      "enum": [
+        "DRAFT_PRIVATE_REVIEW",
+        "PENDING_REVIEW_WINDOW",
+        "PENDING_MUTUAL_CONSENT",
+        "PUBLICATION_ALLOWED"
+      ]
+    },
+    "publication_authorized": {
+      "type": "boolean"
+    },
+    "manifest_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "claim_ceiling": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

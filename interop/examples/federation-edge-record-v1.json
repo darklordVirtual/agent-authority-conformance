@@ -1,0 +1,20 @@
+{
+  "schema_version": "federation-edge-record-v1",
+  "edge_id": "E7",
+  "producer": "REMORA-research",
+  "consumer": "example-verifier",
+  "claim": "bounded_observed_surface_matches_governed_set",
+  "artifact": {
+    "repository": "darklordVirtual/REMORA-research",
+    "revision": "dc5f10e87ea546137d00b09d01d147f2ab6972e0",
+    "sha256": "b09b937ad263169682fd0d6175564d084b4a61f5c996adb1237fd2eac31aaccf"
+  },
+  "status": "PROPOSED",
+  "claim_ceiling": "Example only. No external verification is established by this record.",
+  "run_records": [],
+  "explicit_non_claims": [
+    "Federation membership",
+    "endorsement",
+    "production enforcement"
+  ]
+}

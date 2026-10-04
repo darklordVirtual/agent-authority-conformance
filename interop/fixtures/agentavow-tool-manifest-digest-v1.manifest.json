@@ -1,0 +1,13 @@
+{
+  "schema_version": "federation-producer-package-v1",
+  "producer": "AgentAvow/AgentAvow",
+  "producer_revision": "36426cfd5152bba6a27766febfac8aaef47b6f34",
+  "consumer_contract": "agentavow-tool-manifest-digest-v1",
+  "package_files": [
+    {
+      "path": "interop/fixtures/agentavow-tool-manifest-digest-v1.json",
+      "sha256": "488496079155830caf83593be0cafcb21367f72cd70ea363c2400f40eda72647"
+    }
+  ],
+  "claim_ceiling": "The package binds a signed static tool-definition digest to one named tool at evaluation time. It does not establish runtime behavior, execution authorization, effect occurrence, or Federation membership."
+}

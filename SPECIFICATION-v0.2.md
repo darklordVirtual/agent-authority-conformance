@@ -1,5 +1,7 @@
 # Agent Authority Conformance v0.2
 
+> Published under the project's former name. The project is now Agent Authority Conformance Profiles (AACP); this specification is preserved as written and its requirement set is frozen. See [TERMINOLOGY.md](TERMINOLOGY.md#names).
+
 **Status: draft.** Vendor-neutral; not a standard, certification, ranking or
 general security score. v0.1 remains available without reinterpretation.
 
