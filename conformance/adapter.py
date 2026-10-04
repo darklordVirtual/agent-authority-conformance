@@ -110,7 +110,7 @@ def validate_manifest(m: dict[str, Any]) -> None:
         if mapping is not None and mapping.get("relationship") not in {
             "exact", "structural", "partial", "false_analog", "no_mapping", "not_evaluated"
         }:
-            raise AdapterError("unsupported AAC mapping relationship")
+            raise AdapterError("unsupported AACP mapping relationship")
     _review_policy(m.get("review", {}))
 
 def _publication_state(policy: dict[str, Any]) -> tuple[str, bool]:
@@ -173,7 +173,7 @@ def resolve(manifest: dict[str, Any], subject_root: str | Path) -> dict[str, Any
         "review_state": review_state,
         "publication_authorized": publication_authorized,
         "manifest_sha256": sha256_bytes(canonical_json(manifest)),
-        "claim_ceiling": "This bundle establishes artifact resolution only. It is not an AAC property verdict, certification, endorsement, independent validation, or production claim.",
+        "claim_ceiling": "This bundle establishes artifact resolution only. It is not an AACP property verdict, certification, endorsement, independent validation, or production claim.",
     }
 
 def write_bundle(manifest_path: str | Path, subject_root: str | Path, out: str | Path) -> None:

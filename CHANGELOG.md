@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- Rename the project to Agent Authority Conformance Profiles (AACP). The
+  former name is held by the LF Decentralized Trust Agent Authority
+  Conformance lab. Added `CHARTER.md` (seven principles, implementation
+  neutrality as a normative rule), `METHOD.md` (Bounded Claim Reproduction,
+  levels BCR-0 to BCR-4, six-valued result vocabulary for the planned
+  `bcr-run-v1`), `TERMINOLOGY.md` and `GOVERNANCE.md`. Schema `$id`s and
+  prose now carry the new name; the v0.1 and v0.2 specifications, the
+  committed assessments, the adapter manifests and the mutation definitions
+  keep their text so pinned bytes and historical records are unchanged.
 - Add seeded-fault adequacy for the bounded E rule: `conformance/mutations-v0.2.json`
   defines 30 faults and two controls, `python -m conformance.mutations` scores the
   committed fixtures against them in memory, and seven fixtures were added so that

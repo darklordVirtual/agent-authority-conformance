@@ -1,6 +1,6 @@
 # Contributing
 
-Agent Authority Conformance is intentionally conservative. The project improves when a contribution makes a claim boundary sharper, an assessment more reproducible, or the model less dependent on one architecture.
+AACP is intentionally conservative. The project improves when a contribution makes a claim boundary sharper, an assessment more reproducible, or the model less dependent on one architecture.
 
 ## High-value contributions
 

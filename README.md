@@ -1,14 +1,14 @@
-# Agent Authority Conformance
+# Agent Authority Conformance Profiles (AACP)
 
 > **Evidence before adjectives.** A vendor-neutral vocabulary for evaluating authority and execution controls in agentic systems.
 
-> **Project identity:** this repository is independent. It is not `Agent-Authority-Conformance/aps-conformance-suite`, not a Federation authority, and not a membership or certification body.
+> **Project identity:** this repository is independent. It is not the LF Decentralized Trust *Agent Authority Conformance* lab and not `Agent-Authority-Conformance/aps-conformance-suite`; it is not a Federation authority, and not a membership or certification body. The project was published as "Agent Authority Conformance" until 2026-10 and gave that name up because the lab holds it; see [TERMINOLOGY.md](TERMINOLOGY.md#names).
 
 **Status:** Draft v0.2 (opt-in; v0.1 preserved) · **No aggregate score** · **Not a certification** · **Not a product ranking**
 
-When an agent runtime says *“the tool call was authorized”*, that statement hides several independent security and governance questions. Agent Authority Conformance separates those questions so implementations can state precisely what they have demonstrated, what remains untested, and what they deliberately do not claim.
+When an agent runtime says *“the tool call was authorized”*, that statement hides several independent security and governance questions. AACP separates those questions so implementations can state precisely what they have demonstrated, what remains untested, and what they deliberately do not claim.
 
-The project evaluates **evidence**, not marketing language.
+The project evaluates **evidence**, not marketing language. Profiles are the unit: one bounded property an implementation can try to demonstrate, with fixtures that would fail it. Results are recorded with Bounded Claim Reproduction ([METHOD.md](METHOD.md)), which states who ran what against which revisions and what the result does not establish. The seven principles that bind both are in [CHARTER.md](CHARTER.md).
 
 ## The seven properties
 
@@ -58,6 +58,10 @@ No percentage, star rating, “5/7 conformant”, security grade or ranking is v
 
 | Path | Purpose |
 |---|---|
+| [`CHARTER.md`](CHARTER.md) | The seven principles, including implementation neutrality |
+| [`METHOD.md`](METHOD.md) | Bounded Claim Reproduction: the chain, levels BCR-0 to BCR-4, result vocabulary |
+| [`TERMINOLOGY.md`](TERMINOLOGY.md) | Names, the four distinctions (conformance, interoperability, validation, certification), properties A to G, profile identity |
+| [`GOVERNANCE.md`](GOVERNANCE.md) | How profiles and runs are proposed, frozen and reviewed |
 | [`SPECIFICATION-v0.2.md`](SPECIFICATION-v0.2.md) | Draft v0.2 semantics and bounded E evidence rules |
 | [`schema/assessment-v0.2.schema.json`](schema/assessment-v0.2.schema.json) | Opt-in v0.2 assessment schema |
 | [`MIGRATION-v0.2.md`](MIGRATION-v0.2.md) | Per-record migration and compatibility rules |

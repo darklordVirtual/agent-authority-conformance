@@ -1,7 +1,7 @@
 # Federation adapters
 
 Adapters are read-only evidence resolvers for bounded cross-project reviews. They
-are intentionally thinner than AAC itself.
+are intentionally thinner than AACP itself.
 
 An adapter MAY locate pinned artifacts, verify exact bytes, normalize provenance
 and prepare named claim inputs. It MUST NOT award A-G credit, execute arbitrary
@@ -12,14 +12,14 @@ endorsement.
 The pipeline is:
 
 ```text
-producer artifact -> adapter resolution -> evidence admission -> AAC inference
+producer artifact -> adapter resolution -> evidence admission -> AACP inference
                   -> maintainer review -> publication decision
 ```
 
 Each arrow is a claim boundary. Resolution proves only that the assessor read the
 declared bytes. Admission additionally asks whether those bytes are relevant,
 authentic enough for the procedure, applicable to the scope and sufficiently
-independent. Only then may a property-specific AAC procedure infer a bounded
+independent. Only then may a property-specific AACP procedure infer a bounded
 result.
 
 ## Required manifest discipline

@@ -67,7 +67,7 @@ jobs:
   remora-adapter-metatest:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out AAC
+      - name: Check out AACP
         uses: actions/checkout@v4
         with:
           path: aac

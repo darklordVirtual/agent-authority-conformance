@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "AAC federation edge record v1",
+  "title": "AACP federation edge record v1",
   "type": "object",
   "additionalProperties": false,
   "required": [
