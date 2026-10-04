@@ -154,6 +154,24 @@ class CliTest(LabTest):
         self.assertEqual(self.cli("status", "toy")[1].strip(), "FROZEN")
         self.assertEqual(self.cli("run", "toy")[0], 1)  # survivors present
 
+    def test_cli_condition_admission_and_provenance(self):
+        run_dir = prepare_run(self)
+        code, _, err = self.cli("consent", "toy", "--who", "maintainer", "--action", "scope_agreed",
+                                "--ref", AGREE_REF, "--condition", "row-a=test keys only, = kept",
+                                "--drafted-by", "agent:claude", "--ai-assisted", "--recorded-by", "operator")
+        self.assertEqual(code, 0, err)
+        code, _, err = self.cli("admit", "toy", "--input", "cases", "--decision", "NOT_ADMITTED",
+                                "--rationale", "producer-authored expectations", "--who", "tester", "--ref", AGREE_REF)
+        self.assertEqual(code, 0, err)
+        first, second = consent.load(run_dir)
+        self.assertEqual(first["conditions"], [{"claims": ["row-a"], "text": "test keys only, = kept"}])
+        self.assertEqual((first["drafted_by"], first["ai_assisted"], first["recorded_by"]),
+                         ("agent:claude", True, "operator"))
+        self.assertEqual((second["action"], second["decision"], second["drafted_by"]),
+                         ("admission", "NOT_ADMITTED", "human"))
+        self.assertEqual(self.cli("consent", "toy", "--who", "x", "--action", "run_authorized",
+                                  "--ref", AGREE_REF, "--condition", "a=b")[0], 2)
+
     def test_cli_errors_exit_two(self):
         code, _, err = self.cli("status", "missing")
         self.assertEqual(code, 2)

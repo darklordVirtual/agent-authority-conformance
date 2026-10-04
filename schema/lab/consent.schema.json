@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/darklordVirtual/agent-authority-conformance/schema/lab/consent.schema.json",
-  "title": "AAC lab CONSENT.json (v0.3)",
-  "description": "Append-only. prev_sha256 is the SHA-256 of the canonical previous event (64 zeros for the first).",
+  "title": "AACP lab CONSENT.json (v0.3, federation tracks)",
+  "description": "Append-only. prev_sha256 is the SHA-256 of the canonical previous event (64 zeros for the first). drafted_by and ai_assisted disclose how the linked statement was produced; they never change a gate.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -34,8 +34,10 @@
             "enum": [
               "scope_agreed",
               "run_authorized",
+              "admission",
               "factual_corrections",
               "survivor_classification",
+              "review_ack",
               "publication_approved",
               "publication_declined",
               "withdrawn"
@@ -48,8 +50,96 @@
           "prev_sha256": {
             "type": "string",
             "pattern": "^[0-9a-f]{64}$"
+          },
+          "drafted_by": {
+            "type": "string",
+            "pattern": "^(human|agent:[A-Za-z0-9._-]+)$"
+          },
+          "ai_assisted": {
+            "type": "boolean"
+          },
+          "recorded_by": {
+            "type": "string",
+            "minLength": 1
+          },
+          "conditions": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "text",
+                "claims"
+              ],
+              "properties": {
+                "text": {
+                  "type": "string",
+                  "pattern": "\\S"
+                },
+                "claims": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "type": "string",
+                    "pattern": "\\S"
+                  }
+                }
+              }
+            }
+          },
+          "input": {
+            "type": "string",
+            "pattern": "\\S"
+          },
+          "decision": {
+            "enum": [
+              "ADMITTED",
+              "NOT_ADMITTED",
+              "UNKNOWN"
+            ]
+          },
+          "rationale": {
+            "type": "string",
+            "pattern": "\\S"
           }
-        }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "action": {
+                  "const": "admission"
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "input",
+                "decision",
+                "rationale"
+              ]
+            }
+          },
+          {
+            "if": {
+              "not": {
+                "properties": {
+                  "action": {
+                    "const": "scope_agreed"
+                  }
+                }
+              }
+            },
+            "then": {
+              "not": {
+                "required": [
+                  "conditions"
+                ]
+              }
+            }
+          }
+        ]
       }
     }
   }

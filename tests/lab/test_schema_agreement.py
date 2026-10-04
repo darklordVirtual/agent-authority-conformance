@@ -65,6 +65,26 @@ class SchemaAgreementTest(unittest.TestCase):
             with self.subTest(path=path.name):
                 schema.validate(json.loads(path.read_text(encoding="utf-8")))
 
+    def test_consent_events_match_schema(self):
+        import tempfile
+        from conformance.lab import consent
+        from tests.lab.helpers import AGREE_REF, NOW
+        with tempfile.TemporaryDirectory() as tmp:
+            consent.add(tmp, "a", "scope_agreed", AGREE_REF, NOW,
+                        conditions=[{"text": "test keys only", "claims": ["c1"]}])
+            consent.add(tmp, "a", "admission", AGREE_REF, NOW, drafted_by="agent:x", ai_assisted=True,
+                        input="i1", decision="UNKNOWN", rationale="provenance open")
+            consent.add(tmp, "b", "review_ack", AGREE_REF, NOW, recorded_by="op")
+            doc = json.loads((Path(tmp) / consent.FILE).read_text(encoding="utf-8"))
+        schema = validator("consent")
+        schema.validate(doc)
+        bad = json.loads(json.dumps(doc))
+        bad["events"][1].pop("decision")
+        self.assertFalse(schema.is_valid(bad))
+        bad = json.loads(json.dumps(doc))
+        bad["events"][2]["conditions"] = [{"text": "x", "claims": ["c1"]}]
+        self.assertFalse(schema.is_valid(bad))
+
     def test_remaining_schemas_are_valid_schemas(self):
         for name in ("consent", "claim-results", "row-result"):
             validator(name)

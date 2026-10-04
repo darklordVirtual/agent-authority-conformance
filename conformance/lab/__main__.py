@@ -12,6 +12,17 @@ from .errors import LabError
 from .state import load_state
 
 
+def _provenance(p):
+    p.add_argument("--drafted-by", default="human", metavar="human|agent:<id>",
+                   help="who drafted the linked statement; disclosure only")
+    p.add_argument("--ai-assisted", action="store_true")
+    p.add_argument("--recorded-by", help="handle operating this tool, when not --who")
+
+
+def _provenance_args(args):
+    return {"drafted_by": args.drafted_by, "ai_assisted": args.ai_assisted, "recorded_by": args.recorded_by}
+
+
 def build_parser():
     parser = argparse.ArgumentParser(prog="python -m conformance.lab", description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
@@ -31,8 +42,19 @@ def build_parser():
     p = sub.add_parser("consent", help="append a consent event")
     p.add_argument("run_id")
     p.add_argument("--who", required=True)
-    p.add_argument("--action", required=True, choices=sorted(consent.ACTIONS))
+    p.add_argument("--action", required=True, choices=sorted(consent.ACTIONS - {"admission"}))
     p.add_argument("--ref", required=True)
+    p.add_argument("--condition", action="append", metavar="CLAIM[,CLAIM]=TEXT",
+                   help="scope_agreed only: a condition on the named claims (repeatable)")
+    _provenance(p)
+    p = sub.add_parser("admit", help="record an admission decision for one input (manual track)")
+    p.add_argument("run_id")
+    p.add_argument("--input", required=True)
+    p.add_argument("--decision", required=True, choices=consent.DECISIONS)
+    p.add_argument("--rationale", required=True)
+    p.add_argument("--who", required=True)
+    p.add_argument("--ref", required=True)
+    _provenance(p)
     p = sub.add_parser("freeze", help="write the plan and print its hash; then record where it was published")
     p.add_argument("run_id")
     p.add_argument("--published-ref")
@@ -63,8 +85,14 @@ def main(argv=None, config=None):
             lifecycle.pin(run_dir)
             print("pinned; review SCOPE.json and ask the parties to agree it")
         elif args.command == "consent":
-            consent.add(run_dir, args.who, args.action, args.ref, now)
+            conditions = [consent.parse_condition(c) for c in args.condition] if args.condition else None
+            consent.add(run_dir, args.who, args.action, args.ref, now, conditions=conditions,
+                        **_provenance_args(args))
             print(f"recorded {args.action} by {args.who}")
+        elif args.command == "admit":
+            consent.add(run_dir, args.who, "admission", args.ref, now, input=args.input,
+                        decision=args.decision, rationale=args.rationale, **_provenance_args(args))
+            print(f"recorded admission of {args.input}: {args.decision} by {args.who}")
         elif args.command == "freeze":
             digest, frozen = lifecycle.freeze(run_dir, now, args.published_ref)
             print(f"plan sha256: {digest}")

@@ -62,5 +62,67 @@ class ConsentTest(LabTest):
         self.assertEqual(consent.publication_status(consent.load(self.tmp), ["a", "b"]), "pending")
 
 
+
+class ProvenanceTest(LabTest):
+    def test_defaults_and_agent_draft_are_hash_chained(self):
+        event = consent.add(self.tmp, "tester", "scope_agreed", AGREE_REF, NOW)
+        self.assertEqual((event["drafted_by"], event["ai_assisted"]), ("human", False))
+        event = consent.add(self.tmp, "tester", "run_authorized", AGREE_REF, NOW,
+                            drafted_by="agent:claude", ai_assisted=True, recorded_by="operator")
+        self.assertEqual((event["drafted_by"], event["ai_assisted"], event["recorded_by"]),
+                         ("agent:claude", True, "operator"))
+        self.assertEqual(len(consent.load(self.tmp)), 2)
+
+    def test_bad_drafted_by_refused(self):
+        for bad in ("robot", "agent:", "agent:a b"):
+            with self.assertRaises(GateError):
+                consent.add(self.tmp, "tester", "scope_agreed", AGREE_REF, NOW, drafted_by=bad)
+
+    def test_old_events_without_fields_still_verify(self):
+        event = {"at": NOW, "who": "tester", "action": "scope_agreed", "ref": AGREE_REF,
+                 "prev_sha256": consent.GENESIS}
+        (self.tmp / consent.FILE).write_text(json.dumps({"events": [event]}), encoding="utf-8")
+        self.assertEqual(len(consent.load(self.tmp)), 1)
+        consent.add(self.tmp, "tester", "run_authorized", AGREE_REF, NOW)
+        self.assertEqual(len(consent.load(self.tmp)), 2)
+
+    def test_conditions_only_on_scope_agreed(self):
+        cond = [{"text": "test keys only", "claims": ["exact_call"]}]
+        event = consent.add(self.tmp, "tester", "scope_agreed", AGREE_REF, NOW, conditions=cond)
+        self.assertEqual(event["conditions"], cond)
+        self.assertEqual(consent.conditions(consent.load(self.tmp)),
+                         [{"who": "tester", "text": "test keys only", "claims": ["exact_call"]}])
+        with self.assertRaises(GateError):
+            consent.add(self.tmp, "tester", "run_authorized", AGREE_REF, NOW, conditions=cond)
+        for bad in ([], [{"text": "x", "claims": []}], [{"text": "", "claims": ["a"]}], [{"claims": ["a"]}]):
+            with self.assertRaises(GateError):
+                consent.add(self.tmp, "tester", "scope_agreed", AGREE_REF, NOW, conditions=bad)
+
+    def test_condition_parsing_keeps_text(self):
+        self.assertEqual(consent.parse_condition("a, b=keys = test, only"),
+                         {"claims": ["a", "b"], "text": "keys = test, only"})
+        for bad in ("no equals", "=text", "a=", " , =text"):
+            with self.assertRaises(GateError):
+                consent.parse_condition(bad)
+
+    def test_admission_latest_wins_and_is_validated(self):
+        consent.add(self.tmp, "tester", "admission", AGREE_REF, NOW,
+                    input="within", decision="UNKNOWN", rationale="provenance open")
+        consent.add(self.tmp, "tester", "admission", AGREE_REF, NOW,
+                    input="within", decision="ADMITTED", rationale="checked")
+        latest = consent.admissions(consent.load(self.tmp))["within"]
+        self.assertEqual((latest["decision"], latest["index"]), ("ADMITTED", 1))
+        for kwargs in ({"input": "within", "decision": "MAYBE", "rationale": "r"},
+                       {"input": "within", "decision": "ADMITTED", "rationale": ""},
+                       {"input": "", "decision": "ADMITTED", "rationale": "r"},
+                       {"decision": "ADMITTED", "rationale": "r"}):
+            with self.assertRaises(GateError):
+                consent.add(self.tmp, "tester", "admission", AGREE_REF, NOW, **kwargs)
+
+    def test_review_ack_is_a_known_action(self):
+        consent.add(self.tmp, "maintainer", "review_ack", AGREE_REF, NOW)
+        self.assertEqual(consent.load(self.tmp)[0]["action"], "review_ack")
+
+
 if __name__ == "__main__":
     unittest.main()
