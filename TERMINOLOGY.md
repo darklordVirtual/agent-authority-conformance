@@ -13,7 +13,9 @@
 This project was published as "Agent Authority Conformance" until 2026-10.
 The name was given up because it is the name of the LF Decentralized Trust
 lab. Records written under the old name, including the v0.1 and v0.2
-specifications and the committed assessments, keep their text.
+specifications and the committed assessments, keep their text. The v0.1
+specification and schema are byte-pinned by a test and keep the former name
+and `$id` verbatim.
 
 ## Four different things
 

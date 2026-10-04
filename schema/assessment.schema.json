@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/darklordVirtual/agent-authority-conformance-profiles/schema/assessment.schema.json",
-  "title": "Agent Authority Conformance Profiles (AACP) Assessment",
+  "$id": "https://github.com/darklordVirtual/agent-authority-conformance/schema/assessment.schema.json",
+  "title": "Agent Authority Conformance Assessment",
   "description": "Machine-readable representation of a scoped A-G authority conformance assessment. Aggregate scoring is intentionally unsupported.",
   "type": "object",
   "additionalProperties": false,

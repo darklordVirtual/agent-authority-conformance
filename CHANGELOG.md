@@ -11,6 +11,9 @@
   prose now carry the new name; the v0.1 and v0.2 specifications, the
   committed assessments, the adapter manifests and the mutation definitions
   keep their text so pinned bytes and historical records are unchanged.
+  `SPECIFICATION.md` and `schema/assessment.schema.json` are byte-pinned by
+  `tests/test_conformance.py` and keep the former name verbatim, including
+  the v0.1 `$id`.
 - Add seeded-fault adequacy for the bounded E rule: `conformance/mutations-v0.2.json`
   defines 30 faults and two controls, `python -m conformance.mutations` scores the
   committed fixtures against them in memory, and seven fixtures were added so that
