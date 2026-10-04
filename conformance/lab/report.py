@@ -1,9 +1,12 @@
 """Markdown for REPORT, STATUS, NOTICE and REPRODUCE. Nothing is ever aggregated."""
 
 from .canonical import sha256_json
+from .independence import BCR, FEDERATION, per_claim
 
 INDEPENDENCE_TEXT = {
     "SELF_RUN": "SELF_RUN. The runner measured its own project; this is not independent evidence.",
+    "REPRODUCTION": "REPRODUCTION. The runner reran the producer's own verifier; this establishes "
+                    "reproducibility, not implementation independence.",
     "SECOND_IMPLEMENTATION": "SECOND_IMPLEMENTATION. A reproduction made with knowledge of the "
                              "producer's code; not independent verification.",
     "INDEPENDENT_IMPLEMENTATION": "INDEPENDENT_IMPLEMENTATION. The runner's own implementation; "
@@ -34,7 +37,9 @@ def _bullets(items):
 
 def render_report(scope, plan, results, conditions=None):
     lines = [f"# {scope['run_id']}", "",
-             f"**Independence:** {INDEPENDENCE_TEXT[scope['independence']]}", ""]
+             f"**Independence:** {INDEPENDENCE_TEXT[scope['independence']]}", "",
+             f"Reads as `{FEDERATION[scope['independence']]}` in federation-run-v1 and "
+             f"{BCR[scope['independence']]} in BCR terms.", ""]
     if scope.get("independence_statement"):
         lines += [f"**Independence statement:** {scope['independence_statement']}", ""]
     if scope.get("previous_run"):
@@ -50,6 +55,7 @@ def render_report(scope, plan, results, conditions=None):
         lines += _adequacy_sections(scope, results)
     else:
         lines += _verification_sections(results)
+    lines += _independence_section(scope)
     lines += _condition_sections(scope, conditions or [])
     lines += ["## Limits", "", _bullets(LIMITS), "",
               "Prepared with the Agent Authority Conformance lab; see CONSENT.json for who agreed to what.", ""]
@@ -100,6 +106,16 @@ def _verification_sections(results):
                 "| Input | Claim | Ours | Producer | Agree |", "|---|---|---|---|---|"]
         out += [f"| {a['input']} | {a['claim']} | {a['ours']} | {a['producer']} | {'yes' if a['agree'] else 'no'} |"
                 for a in agree["rows"]]
+    return out + [""]
+
+
+def _independence_section(scope):
+    rows = per_claim(scope)
+    authored = scope.get("runner_authored") or []
+    out = ["## Independence per claim", "",
+           "Runner-authored material: " + (", ".join(authored) if authored else "none declared") + ".", "",
+           "| Claim | Independent | Basis |", "|---|---|---|"]
+    out += [f"| {cid} | {'yes' if v['independent'] else 'no'} | {v['reason']} |" for cid, v in rows.items()]
     return out + [""]
 
 

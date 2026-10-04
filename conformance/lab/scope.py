@@ -12,7 +12,7 @@ from .canonical import find_forbidden_keys, read_json
 from .errors import ScopeError
 
 KINDS = ("adequacy", "verification")
-INDEPENDENCE = ("SELF_RUN", "SECOND_IMPLEMENTATION", "INDEPENDENT_IMPLEMENTATION")
+INDEPENDENCE = ("SELF_RUN", "REPRODUCTION", "SECOND_IMPLEMENTATION", "INDEPENDENT_IMPLEMENTATION")
 ENGINES = ("native", "corpus_adequacy")
 COMMIT = re.compile(r"^[0-9a-f]{40}$")
 SHA256 = re.compile(r"^[0-9a-f]{64}$")
@@ -49,6 +49,20 @@ def validate_scope(scope, *, require_pins=False):
         p.append(f"independence must be one of {', '.join(INDEPENDENCE)}")
     if independence == "INDEPENDENT_IMPLEMENTATION" and not _text(scope.get("independence_statement")):
         p.append("INDEPENDENT_IMPLEMENTATION requires independence_statement")
+    authored = scope.get("runner_authored")
+    if authored is not None and not (isinstance(authored, list) and all(_text(a) for a in authored)):
+        p.append("runner_authored must be a list of nonempty strings")
+    for item in scope.get("claims", []) + scope.get("rows", []) if isinstance(
+            scope.get("claims", []), list) and isinstance(scope.get("rows", []), list) else []:
+        if not isinstance(item, dict) or "independent" not in item:
+            continue
+        w = f"claim or row {item.get('id')!r}"
+        if not isinstance(item["independent"], bool):
+            p.append(f"{w}: independent must be true or false")
+        elif item["independent"] is False and not _text(item.get("not_independent_reason")):
+            p.append(f"{w}: independent false requires not_independent_reason")
+        elif item["independent"] is True and independence != "INDEPENDENT_IMPLEMENTATION":
+            p.append(f"{w}: a claim cannot be more independent than the run label {independence}")
     ref = scope.get("agreement_ref")
     if ref is not None and not (isinstance(ref, str) and ref.startswith("https://")):
         p.append("agreement_ref must be null or an https URL")

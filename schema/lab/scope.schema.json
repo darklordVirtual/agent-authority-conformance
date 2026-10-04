@@ -55,6 +55,7 @@
     "independence": {
       "enum": [
         "SELF_RUN",
+        "REPRODUCTION",
         "SECOND_IMPLEMENTATION",
         "INDEPENDENT_IMPLEMENTATION"
       ]
@@ -293,8 +294,34 @@
               "id_key",
               "field"
             ]
+          },
+          "independent": {
+            "type": "boolean"
+          },
+          "not_independent_reason": {
+            "type": "string",
+            "pattern": "\\S"
           }
-        }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "independent": {
+                  "const": false
+                }
+              },
+              "required": [
+                "independent"
+              ]
+            },
+            "then": {
+              "required": [
+                "not_independent_reason"
+              ]
+            }
+          }
+        ]
       }
     },
     "controls": {
@@ -423,8 +450,34 @@
           },
           "temporal": {
             "type": "boolean"
+          },
+          "independent": {
+            "type": "boolean"
+          },
+          "not_independent_reason": {
+            "type": "string",
+            "pattern": "\\S"
           }
-        }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "independent": {
+                  "const": false
+                }
+              },
+              "required": [
+                "independent"
+              ]
+            },
+            "then": {
+              "required": [
+                "not_independent_reason"
+              ]
+            }
+          }
+        ]
       }
     },
     "reference_time": {
@@ -439,6 +492,13 @@
         "run_id",
         "plan_sha256"
       ]
+    },
+    "runner_authored": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "\\S"
+      }
     }
   },
   "allOf": [

@@ -76,6 +76,8 @@ class ConditionTest(LabTest):
         self.assertIn("under published test keys only", section)
         self.assertIn("tester", section)
         self.assertNotIn("cap_compliance", section.split("##", 1)[0])
+        self.assertIn("## Independence per claim", report)
+        self.assertIn("BCR-3 at most", report)
 
 
 if __name__ == "__main__":
