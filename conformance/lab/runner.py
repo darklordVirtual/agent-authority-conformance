@@ -40,6 +40,16 @@ def admission_record(run_dir, scope):
     """Manual track: every input needs a decision in CONSENT.json before run.
     Self-service: the producer's offer pre-admits exactly the inputs it lists."""
     if scope.get("track", "manual") == "self_service":
+        if "public_boundary" in scope:
+            from .public_boundary import source_url
+            ref = scope["public_boundary"]
+            source = source_url(ref)
+            return {"note": ADMISSION_NOTE, "inputs": {
+                i["id"]: {"decision": "ADMITTED",
+                          "rationale": "runner admission of a public input under the pinned public boundary; "
+                                       "not producer consent or producer admission",
+                          "who": f"runner:{scope['runner']['project']}", "ref": source, "consent_index": None}
+                for i in scope["inputs"]}}
         ref = scope["offer"]
         source = f"{ref['repo']}/blob/{ref['commit']}/{ref['path']}"
         return {"note": ADMISSION_NOTE, "inputs": {

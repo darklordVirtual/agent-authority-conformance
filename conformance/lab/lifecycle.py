@@ -81,11 +81,15 @@ def pin(run_dir, workdir=None):
     scope = read_json(path)
     validate_scope(scope)
     if scope.get("track") == "self_service":
-        from .offer import check_scope_against, fetch_pinned, terms
-        entry = fetch_pinned(scope["offer"], workdir)
-        check_scope_against(scope, entry)
-        # The terms the run relies on, frozen into SCOPE.json (and so into the plan hash).
-        scope["offer_terms"] = terms(entry)
+        if "offer" in scope:
+            from .offer import check_scope_against, fetch_pinned, terms
+            entry = fetch_pinned(scope["offer"], workdir)
+            check_scope_against(scope, entry)
+            # The terms the run relies on, frozen into SCOPE.json (and so into the plan hash).
+            scope["offer_terms"] = terms(entry)
+        else:
+            from .public_boundary import verify_pinned
+            verify_pinned(scope["public_boundary"], workdir)
     with tempfile.TemporaryDirectory(prefix="aac-pin-", dir=workdir) as tmp:
         for i, subject in enumerate(scope["subjects"]):
             clone = pins.fetch(subject["repo"], subject["commit"], Path(tmp) / f"clone-{i}")
@@ -200,6 +204,19 @@ def _publish_self_service(run_dir, now, workdir=None):
     from .offer import check_tip
     current = state.require(run_dir, "SHARED_PRIVATE", "REVIEWED")
     scope = load_scope(run_dir, require_pins=True)
+    if "public_boundary" in scope:
+        from .public_boundary import source_url, verify_pinned
+        verify_pinned(scope["public_boundary"], workdir)
+        notes = [
+            "Runner-attributed self-service result over a pinned public boundary; "
+            "not producer-reviewed, not producer-endorsed and not a statement in the producer's name.",
+            f"Public boundary: {source_url(scope['public_boundary'])}",
+        ]
+        current = _set_status(run_dir, "PUBLISHED_SELF_SERVICE", "Record public-boundary self-service publication",
+                              notes)
+        github.make_public(current["repository"])
+        state.transition(run_dir, "PUBLISHED", now, note="published runner-attributed public-boundary result")
+        return
     from .offer import verify_scope_offer
     verify_scope_offer(scope, workdir)
     check_tip(scope["offer"], now, workdir)

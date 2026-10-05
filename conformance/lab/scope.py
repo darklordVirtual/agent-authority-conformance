@@ -123,18 +123,29 @@ def validate_scope(scope, *, require_pins=False):
 
 
 def _self_service_problems(scope):
-    from .offer import validate_ref
     p = []
-    try:
-        validate_ref(scope.get("offer"))
-    except ScopeError as exc:
-        p.append(f"self_service needs an offer: {exc}")
+    has_offer = "offer" in scope
+    has_public = "public_boundary" in scope
+    if has_offer == has_public:
+        p.append("self_service needs exactly one basis: offer or public_boundary")
+    elif has_offer:
+        from .offer import validate_ref
+        try:
+            validate_ref(scope.get("offer"))
+        except ScopeError as exc:
+            p.append(f"invalid self_service offer: {exc}")
+    else:
+        from .public_boundary import validate_ref
+        try:
+            validate_ref(scope.get("public_boundary"))
+        except ScopeError as exc:
+            p.append(f"invalid public_boundary: {exc}")
     if scope.get("kind") != "verification":
         p.append("self_service allows only kind verification; adequacy and mutation need the manual track")
     if len(scope.get("subjects") or []) != 1:
         p.append("self_service runs measure exactly one subject, the offer's")
     if "publication" in scope:
-        p.append("self_service takes its publication policy from the offer; remove publication")
+        p.append("self_service publication is runner-attributed or taken from the producer offer; remove publication")
     if not _text(scope.get("procedure")):
         p.append("self_service needs procedure: the offered procedure id")
     return p
