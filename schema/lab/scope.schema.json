@@ -597,6 +597,50 @@
       "type": "string",
       "pattern": "\\S",
       "description": "Procedure id; required for self_service (the offered procedure)."
+    },
+    "public_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repo",
+        "commit",
+        "path",
+        "sha256",
+        "procedure_ref",
+        "claims_ref",
+        "classification_ref"
+      ],
+      "properties": {
+        "repo": {
+          "type": "string",
+          "pattern": "^https://"
+        },
+        "commit": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "path": {
+          "type": "string",
+          "pattern": "^(?!/)(?!.*(^|/)\\\\.\\\\.(/|$)).+$"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "procedure_ref": {
+          "type": "string",
+          "pattern": "\\\\S"
+        },
+        "claims_ref": {
+          "type": "string",
+          "pattern": "\\\\S"
+        },
+        "classification_ref": {
+          "type": "string",
+          "pattern": "\\\\S"
+        }
+      },
+      "description": "Pinned public boundary used as a runner-attributed self-service basis. It is not producer consent, endorsement or admission."
     }
   },
   "allOf": [
@@ -672,7 +716,6 @@
       },
       "then": {
         "required": [
-          "offer",
           "procedure"
         ],
         "properties": {
@@ -687,7 +730,29 @@
           "required": [
             "publication"
           ]
-        }
+        },
+        "oneOf": [
+          {
+            "required": [
+              "offer"
+            ],
+            "not": {
+              "required": [
+                "public_boundary"
+              ]
+            }
+          },
+          {
+            "required": [
+              "public_boundary"
+            ],
+            "not": {
+              "required": [
+                "offer"
+              ]
+            }
+          }
+        ]
       },
       "else": {
         "required": [
