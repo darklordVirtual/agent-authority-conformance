@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+- Add optional federation tracks ([docs/FEDERATION-TRACKS.md](docs/FEDERATION-TRACKS.md)):
+  self-service runs under a producer-owned open verification offer
+  (`schema/lab/offers.schema.json`), and stricter manual runs with conditional scope
+  confirmation, per-input admission before inference (`NOT_ADMITTED` non-verdicts),
+  `review_ack`, phase rules and withdrawal stops. Both: AI-drafting disclosure on consent
+  events, per-claim independence, `REPRODUCTION` label, verifier authors, trust-material
+  disclosure, run capture of every attempt and a negative runner self-test. Scopes
+  without `track` are manual and unchanged.
+- `aacp run`, `aacp next` and `aacp export map` (evidence records in the shape of the
+  #187 systems-map prototype). The lab is packaged with `aacp`; `lab.toml` is read from
+  the current directory first.
+
 - Rename the project to Agent Authority Conformance Profiles (AACP). The
   former name is held by the LF Decentralized Trust Agent Authority
   Conformance lab. Added `CHARTER.md` (seven principles, implementation

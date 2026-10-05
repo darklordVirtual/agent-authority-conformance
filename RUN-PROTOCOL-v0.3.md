@@ -224,7 +224,31 @@ pinned by commit (default `5fa2ff587497b00ac684a767335b9068f7e520a6`) and
 translates its verdicts. A cross-check runs both; disagreements are engine
 findings and never change the subject's row result.
 
-## 9. Limits
+## 9. Tracks
+
+A scope may set `track` to `manual` (the default when absent) or `self_service`.
+See [docs/FEDERATION-TRACKS.md](docs/FEDERATION-TRACKS.md). In brief:
+
+- **self_service** pins a producer-owned open verification offer
+  (`offer: {repo, commit, path, offer_id, sha256}`, [schema](schema/lab/offers.schema.json)).
+  `pin` checks the scope against it and writes `offer_terms`. `freeze`, `run`
+  and `publish` re-read the producer's default branch and refuse a withdrawn,
+  revoked or expired offer. No consent event is required. Inputs are admitted
+  by the offer. `freeze --not-preregistered` is allowed and reported.
+  Publication follows the offer's mode and review window. A producer decline
+  blocks under `HOLD` and is published with the record under
+  `PUBLISH_WITH_DISAGREEMENT`. Verification only. Producer code never runs.
+- **manual** adds to §4: conditional `scope_agreed` (`conditions` naming
+  claims, carried into the report), `admission` per input between freeze and
+  run (anything but `ADMITTED` makes that input's claims `NOT_ADMITTED`
+  non-verdicts), `review_ack` (clarification only, no gate), phase rules for
+  every pre-run and post-run event, and a stop on any party's `withdrawn`.
+- Both: optional `drafted_by` / `ai_assisted` / `recorded_by` on every event,
+  per-claim independence and `runner_authored`, `REPRODUCTION` label,
+  `verifier_authors`, `trust_material`, `RUN-CAPTURE.json` for every run
+  attempt, and `selftest`.
+
+## 10. Limits
 
 Local execution is not network isolation. A schema-valid scope is well-formed,
 not agreed; an agreed scope is not a result; a result is bounded by its claim

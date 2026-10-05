@@ -64,6 +64,7 @@ No percentage, star rating, “5/7 conformant”, security grade or ranking is v
 | [`GOVERNANCE.md`](GOVERNANCE.md) | How profiles and runs are proposed, frozen and reviewed |
 | [`SPECIFICATION-v0.2.md`](SPECIFICATION-v0.2.md) | Draft v0.2 semantics and bounded E evidence rules |
 | [`RUN-PROTOCOL-v0.3.md`](RUN-PROTOCOL-v0.3.md) | Private-first runs against other projects' pinned artifacts |
+| [`docs/FEDERATION-TRACKS.md`](docs/FEDERATION-TRACKS.md) | Optional self-service (producer offer) and manual tracks; `aacp next`, map export |
 | [`conformance/lab/`](conformance/lab/) | `python -m conformance.lab`: scope, freeze, run, package, share, rerun |
 | [`schema/lab/`](schema/lab/) | Run scope, consent, fault and result schemas |
 | [`templates/scopes/`](templates/scopes/) | Draft scopes for external targets (not runnable until agreed) |
