@@ -101,6 +101,7 @@ jobs:
           "$CLI" init --name package-smoke --json > init.json
           "$CLI" validate --json > validate.json
           "$CLI" inspect --json > inspect.json
+          "$CLI" adversarial --list --json > adversarial-vectors.json
           "$RUNNER_TEMP/cli-venv/bin/python" - <<'PY'
           import json
           from pathlib import Path
@@ -111,6 +112,11 @@ jobs:
               assert result["status"] == "OK"
               assert result["verification_status"] == "NOT_RUN"
               assert result["property_verdict"] is None
+          vectors = json.loads(Path("adversarial-vectors.json").read_text(encoding="utf-8"))
+          assert vectors["suite_version"] == "aacp-portable-cfg-adversarial-v1"
+          assert {row["property"] for row in vectors["cases"]} == {"C", "F", "G"}
+          assert all("challenge" in row for row in vectors["cases"])
+          validator("aacp-adversarial-run-v1.schema.json")
           PY
 
   remora-adapter-metatest:
