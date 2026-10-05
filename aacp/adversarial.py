@@ -492,10 +492,7 @@ def main(argv: list[str] | None = None) -> int:
 
     selected = tuple(dict.fromkeys(args.properties or PROPERTIES))
     if args.list:
-        rows = [
-            {k: copy.deepcopy(case[k]) for k in ("id", "property", "kind", "title", "claim_ceiling")}
-            for case in CASES if case["property"] in selected
-        ]
+        rows = [copy.deepcopy(case) for case in CASES if case["property"] in selected]
         if args.json:
             print(json.dumps({"suite_version": SUITE_VERSION, "cases": rows}, sort_keys=True))
         else:
