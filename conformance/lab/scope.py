@@ -89,7 +89,7 @@ def validate_scope(scope, *, require_pins=False):
         p.append("runner needs project and maintainers")
     if selected == "self_service":
         p.extend(_self_service_problems(scope))
-        if require_pins and not isinstance(scope.get("offer_terms"), dict):
+        if require_pins and "offer" in scope and not isinstance(scope.get("offer_terms"), dict):
             p.append("offer_terms is missing; run pin to read the offer")
     elif not _texts(scope.get("agreement_parties")):
         p.append("agreement_parties must be a nonempty list of handles")
