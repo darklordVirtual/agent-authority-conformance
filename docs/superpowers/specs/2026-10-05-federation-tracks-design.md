@@ -242,3 +242,13 @@ Standard-library `unittest`, local file-URL git repositories as in the existing 
 - Export: S published, M published, M unpublished refused, `--include-unpublished` omits results, no `owner_confirmation`.
 - Backward compatibility: existing fixtures, templates and `runs/remora-es-v12-adequacy` validate unchanged.
 - Full existing suites on the merged branch (`python -m unittest discover -s tests`, conformance checks).
+
+## 14. Addendum (2026-10-05, after principle audit and review)
+
+- Phase rules: `scope_agreed`/`run_authorized` only in SCOPED, `admission` only in FROZEN, review events only after delivery; any agreement party's `withdrawn` stops freeze and run.
+- Admission may be recorded only by runner maintainers, agreement parties or subject maintainers.
+- An offer covers only artifacts in the repository that issued it; it names a runner-owned `procedure`, and claims may declare `negative_controls` that S scopes must keep.
+- Self-service gates re-derive scope-within-offer and `offer_terms` from the pinned offer at freeze, run and publish; publish and withhold verify the frozen scope, run files and results first.
+- Declared negative controls are evaluated after results exist (`results/controls.json`).
+- `compare` lists two verification runs side by side without combining them.
+- Report and export name verifier authors and disclose declared `trust_material`; run capture records the workspace-relative working directory and the executing lab revision, captures only before results exist, and redacts what the leak scan refuses.

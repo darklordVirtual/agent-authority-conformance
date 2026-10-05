@@ -93,6 +93,19 @@ def _check_phase(run_dir, action):
                         f"the run is {current}")
 
 
+def _check_admitter(run_dir, who):
+    """Admission is a judgement by the runner, an agreement party or a subject maintainer."""
+    scope_path = Path(run_dir) / "SCOPE.json"
+    if not scope_path.is_file():
+        return
+    scope = read_json(scope_path)
+    allowed = handles(scope.get("runner", {}).get("maintainers", []) + scope.get("agreement_parties", [])
+                      + [m for s in scope.get("subjects", []) for m in s.get("maintainers", [])])
+    if handle(who) not in allowed:
+        raise GateError(f"admission by {who}: only runner maintainers, agreement parties or subject "
+                        "maintainers can record an admission decision")
+
+
 def withdrawn_parties(events, parties):
     """Agreement parties who withdrew. Withdrawal is always possible and is never undone
     by a later event in the same run; agreeing again means a new run."""
@@ -134,6 +147,7 @@ def add(run_dir, who, action, ref, now, *, drafted_by="human", ai_assisted=False
         _check_conditions(conditions)
         extra["conditions"] = conditions
     if action == "admission":
+        _check_admitter(run_dir, who)
         if not (_text(context.get("input")) and context.get("decision") in DECISIONS
                 and _text(context.get("rationale"))):
             raise GateError(f"admission needs input, decision ({', '.join(DECISIONS)}) and rationale")

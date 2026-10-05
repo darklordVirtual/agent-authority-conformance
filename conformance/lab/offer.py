@@ -94,6 +94,16 @@ def _entry_problems(i, e):
         ids = [c.get("id") for c in claims if isinstance(c, dict)]
         if len(set(ids)) != len(ids):
             p.append(f"{w}.claims ids must be unique")
+    procedure = e.get("procedure") if isinstance(e.get("procedure"), dict) else None
+    if not (procedure and isinstance(procedure.get("id"), str) and ID.match(procedure["id"])
+            and _text(procedure.get("description")) and procedure.get("verifier") == "runner_owned"):
+        p.append(f"{w}.procedure needs id, description and verifier 'runner_owned' (the runner's own checks; "
+                 "producer code is never executed under an offer)")
+    offered = {x.get("id") for x in inputs} if isinstance(inputs, list) else set()
+    for j, c in enumerate(claims if isinstance(claims, list) else []):
+        controls = c.get("negative_controls") if isinstance(c, dict) else None
+        if controls is not None and not (_texts(controls) and set(controls) <= offered):
+            p.append(f"{w}.claims[{j}].negative_controls must name offered inputs")
     kinds = e.get("kinds")
     if not (_texts(kinds) and set(kinds) <= set(KINDS)):
         p.append(f"{w}.kinds may contain only {', '.join(KINDS)}; adequacy and mutation need the manual track")
@@ -160,7 +170,11 @@ def fetch_pinned(ref, workdir=None):
             raise PinError(f"{ref['path']} does not exist at offer commit {ref['commit']}")
         if sha256_file(path) != ref["sha256"]:
             raise PinError(f"{ref['path']} at {ref['commit']} does not have the pinned sha256")
-        return find(validate_offers(read_json(path)), ref["offer_id"])
+        entry = find(validate_offers(read_json(path)), ref["offer_id"])
+    if entry["subject"]["repo"].rstrip("/") != ref["repo"].rstrip("/"):
+        raise ScopeError("an offer can only cover artifacts in the repository that issued it; "
+                         f"{ref['repo']} cannot open {entry['subject']['repo']}")
+    return entry
 
 
 def check_tip(ref, now, workdir=None):
@@ -200,12 +214,34 @@ def check_scope_against(scope, entry):
     for item in scope.get("inputs", []):
         if offered_inputs.get(item.get("id")) != item.get("path") or item.get("subject") != 0:
             p.append(f"input {item.get('id')!r} is not offered with path {item.get('path')!r}")
+    if scope.get("procedure") != entry["procedure"]["id"]:
+        p.append(f"procedure must be the offered procedure {entry['procedure']['id']!r}")
     offered_claims = {c["id"]: c for c in entry["claims"]}
     for claim in scope.get("claims", []):
         cid = claim.get("id")
         if cid not in offered_claims:
             p.append(f"claim {cid!r} is not offered")
-        elif claim.get("claim_ceiling") != offered_claims[cid]["claim_ceiling"]:
-            p.append(f"claim {cid!r} must carry the offer's claim_ceiling unchanged")
+        else:
+            if claim.get("claim_ceiling") != offered_claims[cid]["claim_ceiling"]:
+                p.append(f"claim {cid!r} must carry the offer's claim_ceiling unchanged")
+            missing = set(offered_claims[cid].get("negative_controls", [])) - set(claim.get("negative_controls", []))
+            if missing:
+                p.append(f"claim {cid!r} must keep the offered negative control(s) {', '.join(sorted(missing))}")
     if p:
         raise ScopeError("scope exceeds the offer: " + "; ".join(p))
+
+
+def terms(entry):
+    """What a self-service run relies on from its offer; frozen into SCOPE.json at pin."""
+    return {"publication": entry["publication"], "maintainers": entry["producer"]["maintainers"],
+            "expires": entry["expires"]}
+
+
+def verify_scope_offer(scope, workdir=None):
+    """Re-derive everything a self-service gate reads from the pinned offer: the scope must
+    still be within the offer and offer_terms must equal the pinned offer's terms."""
+    entry = fetch_pinned(scope["offer"], workdir)
+    check_scope_against(scope, entry)
+    if scope.get("offer_terms") != terms(entry):
+        raise ScopeError("offer_terms in SCOPE.json differ from the pinned offer; start a new run")
+    return entry

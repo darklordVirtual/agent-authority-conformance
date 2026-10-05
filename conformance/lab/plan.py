@@ -84,8 +84,9 @@ def require_agreement(run_dir, scope, now=None, workdir=None):
     """Manual: every agreement party agreed the scope and authorised the run.
     Self-service: the producer's offer is still listed, unrevoked and unexpired."""
     if scope.get("track", "manual") == "self_service":
-        from .offer import check_tip
+        from .offer import check_tip, verify_scope_offer
         consent.load(run_dir)  # the log may hold reviews or declines; it must still verify
+        verify_scope_offer(scope, workdir)
         check_tip(scope["offer"], now or utc_now(), workdir)
         return
     if not (isinstance(scope.get("agreement_ref"), str) and scope["agreement_ref"].startswith("https://")):
@@ -95,7 +96,8 @@ def require_agreement(run_dir, scope, now=None, workdir=None):
     if withdrew:
         raise GateError(f"{', '.join(withdrew)} withdrew; this run cannot proceed (start a new run)")
     for action in ("scope_agreed", "run_authorized"):
-        missing = sorted(set(scope["agreement_parties"]) - {e["who"] for e in events if e["action"] == action})
+        done = {consent.handle(e["who"]) for e in events if e["action"] == action}
+        missing = sorted(p for p in scope["agreement_parties"] if consent.handle(p) not in done)
         if missing:
             raise GateError(f"{action} is missing from: {', '.join(missing)}")
 

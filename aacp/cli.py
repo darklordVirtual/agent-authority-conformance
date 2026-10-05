@@ -140,12 +140,17 @@ def main(argv=None):
     argv = sys.argv[1:] if argv is None else list(argv)
     if argv[:1] == ["run"]:
         from conformance.lab.__main__ import main as lab_main
-        with contextlib.redirect_stderr(io.StringIO()) as usage:
-            try:
-                return lab_main(argv[1:])
-            except SystemExit as exit_:
-                if exit_.code in (0, None):
-                    return 0
+        usage = io.StringIO()
+        try:
+            with contextlib.redirect_stderr(usage):  # only argument errors are turned into an envelope
+                from conformance.lab.__main__ import build_parser
+                build_parser().parse_args(argv[1:])
+        except SystemExit as exit_:
+            if exit_.code in (0, None):
+                sys.stdout.write(usage.getvalue())
+                return 0
+        else:
+            return lab_main(argv[1:])
         message = usage.getvalue().strip().splitlines()[-1:] or ["invalid lab command"]
         result = {"schema_version": "aacp-command-result-v1", "command": "run", "status": "INVALID_INPUT",
                   "verification_status": "NOT_RUN", "property_verdict": None, "data": {},

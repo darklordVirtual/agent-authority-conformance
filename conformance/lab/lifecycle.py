@@ -81,12 +81,11 @@ def pin(run_dir, workdir=None):
     scope = read_json(path)
     validate_scope(scope)
     if scope.get("track") == "self_service":
-        from .offer import check_scope_against, fetch_pinned
+        from .offer import check_scope_against, fetch_pinned, terms
         entry = fetch_pinned(scope["offer"], workdir)
         check_scope_against(scope, entry)
         # The terms the run relies on, frozen into SCOPE.json (and so into the plan hash).
-        scope["offer_terms"] = {"publication": entry["publication"],
-                                "maintainers": entry["producer"]["maintainers"], "expires": entry["expires"]}
+        scope["offer_terms"] = terms(entry)
     with tempfile.TemporaryDirectory(prefix="aac-pin-", dir=workdir) as tmp:
         for i, subject in enumerate(scope["subjects"]):
             clone = pins.fetch(subject["repo"], subject["commit"], Path(tmp) / f"clone-{i}")
@@ -201,6 +200,8 @@ def _publish_self_service(run_dir, now, workdir=None):
     from .offer import check_tip
     current = state.require(run_dir, "SHARED_PRIVATE", "REVIEWED")
     scope = load_scope(run_dir, require_pins=True)
+    from .offer import verify_scope_offer
+    verify_scope_offer(scope, workdir)
     check_tip(scope["offer"], now, workdir)
     terms = scope["offer_terms"]["publication"]
     offer_id = scope["offer"]["offer_id"]
@@ -229,8 +230,16 @@ def _publish_self_service(run_dir, now, workdir=None):
     state.transition(run_dir, "PUBLISHED", now, note=f"published under offer {offer_id}")
 
 
+def _require_frozen_records(run_dir):
+    """Scope, run-owned files and results must still be what was frozen and run, so a
+    later edit (including a track switch) cannot change what the gates read."""
+    from .package import verify_run_integrity
+    verify_run_integrity(Path(run_dir), state.load_state(run_dir))
+
+
 def publish(run_dir, now):
     from . import github
+    _require_frozen_records(run_dir)
     if load_scope(run_dir).get("track") == "self_service":
         return _publish_self_service(run_dir, now)
     current = state.require(run_dir, "REVIEWED")
@@ -247,6 +256,7 @@ def publish(run_dir, now):
 
 def withhold(run_dir, now):
     current = state.require(run_dir, "SHARED_PRIVATE", "REVIEWED")
+    _require_frozen_records(run_dir)
     scope = load_scope(run_dir)
     if scope.get("track") == "self_service":
         if not _producer_declines(run_dir, scope, current["consent_index_at_share"]):

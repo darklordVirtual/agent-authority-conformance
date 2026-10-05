@@ -29,7 +29,8 @@
           "claims",
           "kinds",
           "executes_producer_code",
-          "publication"
+          "publication",
+          "procedure"
         ],
         "properties": {
           "offer_id": {
@@ -159,6 +160,15 @@
                       }
                     }
                   }
+                },
+                "negative_controls": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "type": "string",
+                    "pattern": "\\S"
+                  },
+                  "description": "Offered inputs on which the claim must not be ESTABLISHED (must name offered inputs; checked by conformance/lab/offer.py)."
                 }
               }
             }
@@ -229,6 +239,28 @@
                 }
               }
             ]
+          },
+          "procedure": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "description",
+              "verifier"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9._-]+$"
+              },
+              "description": {
+                "type": "string",
+                "pattern": "\\S"
+              },
+              "verifier": {
+                "const": "runner_owned"
+              }
+            }
           }
         }
       }

@@ -42,6 +42,8 @@ def verify_manifest(pkg):
 
 
 def _comparable(rel, obj):
+    if rel == "results/controls.json":
+        return {f"{c['claim']} / {c['input']}": [c["observed"], c["discriminated"]] for c in obj["controls"]}
     if rel == "results/admission.json":
         return {i: a["decision"] for i, a in obj["inputs"].items()}
     if rel == "results/claims.json":

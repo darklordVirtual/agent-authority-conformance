@@ -63,6 +63,8 @@ class ScopeAgainstTest(unittest.TestCase):
         entry = offer_entry(REPO, COMMIT)
         for claim in s["claims"]:
             claim["claim_ceiling"] = next(c["claim_ceiling"] for c in entry["claims"] if c["id"] == claim["id"])
+        s["procedure"] = entry["procedure"]["id"]
+        s["claims"][0]["negative_controls"] = ["over"]
         return s, entry
 
     def test_matching_scope(self):
@@ -132,3 +134,51 @@ class FetchTest(LabTest):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ProcedureAndIssuerTest(LabTest):
+    def test_offer_needs_a_runner_owned_procedure(self):
+        for bad in (None, {"id": "x", "description": "d", "verifier": "producer_reference"},
+                    {"id": "", "description": "d", "verifier": "runner_owned"}):
+            entry = offer_entry(REPO, COMMIT)
+            if bad is None:
+                entry.pop("procedure")
+            else:
+                entry["procedure"] = bad
+            with self.subTest(bad=bad), self.assertRaisesRegex(ScopeError, "procedure"):
+                offer.validate_offers(doc(entry))
+
+    def test_negative_controls_must_be_offered_inputs(self):
+        entry = offer_entry(REPO, COMMIT)
+        entry["claims"][0]["negative_controls"] = ["nope"]
+        with self.assertRaisesRegex(ScopeError, "negative_controls"):
+            offer.validate_offers(doc(entry))
+
+    def test_offer_covers_only_its_own_repository(self):
+        """An offer in one repository cannot open another project's artifacts."""
+        import hashlib
+        _, subject_commit = self.remote_repo("victim", {"receipts/within.json": "{}"})
+        text = offers_doc(offer_entry("https://example.invalid/victim", subject_commit))
+        third = self.remotes / "third-party"
+        from tests.lab.helpers import make_repo
+        commit = make_repo(third, {OFFER_PATH: text})
+        ref = {"repo": "https://example.invalid/third-party", "commit": commit, "path": OFFER_PATH,
+               "offer_id": "toy-receipts-v1", "sha256": hashlib.sha256(text.encode()).hexdigest()}
+        with self.assertRaisesRegex(ScopeError, "repository that issued it"):
+            offer.fetch_pinned(ref, self.tmp)
+
+
+class ScopeProcedureTest(unittest.TestCase):
+    scope = ScopeAgainstTest.scope
+
+    def test_procedure_must_match(self):
+        s, entry = self.scope()
+        s["procedure"] = "something-else"
+        with self.assertRaisesRegex(ScopeError, "procedure"):
+            offer.check_scope_against(s, entry)
+
+    def test_offered_negative_controls_cannot_be_dropped(self):
+        s, entry = self.scope()
+        s["claims"][0]["negative_controls"] = []
+        with self.assertRaisesRegex(ScopeError, "negative control"):
+            offer.check_scope_against(s, entry)

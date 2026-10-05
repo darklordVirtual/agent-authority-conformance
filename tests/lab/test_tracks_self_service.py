@@ -57,7 +57,7 @@ class ScopeTest(unittest.TestCase):
             validate_scope(s)
 
 
-class SelfServiceFlowTest(LabTest):
+class _SelfServiceBase(LabTest):
     def setUp(self):
         super().setUp()
         self.gh_state = self.tmp / "gh.json"
@@ -84,6 +84,8 @@ class SelfServiceFlowTest(LabTest):
         lifecycle.share(run, ORG, [], NOW)
         return run, producer
 
+
+class SelfServiceFlowTest(_SelfServiceBase):
     def test_full_immediate_flow_without_any_consent(self):
         run, _ = self.to_shared()
         lifecycle.publish(run, NOW)
@@ -197,3 +199,50 @@ class SelfServiceFlowTest(LabTest):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TamperTest(_SelfServiceBase):
+    """Edits to SCOPE.json after pin or after share must not change what the gates read."""
+
+    def test_offer_terms_edited_after_pin_refused_at_freeze(self):
+        run, _ = self_service_run(self, **after_review("HOLD"))
+        lifecycle.pin(run)
+        scope = read_json(run / "SCOPE.json")
+        scope["offer_terms"]["publication"] = {"mode": "PUBLIC_IMMEDIATE", "review_window_days": None,
+                                               "unresolved_disagreement": "PUBLISH_WITH_DISAGREEMENT"}
+        write_json(run / "SCOPE.json", scope)
+        with self.assertRaisesRegex(ScopeError, "offer_terms"):
+            lifecycle.freeze(run, NOW, not_preregistered=True)
+
+    def test_unoffered_claim_added_after_pin_refused_at_freeze(self):
+        run, _ = self_service_run(self)
+        lifecycle.pin(run)
+        scope = read_json(run / "SCOPE.json")
+        scope["claims"].append({**scope["claims"][1], "id": "extra"})
+        write_json(run / "SCOPE.json", scope)
+        with self.assertRaisesRegex(ScopeError, "extra"):
+            lifecycle.freeze(run, NOW, not_preregistered=True)
+
+    def test_scope_edited_after_share_refused_at_publish_and_withhold(self):
+        run, _ = self.to_shared(**after_review("HOLD"))
+        scope = read_json(run / "SCOPE.json")
+        scope["offer_terms"]["maintainers"] = []
+        write_json(run / "SCOPE.json", scope)
+        from conformance.lab.errors import PackageError
+        with self.assertRaisesRegex(PackageError, "SCOPE.json changed"):
+            lifecycle.publish(run, LATER)
+        with self.assertRaisesRegex(PackageError, "SCOPE.json changed"):
+            lifecycle.withhold(run, LATER)
+
+    def test_track_switched_after_share_refused(self):
+        run = frozen_run(self, "toy-verification-run", "toy-receipts")
+        runner.run(run, NOW)
+        lifecycle.package(run, NOW)
+        lifecycle.share(run, ORG, [], NOW)
+        scope = read_json(run / "SCOPE.json")
+        scope["track"] = "self_service"
+        write_json(run / "SCOPE.json", scope)
+        from conformance.lab.errors import LabError
+        with self.assertRaises(LabError):
+            lifecycle.publish(run, NOW)
+        self.assertEqual(self.visibility("toy-verification"), "PRIVATE")

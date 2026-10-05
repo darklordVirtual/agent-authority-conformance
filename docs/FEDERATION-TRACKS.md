@@ -48,8 +48,17 @@ Commit `aacp-offers.json` in your repository. See
 [the example](../templates/offers/aacp-offers.example.json) and
 [the schema](../schema/lab/offers.schema.json).
 
+- An offer covers only artifacts in the repository that commits it: `subject.repo` must be
+  the repository holding `aacp-offers.json`. An offer cannot grant consent, claim ownership or
+  publication rights for another project.
 - `subject` pins one full commit and the paths. An offer cannot contain the commit that
   contains it, so offer a commit that already exists.
+- `procedure` names the procedure that may be run (`id`, `description`, `verifier:
+  "runner_owned"`). The runner brings its own checks, and producer code is never executed. A
+  scope must name the same `procedure`.
+- A claim may list `negative_controls`: offered inputs on which the claim must not be
+  `ESTABLISHED`. The runner must keep them. They are evaluated only after every result
+  exists, and checks never see them.
 - `inputs` are the files you pre-admit. `claims` are the claims you open, each with its own
   `claim_ceiling`. The runner must carry that ceiling unchanged.
 - `kinds` is `["verification"]` and `executes_producer_code` is `false`. Adequacy, mutation of
@@ -96,6 +105,10 @@ aacp run consent <run_id> --who <approver> --action publication_approved --ref <
 aacp run publish <run_id>    # or withhold after a decline
 ```
 
+Admission decisions are recorded by runner maintainers, agreement parties or subject
+maintainers. A manual scope may also name a `procedure` and declare per-claim
+`negative_controls`, so both paths can run the same procedure.
+
 Phase rules: `scope_agreed` and `run_authorized` only before freeze, `admission` only between
 freeze and run, `review_ack` and corrections only after delivery. A post-run review is never
 prior authorisation. A `withdrawn` event from any agreement party stops freeze and run, and
@@ -115,6 +128,26 @@ the export carry it under those claims.
 - `trust_material`: keys and trust roots the checks rely on, for example *the pinned keys
   are the fixture's published test keys*.
 - Per-claim `claim_ceiling` where a producer stated limits for that claim.
+
+## Negative controls and comparison
+
+Each declared negative control is reported as `discriminated`, `did not discriminate` or
+`not exercised` (when the result was a non-verdict), in `results/controls.json` and in the
+report. A control that did not discriminate means the run did not show the procedure can
+fail on that input.
+
+`aacp run compare <run_a> <run_b>` lists two verification runs of the same claims side by
+side, for example a manual and a self-service run, or runs by two different tools. It shows
+each run's provenance and whether the pinned inputs are identical. It never combines the
+runs: there is no score, no count of matching rows and no majority. Different tools may
+establish different bounded facts, and disagreement is itself evidence.
+
+A small experiment needs only this:
+1. take one frozen boundary;
+2. keep its manual procedure;
+3. let the producer expose the same procedure through an offer;
+4. have another participant operate it without maintainer help;
+5. compare the run records.
 
 ## Map export
 

@@ -16,6 +16,26 @@ ADMISSION_NOTE = ("Admission decisions recorded before inference. A claim over a
                   "ADMITTED is a non-verdict; its check did not run.")
 
 
+CONTROLS_FILE = "results/controls.json"
+CONTROLS_NOTE = ("Declared negative controls: inputs on which the claim must not be ESTABLISHED. Evaluated only "
+                 "after every result existed; checks never saw them. A control that was not discriminated means "
+                 "this run did not show the procedure can fail on that input. A non-verdict leaves it unexercised.")
+
+
+def negative_controls(scope, records):
+    declared = [(c["id"], i) for c in scope.get("claims", []) for i in c.get("negative_controls", [])]
+    if not declared:
+        return None
+    by_key = {(r["claim"], r["input"]): r for r in records}
+    rows = []
+    for claim_id, input_id in declared:
+        r = by_key[(claim_id, input_id)]
+        observed = r["result"] or r["execution"]
+        rows.append({"claim": claim_id, "input": input_id, "expected": "not ESTABLISHED", "observed": observed,
+                     "discriminated": None if r["result"] is None else r["result"] != "ESTABLISHED"})
+    return {"note": CONTROLS_NOTE, "controls": rows}
+
+
 def admission_record(run_dir, scope):
     """Manual track: every input needs a decision in CONSENT.json before run.
     Self-service: the producer's offer pre-admits exactly the inputs it lists."""
@@ -43,6 +63,9 @@ def execute(run_dir, scope, trees, admission=None):
         out["results/claims.json"] = {"records": records}
         if admission is not None:
             out[ADMISSION_FILE] = admission
+        controls = negative_controls(scope, records)
+        if controls is not None:
+            out[CONTROLS_FILE] = controls
         agree = verification.agreement(run_dir, records)
         if agree is not None:
             out["results/agreement.json"] = agree

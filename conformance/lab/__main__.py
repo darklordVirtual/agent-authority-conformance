@@ -73,12 +73,23 @@ def build_parser():
     group.add_argument("--classification", metavar="URL")
     p = sub.add_parser("rerun", help="rerun a package with its own vendored lab code")
     p.add_argument("package", type=Path)
+    p = sub.add_parser("compare", help="two verification runs side by side (never combined)")
+    p.add_argument("a", type=Path)
+    p.add_argument("b", type=Path)
     p = sub.add_parser("selftest", help="negative runner self-test: nonzero exit, no results, no success line")
     p.add_argument("--json", action="store_true")
     return parser
 
 
 CAPTURE_FILE = "RUN-CAPTURE.json"
+
+
+def _redact(text):
+    """Remove what the package leak scan refuses (tokens, e-mail addresses, local paths)."""
+    from .package import LEAK_PATTERNS
+    for pattern, label in LEAK_PATTERNS:
+        text = pattern.sub(f"<{label} omitted>", text)
+    return text
 
 
 def _procedure_revision():
@@ -111,7 +122,7 @@ def _capture(run_dir, argv, started, code, error):
              "started_at": started, "ended_at": utc_now(), "exit_status": code,
              "python": platform.python_version(), "platform": platform.system()}
     if error:
-        entry["error"] = error
+        entry["error"] = _redact(error)
     doc["attempts"].append(entry)
     write_json(path, doc)
 
@@ -123,6 +134,12 @@ def main(argv=None, config=None):
     runs = Path(cfg["runs_dir"])
     run_dir = runs / args.run_id if getattr(args, "run_id", None) else None
     if args.command != "run":
+        return _dispatch(args, cfg, runs, run_dir)
+    try:  # capture attempts until the run has produced results; later records are frozen
+        capturing = load_state(run_dir)["state"] in ("SCOPED", "FROZEN")
+    except LabError:
+        capturing = False
+    if not capturing:
         return _dispatch(args, cfg, runs, run_dir)
     started, error, code = utc_now(), None, None
     try:
@@ -187,6 +204,10 @@ def _dispatch(args, cfg, runs, run_dir, capture_error=False):
             print("withheld")
         elif args.command == "status":
             print(load_state(run_dir)["state"])
+        elif args.command == "compare":
+            import json
+            from .compare import compare_runs
+            print(json.dumps(compare_runs(args.a, args.b), indent=2, sort_keys=True, ensure_ascii=False))
         elif args.command == "selftest":
             from .selftest import main as selftest_main
             return selftest_main(["--json"] if args.json else [])

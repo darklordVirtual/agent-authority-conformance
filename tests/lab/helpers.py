@@ -141,6 +141,7 @@ def offer_entry(repo, commit, **overrides):
                    {"id": "over", "path": "receipts/over.json"}],
         "claims": [
             {"id": "cap_compliance", "text": "The observed value is within the delegated cap.",
+             "negative_controls": ["over"],
              "claim_ceiling": {"establishes": ["numeric comparison with the cap"],
                                "does_not_establish": ["units", "cumulative spend"]}},
             {"id": "exact_call", "text": "The observed value equals the authorized exact call.",
@@ -148,6 +149,8 @@ def offer_entry(repo, commit, **overrides):
             {"id": "signature", "text": "The receipt signature verifies under a pinned key.",
              "claim_ceiling": {"establishes": ["fixture signature"], "does_not_establish": ["key control"]}},
         ],
+        "procedure": {"id": "toy-receipts-checks-v1", "verifier": "runner_owned",
+                      "description": "The runner's own per-claim checks over the pinned receipts."},
         "kinds": ["verification"], "executes_producer_code": False,
         "publication": {"mode": "PUBLIC_IMMEDIATE", "review_window_days": None,
                         "unresolved_disagreement": "PUBLISH_WITH_DISAGREEMENT"},

@@ -59,6 +59,8 @@ def validate_scope(scope, *, require_pins=False):
         p.append(f"independence must be one of {', '.join(INDEPENDENCE)}")
     if independence == "INDEPENDENT_IMPLEMENTATION" and not _text(scope.get("independence_statement")):
         p.append("INDEPENDENT_IMPLEMENTATION requires independence_statement")
+    if "procedure" in scope and not _text(scope["procedure"]):
+        p.append("procedure must be a nonempty string when present")
     for key in ("verifier_authors", "trust_material"):
         if key in scope and not _texts(scope[key]):
             p.append(f"{key} must be a nonempty list of strings when present")
@@ -133,6 +135,8 @@ def _self_service_problems(scope):
         p.append("self_service runs measure exactly one subject, the offer's")
     if "publication" in scope:
         p.append("self_service takes its publication policy from the offer; remove publication")
+    if not _text(scope.get("procedure")):
+        p.append("self_service needs procedure: the offered procedure id")
     return p
 
 
@@ -246,6 +250,9 @@ def _verification_problems(scope):
             p.append(f"{w}.reads_fields must be a nonempty list")
         if not (_texts(claim.get("inputs")) and set(claim["inputs"]) <= ids):
             p.append(f"{w}.inputs must name declared inputs")
+        controls = claim.get("negative_controls")
+        if controls is not None and not (_texts(controls) and set(controls) <= set(claim.get("inputs") or [])):
+            p.append(f"{w}.negative_controls must name inputs of this claim")
         if "claim_ceiling" in claim and not _ceiling_ok(claim["claim_ceiling"]):
             p.append(f"{w}.claim_ceiling needs nonempty establishes and does_not_establish")
         if claim.get("temporal") is True and not _text(scope.get("reference_time")):

@@ -55,6 +55,8 @@ def render_report(scope, plan, results, conditions=None, preregistered=True):
     if scope.get("previous_run"):
         prev = scope["previous_run"]
         lines += [f"Follow-up of `{prev['run_id']}` (plan `{prev['plan_sha256']}`); earlier results are unchanged.", ""]
+    if scope.get("procedure"):
+        lines += [f"**Procedure:** `{scope['procedure']}`.", ""]
     if scope.get("track") == "self_service":
         ref = scope["offer"]
         lines += [f"**Track:** self-service under the producer's offer `{ref['offer_id']}` "
@@ -119,6 +121,13 @@ def _verification_sections(results):
         result = r["result"] or f"— ({r['verifier_error']['code']})"
         out.append(f"| {r['input']} | {r['claim']} | {r['execution']} | {result} | "
                    f"{', '.join(r.get('reads', []))} | {', '.join(r.get('unresolved_obligations', []))} |")
+    controls = results.get("results/controls.json")
+    if controls:
+        label = {True: "discriminated", False: "**did not discriminate**", None: "not exercised (non-verdict)"}
+        out += ["", "## Negative controls", "", controls["note"], "",
+                "| Claim | Input | Expected | Observed | Control |", "|---|---|---|---|---|"]
+        out += [f"| {c['claim']} | {c['input']} | {c['expected']} | {c['observed']} | {label[c['discriminated']]} |"
+                for c in controls["controls"]]
     agree = results.get("results/agreement.json")
     if agree:
         out += ["", "## Agreement with the producer's expectations (not a result)", "", agree["note"], "",

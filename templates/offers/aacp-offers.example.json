@@ -22,6 +22,10 @@
         {
           "id": "vectors",
           "path": "fixtures/tool-digest-v1/vectors.json"
+        },
+        {
+          "id": "vectors-tampered",
+          "path": "fixtures/tool-digest-v1/tampered.json"
         }
       ],
       "claims": [
@@ -37,9 +41,17 @@
               "production identity of the signing key",
               "any A-G property"
             ]
-          }
+          },
+          "negative_controls": [
+            "vectors-tampered"
+          ]
         }
       ],
+      "procedure": {
+        "id": "example-digest-recompute-v1",
+        "verifier": "runner_owned",
+        "description": "The runner's own recomputation of each per-tool digest from the served definitions; no producer code is imported or executed."
+      },
       "kinds": [
         "verification"
       ],

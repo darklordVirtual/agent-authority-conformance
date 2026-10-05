@@ -480,6 +480,14 @@
                 }
               }
             }
+          },
+          "negative_controls": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "pattern": "\\S"
+            }
           }
         },
         "allOf": [
@@ -584,6 +592,11 @@
         "pattern": "\\S"
       },
       "description": "Disclosure of keys and trust roots the checks rely on, e.g. that pinned keys are the fixture's published test keys."
+    },
+    "procedure": {
+      "type": "string",
+      "pattern": "\\S",
+      "description": "Procedure id; required for self_service (the offered procedure)."
     }
   },
   "allOf": [
@@ -659,7 +672,8 @@
       },
       "then": {
         "required": [
-          "offer"
+          "offer",
+          "procedure"
         ],
         "properties": {
           "kind": {

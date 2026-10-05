@@ -60,6 +60,14 @@ class CliTracksTest(LabTest):
         lifecycle.publish(run, NOW)
         return run
 
+    def test_run_gate_refusals_reach_stderr(self):
+        prepare_run(self)
+        err = io.StringIO()
+        with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(err):
+            code = main(["run", "freeze", "toy"])
+        self.assertEqual(code, 2)
+        self.assertIn("error:", err.getvalue())
+
     def test_run_passthrough_status(self):
         prepare_run(self)
         code, out = self.cli("run", "status", "toy")

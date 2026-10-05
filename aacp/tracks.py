@@ -17,7 +17,8 @@ from conformance.lab.errors import GateError
 from conformance.lab.state import load_state
 
 MAP_FORMAT_REF = "aeoess/agent-governance-vocabulary#187@591a0bab4f5f21c546b82950713c4609fa4bdc74"
-REVIEW_ACTIONS = ("factual_corrections", "survivor_classification", "review_ack")
+REVIEW_ACTIONS = ("factual_corrections", "survivor_classification", "review_ack",
+                  "publication_declined", "withdrawn")
 CEILING = ("Lifecycle guidance and record export only; no property verdict, admission, endorsement, "
            "independence credit or certification.")
 
@@ -134,9 +135,12 @@ def evidence_record(run_dir, include_unpublished=False):
     track = scope.get("track", "manual")
     reviews = [{"by": e["who"], "date": e["at"][:10], "kind": e["action"], "ref": e["ref"]}
                for e in events if e["action"] in REVIEW_ACTIONS]
-    if not published:
+    corrections = [r for r in reviews if r["kind"] in ("factual_corrections", "survivor_classification", "review_ack")]
+    if current["state"] == "WITHHELD":
+        record_state = "withheld, not published"
+    elif not published:
         record_state = "private, not published"
-    elif track == "self_service" and not reviews:
+    elif track == "self_service" and not corrections:
         record_state = "published, unreviewed"
     else:
         record_state = "published after review"
@@ -156,6 +160,14 @@ def evidence_record(run_dir, include_unpublished=False):
         notes.append(f"Condition by {c['who']} on {', '.join(c['claims'])}: {c['text']}")
     if any(e.get("drafted_by", "human") != "human" or e.get("ai_assisted") for e in events):
         notes.append("Some recorded statements were drafted with AI assistance (see CONSENT.json).")
+    if scope.get("procedure"):
+        notes.append(f"Procedure {scope['procedure']}.")
+    controls_path = run_dir / "results" / "controls.json"
+    if published and controls_path.is_file():
+        for c in read_json(controls_path)["controls"]:
+            if c["discriminated"] is not True:
+                state_word = "not exercised" if c["discriminated"] is None else "did not discriminate"
+                notes.append(f"Negative control {c['claim']} on {c['input']} {state_word} ({c['observed']}).")
     if not published:
         notes.append("Results are withheld until publication.")
     record = {

@@ -26,6 +26,9 @@
         "over"
       ],
       "layer": "authority",
+      "negative_controls": [
+        "over"
+      ],
       "reads_fields": [
         "execution.nativeValue",
         "delegation.cap"
@@ -97,6 +100,7 @@
     "repo": "https://example.invalid/toy-receipts",
     "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
   },
+  "procedure": "toy-receipts-checks-v1",
   "reference_time": null,
   "run_id": "toy-offer",
   "runner": {
