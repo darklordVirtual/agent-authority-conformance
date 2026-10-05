@@ -107,6 +107,16 @@ class PortableAdversarialTests(unittest.TestCase):
             self.assertNotIn("verdict", case)
         self.assertEqual(document["independence"], "SELF_RUN")
 
+    def test_cli_exposes_machine_readable_vectors(self):
+        output = io.StringIO()
+        with contextlib.redirect_stdout(output):
+            code = cli_main(["adversarial", "--list", "--json"])
+        self.assertEqual(code, 0)
+        document = json.loads(output.getvalue())
+        self.assertEqual(document["suite_version"], "aacp-portable-cfg-adversarial-v1")
+        self.assertEqual({row["property"] for row in document["cases"]}, {"C", "F", "G"})
+        self.assertTrue(all("challenge" in row for row in document["cases"]))
+
     def test_run_record_matches_schema(self):
         def adapter(case):
             return {"execution": "UNSUPPORTED", "message": "fixture adapter"}
