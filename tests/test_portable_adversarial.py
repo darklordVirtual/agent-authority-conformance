@@ -106,6 +106,7 @@ class PortableAdversarialTests(unittest.TestCase):
             self.assertNotIn("result", case)
             self.assertNotIn("verdict", case)
         self.assertEqual(document["independence"], "SELF_RUN")
+        self.assertEqual(document["bcr_level"], "BCR-0")
 
     def test_cli_exposes_machine_readable_vectors(self):
         output = io.StringIO()
