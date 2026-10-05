@@ -1,0 +1,269 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/darklordVirtual/agent-authority-conformance/schema/lab/offers.schema.json",
+  "title": "AACP open verification offers (aacp-offers-v1)",
+  "description": "Producer-owned standing consent for self-service verification runs. Committed in the producer's repository; the runner pins it by commit and SHA-256. offer_id values must be unique (checked by conformance/lab/offer.py). A newer offer is a new entry; revocation sets revoked or removes the entry on the default branch. An offer is consent to bounded runs of the named claims only: not endorsement, membership, shared-governance participation, agreement to any economic model or consent to another pilot. AACP's own optional format, not a shared one.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "offers"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "aacp-offers-v1"
+    },
+    "offers": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "offer_id",
+          "revoked",
+          "expires",
+          "producer",
+          "subject",
+          "inputs",
+          "claims",
+          "kinds",
+          "executes_producer_code",
+          "publication",
+          "procedure"
+        ],
+        "properties": {
+          "offer_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._-]+$"
+          },
+          "revoked": {
+            "type": "boolean"
+          },
+          "expires": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          },
+          "producer": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "project",
+              "maintainers"
+            ],
+            "properties": {
+              "project": {
+                "type": "string",
+                "pattern": "\\S"
+              },
+              "maintainers": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "string",
+                  "pattern": "\\S"
+                }
+              }
+            }
+          },
+          "subject": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "repo",
+              "commit",
+              "paths"
+            ],
+            "properties": {
+              "repo": {
+                "type": "string",
+                "pattern": "^https://"
+              },
+              "commit": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{40}$"
+              },
+              "paths": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "string",
+                  "pattern": "^(?!/)(?!.*(^|/)\\.\\.(/|$)).+$"
+                }
+              }
+            }
+          },
+          "inputs": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "id",
+                "path"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "\\S"
+                },
+                "path": {
+                  "type": "string",
+                  "pattern": "^(?!/)(?!.*(^|/)\\.\\.(/|$)).+$"
+                }
+              }
+            }
+          },
+          "claims": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "id",
+                "text",
+                "claim_ceiling"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "\\S"
+                },
+                "text": {
+                  "type": "string",
+                  "pattern": "\\S"
+                },
+                "claim_ceiling": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "establishes",
+                    "does_not_establish"
+                  ],
+                  "properties": {
+                    "establishes": {
+                      "type": "array",
+                      "minItems": 1,
+                      "items": {
+                        "type": "string",
+                        "pattern": "\\S"
+                      }
+                    },
+                    "does_not_establish": {
+                      "type": "array",
+                      "minItems": 1,
+                      "items": {
+                        "type": "string",
+                        "pattern": "\\S"
+                      }
+                    }
+                  }
+                },
+                "negative_controls": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "type": "string",
+                    "pattern": "\\S"
+                  },
+                  "description": "Offered inputs on which the claim must not be ESTABLISHED (must name offered inputs; checked by conformance/lab/offer.py)."
+                }
+              }
+            }
+          },
+          "kinds": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "enum": [
+                "verification"
+              ]
+            }
+          },
+          "executes_producer_code": {
+            "const": false
+          },
+          "publication": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "mode",
+              "review_window_days",
+              "unresolved_disagreement"
+            ],
+            "properties": {
+              "mode": {
+                "enum": [
+                  "PUBLIC_IMMEDIATE",
+                  "PUBLIC_AFTER_REVIEW"
+                ]
+              },
+              "review_window_days": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 1
+              },
+              "unresolved_disagreement": {
+                "enum": [
+                  "PUBLISH_WITH_DISAGREEMENT",
+                  "HOLD"
+                ]
+              }
+            },
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "mode": {
+                      "const": "PUBLIC_AFTER_REVIEW"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "review_window_days": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "else": {
+                  "properties": {
+                    "review_window_days": {
+                      "type": "null"
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "procedure": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "description",
+              "verifier"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9._-]+$"
+              },
+              "description": {
+                "type": "string",
+                "pattern": "\\S"
+              },
+              "verifier": {
+                "const": "runner_owned"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

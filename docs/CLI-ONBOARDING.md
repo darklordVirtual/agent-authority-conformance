@@ -107,9 +107,18 @@ leaves the pin `UNKNOWN`. A missing Git executable is a tooling error.
 evidence. Configuration validation is not resolution, resolution is not
 admission, and admission is not an established property. No score is computed.
 
+## Lab runs
+
+`aacp run <lab command>` operates the run protocol lab (`python -m conformance.lab`),
+`aacp next <run>` lists what a run is waiting for (mechanical steps and the named
+people whose statements are outstanding) and `aacp export map <run> --out <dir>`
+writes an evidence record. All three keep `verification_status: NOT_RUN` in their
+envelopes; a run's results live in its own records. See
+[FEDERATION-TRACKS.md](FEDERATION-TRACKS.md).
+
 ## Next slices
 
-The planned `profiles`, `doctor`, `plan`, `next`, `collect`, `verify`, `interop`,
+The planned `profiles`, `doctor`, `plan`, `collect`, `verify`, `interop`,
 `mutate`, `reproduce`, `report` and `ai-context` commands are **not implemented**
 by this onboarding release. They must be added with their own typed contracts,
 applicability rules, evidence boundaries and negative controls, not placeholder

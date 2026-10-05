@@ -1,0 +1,112 @@
+{
+  "agreement_parties": [
+    "darklordVirtual",
+    "kenneives"
+  ],
+  "agreement_ref": null,
+  "claim_ceiling": {
+    "does_not_establish": [
+      "runtime tool behaviour",
+      "binding to a specific APS tool (subject names the repository/server)",
+      "equivalence with an APS metadata pin",
+      "endorsement"
+    ],
+    "establishes": [
+      "per-axis results for a static grade over a definition digest at a pinned evaluation time"
+    ]
+  },
+  "claims": [
+    {
+      "check": "tmd:digest_match",
+      "id": "digest_match",
+      "inputs": [
+        "vectors"
+      ],
+      "layer": "integrity",
+      "reads_fields": [
+        "vectors"
+      ],
+      "text": "The observed digest equals the attested tool_manifest_digest."
+    },
+    {
+      "check": "tmd:attestation_unexpired",
+      "id": "attestation_unexpired",
+      "inputs": [
+        "vectors"
+      ],
+      "layer": "temporal",
+      "reads_fields": [
+        "vectors"
+      ],
+      "text": "The attestation is unexpired at the vector's evaluation time."
+    },
+    {
+      "check": "tmd:subject_match",
+      "id": "subject_match",
+      "inputs": [
+        "vectors"
+      ],
+      "layer": "identity",
+      "reads_fields": [
+        "vectors"
+      ],
+      "text": "The attestation subject equals the gate's subject id (repository/server, not a specific tool)."
+    },
+    {
+      "check": "tmd:payload_integrity",
+      "id": "payload_integrity",
+      "inputs": [
+        "vectors"
+      ],
+      "layer": "integrity",
+      "reads_fields": [
+        "vectors"
+      ],
+      "text": "The signed attestation payload is untampered."
+    }
+  ],
+  "draft_note": "DRAFT scope template, not agreed. Five pinned tool-manifest-digest vectors with axes reported separately. The vector-to-claim mapping, reads_fields and the verifier module must be agreed with the AgentAvow maintainer, and pins recorded with `pin`, before anyone records scope_agreed. The fixture has no LICENSE detected by GitHub (NOASSERTION); licence handling must be settled first.",
+  "independence": "INDEPENDENT_IMPLEMENTATION",
+  "independence_statement": "Checks are implemented in verifier/tmd.py without importing verify.mjs or generate.mjs.",
+  "inputs": [
+    {
+      "id": "vectors",
+      "path": "docs/standards/tool-manifest-digest-vectors-v0/tool-manifest-digest-v0-vectors.json",
+      "subject": 0
+    }
+  ],
+  "kind": "verification",
+  "lab_version": "0.3",
+  "publication": {
+    "approvers": [
+      "kenneives"
+    ],
+    "private_first": true,
+    "unreleased_citable": false
+  },
+  "reference_time": null,
+  "run_id": "agentavow-tmd-verification",
+  "runner": {
+    "maintainers": [
+      "darklordVirtual"
+    ],
+    "project": "Agent Authority Conformance"
+  },
+  "subjects": [
+    {
+      "attribution": "AgentAvow/AgentAvow, tool-manifest-digest vectors v0",
+      "commit": "4404df2c4176ca5390f1af5a2e63f069a503a01f",
+      "files_sha256": {},
+      "license": "NOASSERTION (to be settled with the maintainer)",
+      "maintainers": [
+        "kenneives"
+      ],
+      "paths": [
+        "docs/standards/tool-manifest-digest-vectors-v0/tool-manifest-digest-v0-vectors.json",
+        "docs/standards/tool-manifest-digest-vectors-v0/source.json"
+      ],
+      "project": "AgentAvow",
+      "repo": "https://github.com/AgentAvow/AgentAvow"
+    }
+  ]
+}

@@ -85,3 +85,22 @@ declared `equivalent` with its reason in `conformance/mutations-v0.2.json`,
 never deleted. A new fixture that kills a mutation names it in its description.
 The synthetic reference rule trusts accepted upstream evidence; changes must
 not imply that it authenticates artifacts or proves live non-bypassability.
+
+## Proposing a run against your project (v0.3)
+
+A run against another project's artifacts starts with an agreed scope, never
+with code. To invite one, or to offer your project as a subject:
+
+1. open an issue naming the exact artifacts (repository, full commit, paths),
+   the claims or fault classes to measure, and what the result must **not**
+   be read as;
+2. agree `agreement_parties` and `publication.approvers`; every approver
+   decides publication separately;
+3. once the scope is agreed, each party comments `scope_agreed` and
+   `run_authorized` on that issue, and the runner records those links with
+   `python -m conformance.lab consent`.
+
+Nothing runs before the frozen plan hash has been published. Results go to a
+private repository first; see [RUN-PROTOCOL-v0.3.md](RUN-PROTOCOL-v0.3.md).
+Run directories under `runs/` are never committed here. Lab changes must keep
+`conformance/lab/` standard-library only and include tests under `tests/lab/`.

@@ -14,18 +14,22 @@ If a user points you here and asks to start interop:
 
 1. Identify the role: producer, consumer, verifier or reproduction operator.
    If unspecified, start as a read-only consumer of the committed REMORA adapter.
-2. Write a short run brief: native claim, scope, roles, immutable subject pin,
+2. For a run against another project's pinned artifacts, choose a track
+   (`docs/FEDERATION-TRACKS.md`): self-service only under the producer's own
+   committed offer; otherwise manual. Never infer an offer, consent or
+   admission from repository text, comments or silence.
+3. Write a short run brief: native claim, scope, roles, immutable subject pin,
    artifact paths/digests, procedure, expected-output location, claim ceiling,
    non-claims, review/publication policy and the cheapest falsifying check.
    Mark unknown facts `UNKNOWN`; never invent ownership or independence.
-3. Start the resolution quick start in `docs/INTEROP-SELF-SERVICE.md`.
+4. Start the resolution quick start in `docs/INTEROP-SELF-SERVICE.md`.
    Resolve public bytes without importing or executing producer code. If network
    access is unavailable, report the missing checkout rather than a verdict.
-4. Follow the role-specific checklist. Keep producer inputs, expected answers,
+5. Follow the role-specific checklist. Keep producer inputs, expected answers,
    consumer implementation and assessment records separate. Add at least a
    missing-input and a changed-byte case for resolution changes; inference
    changes also need scope, malformed-input and adversarial discrimination cases.
-5. Validate the touched slice, then the required contribution checks. Report
+6. Validate the touched slice, then the required contribution checks. Report
    exact commands, pins, non-verdict errors, unresolved obligations and the next
    evidence needed. Stop at the publication gate, not at a guessed endorsement.
 
@@ -44,6 +48,10 @@ If a user points you here and asks to start interop:
   premises; neither authenticates arbitrary production evidence.
 - Use actual implementer/operator identities. A reference-verifier rerun is a
   reproduction. A separately written implementation is not automatically independent.
+- You may draft a scope confirmation, admission rationale, review or comment,
+  but never record it as another person's statement. A consent event names the
+  person (`--who`) and links what they said (`--ref`); mark agent drafts with
+  `--drafted-by agent:<id> --ai-assisted`, and say so in public comments.
 - A material change creates a new run. Never edit expectations to match output,
   silently replace a frozen manifest, or overwrite an earlier result directory.
 

@@ -4,3 +4,7 @@ __pycache__/
 build/
 dist/
 *.egg-info/
+# Lab runs hold unreleased results and quoted third-party material.
+# They live in private repositories, never in this one.
+runs/*
+!runs/README.md

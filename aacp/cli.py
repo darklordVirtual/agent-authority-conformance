@@ -2,7 +2,9 @@
 from __future__ import annotations
 
 import argparse
+import contextlib
 import hashlib
+import io
 import json
 from pathlib import Path
 import shlex
@@ -135,9 +137,38 @@ def execute(arguments):
 
 
 def main(argv=None):
-    argv = sys.argv[1:] if argv is None else argv
+    argv = sys.argv[1:] if argv is None else list(argv)
+    if argv[:1] == ["run"]:
+        from conformance.lab.__main__ import main as lab_main
+        usage = io.StringIO()
+        try:
+            with contextlib.redirect_stderr(usage):  # only argument errors are turned into an envelope
+                from conformance.lab.__main__ import build_parser
+                build_parser().parse_args(argv[1:])
+        except SystemExit as exit_:
+            if exit_.code in (0, None):
+                sys.stdout.write(usage.getvalue())
+                return 0
+        else:
+            return lab_main(argv[1:])
+        message = usage.getvalue().strip().splitlines()[-1:] or ["invalid lab command"]
+        result = {"schema_version": "aacp-command-result-v1", "command": "run", "status": "INVALID_INPUT",
+                  "verification_status": "NOT_RUN", "property_verdict": None, "data": {},
+                  "errors": [{"code": "INVALID_LAB_COMMAND", "message": message[0]}],
+                  "next_action": {"action": "choose_lab_command", "command": "aacp run --help",
+                                  "output_schema": "aacp-command-result-v1"},
+                  "claim_ceiling": CEILING}
+        if "--json" in argv:
+            print(json.dumps(result, sort_keys=True, ensure_ascii=True))
+        else:
+            print(f"run: INVALID_INPUT: {message[0]}", file=sys.stderr)
+        return 2
+    if argv[:1] in (["next"], ["export"]):
+        from aacp.tracks import main as tracks_main
+        return tracks_main(argv)
     json_output = "--json" in argv
-    parser = Parser(prog="aacp", description="Offline, non-verdict project onboarding")
+    parser = Parser(prog="aacp", description="Offline, non-verdict project onboarding. Lab runs: "
+                    "aacp run <lab command>, aacp next <run>, aacp export map <run> --out <dir>.")
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--project", default="aacp-project.yaml")
     commands = parser.add_subparsers(dest="command", required=True)

@@ -1,0 +1,37 @@
+{
+  "agreement_parties": ["tester"],
+  "agreement_ref": "https://example.invalid/issues/2",
+  "claim_ceiling": {
+    "does_not_establish": ["real execution", "signature validity"],
+    "establishes": ["per-claim results over two synthetic receipts"]
+  },
+  "claims": [
+    {"check": "receipts:cap_compliance", "id": "cap_compliance", "inputs": ["within", "over"], "layer": "authority", "reads_fields": ["execution.nativeValue", "delegation.cap"], "text": "The observed value is within the delegated cap."},
+    {"check": "receipts:exact_call", "id": "exact_call", "inputs": ["within", "over"], "layer": "execution", "reads_fields": ["execution.nativeValue", "authorization.value"], "text": "The observed value equals the authorized exact call."},
+    {"check": "receipts:signature", "id": "signature", "inputs": ["within"], "layer": "integrity", "reads_fields": ["signature"], "text": "The receipt signature verifies under a pinned key."}
+  ],
+  "independence": "INDEPENDENT_IMPLEMENTATION",
+  "independence_statement": "The toy verifier imports no producer code.",
+  "inputs": [
+    {"id": "within", "path": "receipts/within.json", "subject": 0},
+    {"id": "over", "path": "receipts/over.json", "subject": 0}
+  ],
+  "kind": "verification",
+  "lab_version": "0.3",
+  "publication": {"approvers": ["tester"], "private_first": true, "unreleased_citable": false},
+  "reference_time": null,
+  "run_id": "toy-verification",
+  "runner": {"maintainers": ["tester"], "project": "AAC tests"},
+  "subjects": [
+    {
+      "attribution": "AAC test fixture",
+      "commit": "0000000000000000000000000000000000000000",
+      "files_sha256": {},
+      "license": "Apache-2.0",
+      "maintainers": ["maintainer"],
+      "paths": ["receipts"],
+      "project": "toy-receipts",
+      "repo": "https://example.invalid/toy-receipts"
+    }
+  ]
+}

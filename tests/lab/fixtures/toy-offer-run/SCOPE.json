@@ -1,0 +1,132 @@
+{
+  "claim_ceiling": {
+    "does_not_establish": [
+      "real execution",
+      "signature validity"
+    ],
+    "establishes": [
+      "per-claim results over two synthetic receipts"
+    ]
+  },
+  "claims": [
+    {
+      "check": "receipts:cap_compliance",
+      "claim_ceiling": {
+        "does_not_establish": [
+          "units",
+          "cumulative spend"
+        ],
+        "establishes": [
+          "numeric comparison with the cap"
+        ]
+      },
+      "id": "cap_compliance",
+      "inputs": [
+        "within",
+        "over"
+      ],
+      "layer": "authority",
+      "negative_controls": [
+        "over"
+      ],
+      "reads_fields": [
+        "execution.nativeValue",
+        "delegation.cap"
+      ],
+      "text": "The observed value is within the delegated cap."
+    },
+    {
+      "check": "receipts:exact_call",
+      "claim_ceiling": {
+        "does_not_establish": [
+          "live execution"
+        ],
+        "establishes": [
+          "value comparison"
+        ]
+      },
+      "id": "exact_call",
+      "inputs": [
+        "within",
+        "over"
+      ],
+      "layer": "execution",
+      "reads_fields": [
+        "execution.nativeValue",
+        "authorization.value"
+      ],
+      "text": "The observed value equals the authorized exact call."
+    },
+    {
+      "check": "receipts:signature",
+      "claim_ceiling": {
+        "does_not_establish": [
+          "key control"
+        ],
+        "establishes": [
+          "fixture signature"
+        ]
+      },
+      "id": "signature",
+      "inputs": [
+        "within"
+      ],
+      "layer": "integrity",
+      "reads_fields": [
+        "signature"
+      ],
+      "text": "The receipt signature verifies under a pinned key."
+    }
+  ],
+  "independence": "SECOND_IMPLEMENTATION",
+  "inputs": [
+    {
+      "id": "within",
+      "path": "receipts/within.json",
+      "subject": 0
+    },
+    {
+      "id": "over",
+      "path": "receipts/over.json",
+      "subject": 0
+    }
+  ],
+  "kind": "verification",
+  "lab_version": "0.3",
+  "offer": {
+    "commit": "0000000000000000000000000000000000000000",
+    "offer_id": "toy-receipts-v1",
+    "path": "aacp-offers.json",
+    "repo": "https://example.invalid/toy-receipts",
+    "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "procedure": "toy-receipts-checks-v1",
+  "reference_time": null,
+  "run_id": "toy-offer",
+  "runner": {
+    "maintainers": [
+      "runner-a"
+    ],
+    "project": "Runner A"
+  },
+  "runner_authored": [
+    "verifier/receipts.py"
+  ],
+  "subjects": [
+    {
+      "attribution": "AAC test fixture",
+      "commit": "0000000000000000000000000000000000000000",
+      "files_sha256": {},
+      "license": "Apache-2.0",
+      "maintainers": [
+        "maintainer"
+      ],
+      "paths": [
+        "receipts"
+      ],
+      "project": "toy-receipts",
+      "repo": "https://example.invalid/toy-receipts"
+    }
+  ],
+  "track": "self_service"
+}
