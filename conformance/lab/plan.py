@@ -84,8 +84,12 @@ def require_agreement(run_dir, scope, now=None, workdir=None):
     """Manual: every agreement party agreed the scope and authorised the run.
     Self-service: the producer's offer is still listed, unrevoked and unexpired."""
     if scope.get("track", "manual") == "self_service":
+        consent.load(run_dir)  # reviews/corrections may still be recorded; the log must verify
+        if "public_boundary" in scope:
+            from .public_boundary import verify_pinned
+            verify_pinned(scope["public_boundary"], workdir)
+            return
         from .offer import check_tip, verify_scope_offer
-        consent.load(run_dir)  # the log may hold reviews or declines; it must still verify
         verify_scope_offer(scope, workdir)
         check_tip(scope["offer"], now or utc_now(), workdir)
         return
