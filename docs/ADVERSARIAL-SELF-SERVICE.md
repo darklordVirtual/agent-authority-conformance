@@ -147,7 +147,7 @@ or a non-verdict execution state:
 
 There is no aggregate score and no "N of M conformant" result.
 
-The run record is always labelled `SELF_RUN`. A successful local run does **not** establish independent reproduction, production security, certification or Federation adoption.
+The run record is always labelled `SELF_RUN` and `BCR-0`. A successful local run does **not** establish independent reproduction, production security, certification or Federation adoption.
 
 ## Relationship to Federation tracks
 
