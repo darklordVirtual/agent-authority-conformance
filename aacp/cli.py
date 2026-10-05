@@ -138,6 +138,9 @@ def execute(arguments):
 
 def main(argv=None):
     argv = sys.argv[1:] if argv is None else list(argv)
+    if argv[:1] == ["adversarial"]:
+        from aacp.adversarial import main as adversarial_main
+        return adversarial_main(argv[1:])
     if argv[:1] == ["run"]:
         from conformance.lab.__main__ import main as lab_main
         usage = io.StringIO()
@@ -167,7 +170,8 @@ def main(argv=None):
         from aacp.tracks import main as tracks_main
         return tracks_main(argv)
     json_output = "--json" in argv
-    parser = Parser(prog="aacp", description="Offline, non-verdict project onboarding. Lab runs: "
+    parser = Parser(prog="aacp", description="Offline project onboarding. Portable local probes: "
+                    "aacp adversarial --adapter <module-or-path>:<function>. Lab runs: "
                     "aacp run <lab command>, aacp next <run>, aacp export map <run> --out <dir>.")
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--project", default="aacp-project.yaml")
