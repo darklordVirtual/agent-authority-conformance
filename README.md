@@ -73,7 +73,7 @@ No percentage, star rating, “5/7 conformant”, security grade or ranking is v
 | [`SPECIFICATION.md`](SPECIFICATION.md) | Preserved normative v0.1 specification |
 | [`schema/assessment.schema.json`](schema/assessment.schema.json) | Preserved v0.1 schema |
 | [`examples/`](examples/) | Versioned examples and historical assessments |
-| [`conformance/`](conformance/) | Validation and bounded E reference inference |
+| [`conformance/`](conformance/) | Validation and bounded E reference inference |\n| [`aacp/adversarial.py`](aacp/adversarial.py) | Portable vendor-neutral C/F/G adversarial self-service runner |\n| [`docs/ADVERSARIAL-SELF-SERVICE.md`](docs/ADVERSARIAL-SELF-SERVICE.md) | Adapter contract, claim ceilings and local self-run workflow |
 | [`conformance/mutations-v0.2.json`](conformance/mutations-v0.2.json) | Seeded faults for the E rule; `python -m conformance.mutations` scores the fixtures against them |
 | [`conformance/invariants.py`](conformance/invariants.py) | Metamorphic relations and a differential reference model for the E rule over a generated space |
 | [`conformance/coverage.py`](conformance/coverage.py) | Strict, score-free A–G component matrix for cross-platform assessment comparison |
@@ -100,6 +100,8 @@ python -m conformance.check
 python -m conformance.mutations
 python -m conformance.invariants
 python -m conformance.coverage tests/adversarial/assessment-pass.json
+aacp adversarial --list
+aacp adversarial --adapter ./aacp_adapter.py:run_case --require-supported
 python -m unittest discover -s tests -v
 ```
 
@@ -125,7 +127,7 @@ artifacts, inspect credential custody or establish coverage itself. Its syntheti
 fixtures test inference semantics, not the security of a deployed product.
 See [the input trust boundary](SPECIFICATION-v0.2.md#6-bounded-reference-rule-and-corpus).
 
-## Running a pilot against another project
+The portable adversarial command is a **local SELF_RUN**, not a Federation self-service run: it may execute the subject maintainer's own adapter and emits no independence credit. Federation self-service remains runner-owned and does not execute producer code. See [Portable adversarial self-service](docs/ADVERSARIAL-SELF-SERVICE.md).\n\n## Running a pilot against another project
 
 The v0.3 run protocol turns an agreed, bounded question about another project's
 artifacts into a package that the other maintainers review privately before
