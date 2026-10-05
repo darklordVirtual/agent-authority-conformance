@@ -73,6 +73,21 @@ Commit `aacp-offers.json` in your repository. See
   membership, governance participation, agreement to any economic model or consent to another
   pilot.
 
+## Public-boundary compatibility
+
+For public artifacts, AACP can also use a pinned `public_boundary` instead of requiring the producer to publish an AACP-specific offer. This follows the self-service direction in agent-governance-vocabulary #177: a public frozen artifact, procedure, claim limits and classification rules may be operated without per-run maintainer guidance.
+
+This path is intentionally narrower than a producer offer:
+
+- the boundary is pinned by repository, full commit, path and SHA-256;
+- the scope records where the procedure, claims and classification rules are defined;
+- input admission is attributed to the **runner**, not to the producer;
+- AACP publishes only the runner's attributed result;
+- it does not record producer consent, review, endorsement, project approval or a statement in the producer's name;
+- it never infers stronger claims from the fact that an artifact is public.
+
+Private/unreleased artifacts and statements made in another project's name remain on the manual path. `aacp-offers.json` remains available when a producer wants to publish explicit AACP-native terms, but it is no longer a prerequisite for operating an already-public bounded reproduction target.
+
 ## Runner: self-service sequence
 
 ```sh
