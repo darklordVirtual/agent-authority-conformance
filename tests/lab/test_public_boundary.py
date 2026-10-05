@@ -34,6 +34,11 @@ class PublicBoundaryScopeTest(unittest.TestCase):
         self.assertNotIn("offer", scope)
         validate_scope(scope)
 
+    def test_public_boundary_does_not_require_offer_terms_after_pin(self):
+        scope = self.scope()
+        self.assertNotIn("offer_terms", scope)
+        validate_scope(scope, require_pins=True)
+
     def test_offer_and_public_boundary_are_mutually_exclusive(self):
         scope = self.scope()
         scope["offer"] = {
