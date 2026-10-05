@@ -456,6 +456,7 @@ def run(adapter: Callable[[dict[str, Any]], dict[str, Any]],
         "schema_version": "aacp-adversarial-run-v1",
         "suite_version": SUITE_VERSION,
         "independence": "SELF_RUN",
+        "bcr_level": "BCR-0",
         "properties": list(properties),
         "cases": records,
         "claim_ceiling": SELF_RUN_CEILING,
@@ -463,7 +464,7 @@ def run(adapter: Callable[[dict[str, Any]], dict[str, Any]],
 
 
 def _print_text(document: dict[str, Any]) -> None:
-    print(f"{document['suite_version']} ({document['independence']})")
+    print(f"{document['suite_version']} ({document['independence']}, {document['bcr_level']})")
     current = None
     for row in document["cases"]:
         if row["property"] != current:
