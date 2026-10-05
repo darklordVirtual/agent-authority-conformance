@@ -105,7 +105,12 @@ def main(argv=None):
     outcome, details = rerun(args.package)
     at = utc_now()
     record = {"outcome": outcome, "at": at, "python": platform.python_version(), **details}
-    write_json(Path(args.package) / "reruns" / f"rerun-{at.replace(':', '')}.json", record)
+    base = Path(args.package) / "reruns" / f"rerun-{at.replace(':', '')}"
+    path, n = base.with_suffix(".json"), 1
+    while path.exists():  # never overwrite an earlier attempt
+        n += 1
+        path = base.parent / f"{base.name}-{n}.json"
+    write_json(path, record)
     print(outcome)
     for key in ("warnings", "problems", "diffs"):
         for item in details.get(key, []):

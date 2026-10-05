@@ -57,6 +57,17 @@ class IndependenceTest(unittest.TestCase):
         s = scope("toy-run")
         self.assertEqual(set(independence.per_claim(s)), {r["id"] for r in s["rows"]})
 
+    def test_roles_and_trust_material_are_optional_nonempty_lists(self):
+        s = scope()
+        s["verifier_authors"] = ["someone"]
+        s["trust_material"] = ["APS keys are the fixture's published test keys"]
+        validate_scope(s)
+        for key in ("verifier_authors", "trust_material"):
+            bad = copy.deepcopy(s)
+            bad[key] = []
+            with self.assertRaises(ScopeError):
+                validate_scope(bad)
+
     def test_mapping(self):
         self.assertEqual(independence.FEDERATION["SELF_RUN"], "AUTHOR_RUN")
         self.assertEqual(independence.BCR["REPRODUCTION"], "BCR-1")

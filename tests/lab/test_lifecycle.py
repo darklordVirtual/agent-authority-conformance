@@ -162,6 +162,13 @@ class CliTest(LabTest):
         self.assertEqual(code, 0, err)
         code, _, err = self.cli("admit", "toy", "--input", "cases", "--decision", "NOT_ADMITTED",
                                 "--rationale", "producer-authored expectations", "--who", "tester", "--ref", AGREE_REF)
+        self.assertEqual(code, 2)  # admission belongs between freeze and run
+        self.assertIn("FROZEN", err)
+        st = state.load_state(run_dir)
+        st["state"] = "FROZEN"
+        state.save(run_dir, st)
+        code, _, err = self.cli("admit", "toy", "--input", "cases", "--decision", "NOT_ADMITTED",
+                                "--rationale", "producer-authored expectations", "--who", "tester", "--ref", AGREE_REF)
         self.assertEqual(code, 0, err)
         first, second = consent.load(run_dir)
         self.assertEqual(first["conditions"], [{"claims": ["row-a"], "text": "test keys only, = kept"}])
@@ -169,7 +176,7 @@ class CliTest(LabTest):
                          ("agent:claude", True, "operator"))
         self.assertEqual((second["action"], second["decision"], second["drafted_by"]),
                          ("admission", "NOT_ADMITTED", "human"))
-        self.assertEqual(self.cli("consent", "toy", "--who", "x", "--action", "run_authorized",
+        self.assertEqual(self.cli("consent", "toy", "--who", "x", "--action", "publication_approved",
                                   "--ref", AGREE_REF, "--condition", "a=b")[0], 2)
 
     def test_cli_errors_exit_two(self):

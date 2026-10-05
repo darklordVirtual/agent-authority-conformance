@@ -71,6 +71,35 @@ def _check_conditions(conditions):
             raise GateError("each condition needs text and a nonempty list of claim ids")
 
 
+# Pre-run statements must precede the run and post-run review must follow delivery, so a
+# later statement can never be presented as an earlier one.
+PHASES = {
+    "scope_agreed": ("SCOPED",),
+    "run_authorized": ("SCOPED",),
+    "admission": ("FROZEN",),
+    "review_ack": ("SHARED_PRIVATE", "REVIEWED"),
+    "factual_corrections": ("SHARED_PRIVATE", "REVIEWED"),
+    "survivor_classification": ("SHARED_PRIVATE", "REVIEWED"),
+}
+
+
+def _check_phase(run_dir, action):
+    state_path = Path(run_dir) / STATE_FILE
+    if action not in PHASES or not state_path.is_file():
+        return
+    current = read_json(state_path).get("state")
+    if current not in PHASES[action]:
+        raise GateError(f"{action} can only be recorded in state {' or '.join(PHASES[action])}; "
+                        f"the run is {current}")
+
+
+def withdrawn_parties(events, parties):
+    """Agreement parties who withdrew. Withdrawal is always possible and is never undone
+    by a later event in the same run; agreeing again means a new run."""
+    wanted = handles(parties)
+    return sorted({handle(e["who"]) for e in events if e["action"] == "withdrawn" and handle(e["who"]) in wanted})
+
+
 def parse_condition(text):
     """'claim_a,claim_b=condition text' -> {"claims": [...], "text": ...}. Only the first
     '=' separates claims from text, so the text may contain '=' and ','."""
@@ -108,6 +137,7 @@ def add(run_dir, who, action, ref, now, *, drafted_by="human", ai_assisted=False
         if not (_text(context.get("input")) and context.get("decision") in DECISIONS
                 and _text(context.get("rationale"))):
             raise GateError(f"admission needs input, decision ({', '.join(DECISIONS)}) and rationale")
+    _check_phase(run_dir, action)
     events = load(run_dir)
     prev = sha256_json(events[-1]) if events else GENESIS
     event = {"at": now, "who": handle(who), "action": action, "ref": ref, "prev_sha256": prev,

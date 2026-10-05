@@ -146,6 +146,10 @@ def evidence_record(run_dir, include_unpublished=False):
                                    f"{scope['offer']['commit'][:12]}." if track == "self_service" else "")]
     notes.append(f"Run label {scope['independence']} ({independence.FEDERATION[scope['independence']]}, "
                  f"{independence.BCR[scope['independence']]}).")
+    if scope.get("verifier_authors"):
+        notes.append(f"Verifier authored by {', '.join(scope['verifier_authors'])}.")
+    for item in scope.get("trust_material", []):
+        notes.append(f"Trust material: {item}")
     if current.get("preregistered") is False:
         notes.append("Plan hash was not published before execution.")
     for c in consent.conditions(events):

@@ -566,6 +566,24 @@
     "offer_terms": {
       "type": "object",
       "description": "Written by pin from the pinned offer: publication, maintainers, expires."
+    },
+    "verifier_authors": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "pattern": "\\S"
+      },
+      "description": "Who wrote the verifier or adapter, when not the runner maintainers."
+    },
+    "trust_material": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "pattern": "\\S"
+      },
+      "description": "Disclosure of keys and trust roots the checks rely on, e.g. that pinned keys are the fixture's published test keys."
     }
   },
   "allOf": [

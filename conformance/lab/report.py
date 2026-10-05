@@ -19,7 +19,9 @@ STATUS_TEXT = {
                  "measured results are unchanged since delivery.",
     "WITHHELD": "WITHHELD. Publication was declined. Not citable as public evidence.",
     "PUBLISHED_SELF_SERVICE": "PUBLISHED (self-service, unreviewed). Published by the runner under the "
-                              "producer's open verification offer; not reviewed and not endorsed.",
+                              "producer's open verification offer; not reviewed and not endorsed. The "
+                              "offer is consent to bounded runs only, not membership, governance "
+                              "participation or agreement to any economic model.",
 }
 LIMITS = (
     "Verification is not endorsement, adoption, dependency or transfer of ownership.",
@@ -44,6 +46,12 @@ def render_report(scope, plan, results, conditions=None, preregistered=True):
              f"{BCR[scope['independence']]} in BCR terms.", ""]
     if scope.get("independence_statement"):
         lines += [f"**Independence statement:** {scope['independence_statement']}", ""]
+    authors = scope.get("verifier_authors") or scope["runner"]["maintainers"]
+    lines += [f"**Roles:** verifier or adapter authored by {', '.join(authors)}; run operated by "
+              f"{scope['runner']['project']} ({', '.join(scope['runner']['maintainers'])}); subject maintained by "
+              + "; ".join(f"{s['project']} ({', '.join(s['maintainers'])})" for s in scope["subjects"]) + ".", ""]
+    if scope.get("trust_material"):
+        lines += ["**Trust material:**", "", _bullets(scope["trust_material"]), ""]
     if scope.get("previous_run"):
         prev = scope["previous_run"]
         lines += [f"Follow-up of `{prev['run_id']}` (plan `{prev['plan_sha256']}`); earlier results are unchanged.", ""]

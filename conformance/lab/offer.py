@@ -7,6 +7,11 @@ offer file by commit and SHA-256. Before freeze, run and publish the lab re-read
 the producer's default branch: a missing, revoked or expired offer refuses new
 work. Nothing already published is changed (nothing is retroactive).
 
+An offer is consent to bounded runs of the named claims only. It is not
+endorsement, membership, participation in shared governance, agreement to any
+economic model or consent to another pilot, and it is AACP's own optional format,
+not a shared one.
+
 Standard library only, because the lab is vendored into every package.
 """
 

@@ -1,4 +1,9 @@
-"""Negative runner self-test (the E030 failure mode, after imokokok's review in #177).
+"""Negative runner self-test.
+
+Attribution: the failure mode was found by imokokok in a review of a pinned runner
+(aeoess/agent-governance-vocabulary#177, 2026-10-02) and recorded by Agent Errata as
+entry E030; the three separately reported assertions are imokokok's. This module is
+AACP's own implementation of that check and certifies no runner.
 
 A wrapper that keeps going after a failed verifier can print a success line and exit 0
 with no new results. This builds a throw-away manual verification run whose verifier

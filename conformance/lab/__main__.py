@@ -81,6 +81,18 @@ def build_parser():
 CAPTURE_FILE = "RUN-CAPTURE.json"
 
 
+def _procedure_revision():
+    """The lab checkout that executed, when it is a git checkout: commit and whether
+    tracked files were modified. A vendored package copy reports 'vendored'."""
+    root = Path(__file__).resolve().parents[2]
+    head = subprocess.run(["git", "-C", str(root), "rev-parse", "HEAD"], capture_output=True, text=True)
+    if head.returncode != 0 or not (root / ".git").exists():
+        return {"source": "vendored"}
+    dirty = subprocess.run(["git", "-C", str(root), "status", "--porcelain", "--untracked-files=no", "--",
+                            "conformance/lab"], capture_output=True, text=True).stdout.strip() != ""
+    return {"source": "git", "commit": head.stdout.strip(), "lab_modified": dirty}
+
+
 def _capture(run_dir, argv, started, code, error):
     """Append one run attempt, as it happened, to RUN-CAPTURE.json in the run directory.
     Arguments are kept as given (run ids and flags); absolute paths are not recorded."""
@@ -90,7 +102,13 @@ def _capture(run_dir, argv, started, code, error):
     doc = read_json(path) if path.is_file() else {
         "note": "Every run attempt with its arguments, start and end time and exit status.", "attempts": []}
     safe = [a if not Path(a).is_absolute() else "<absolute path omitted>" for a in argv]
-    entry = {"argv": safe, "started_at": started, "ended_at": utc_now(), "exit_status": code,
+    workspace = run_dir.resolve().parent.parent  # the directory holding runs/
+    try:
+        cwd = Path.cwd().resolve().relative_to(workspace).as_posix()
+    except ValueError:
+        cwd = "<outside the lab workspace>"
+    entry = {"argv": safe, "cwd_relative_to_workspace": cwd, "procedure_revision": _procedure_revision(),
+             "started_at": started, "ended_at": utc_now(), "exit_status": code,
              "python": platform.python_version(), "platform": platform.system()}
     if error:
         entry["error"] = error

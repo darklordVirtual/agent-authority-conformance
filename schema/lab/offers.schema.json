@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/darklordVirtual/agent-authority-conformance/schema/lab/offers.schema.json",
   "title": "AACP open verification offers (aacp-offers-v1)",
-  "description": "Producer-owned standing consent for self-service verification runs. Committed in the producer's repository; the runner pins it by commit and SHA-256. offer_id values must be unique (checked by conformance/lab/offer.py). A newer offer is a new entry; revocation sets revoked or removes the entry on the default branch.",
+  "description": "Producer-owned standing consent for self-service verification runs. Committed in the producer's repository; the runner pins it by commit and SHA-256. offer_id values must be unique (checked by conformance/lab/offer.py). A newer offer is a new entry; revocation sets revoked or removes the entry on the default branch. An offer is consent to bounded runs of the named claims only: not endorsement, membership, shared-governance participation, agreement to any economic model or consent to another pilot. AACP's own optional format, not a shared one.",
   "type": "object",
   "additionalProperties": false,
   "required": [

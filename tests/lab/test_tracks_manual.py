@@ -58,7 +58,6 @@ class ConditionTest(LabTest):
     def built(self, claims):
         run = frozen_run(self, "toy-verification-run", "toy-receipts",
                          conditions=[{"text": "under published test keys only", "claims": claims}])
-        consent.add(run, "maintainer", "review_ack", AGREE_REF, NOW)  # satisfies no gate
         runner.run(run, NOW)
         return run
 
@@ -77,8 +76,44 @@ class ConditionTest(LabTest):
         self.assertIn("tester", section)
         self.assertNotIn("cap_compliance", section.split("##", 1)[0])
         self.assertIn("## Independence per claim", report)
+        self.assertIn("**Roles:** verifier or adapter authored by tester; run operated by AAC tests", report)
         self.assertIn("BCR-3 at most", report)
 
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class PhaseTest(LabTest):
+    """Pre-run statements stay pre-run; post-run review stays post-run (#177: a post-run
+    producer review is not prior authorisation)."""
+
+    def test_scope_and_authorisation_only_before_freeze(self):
+        run = frozen_run(self, "toy-verification-run", "toy-receipts")
+        for action in ("scope_agreed", "run_authorized"):
+            with self.assertRaisesRegex(GateError, "SCOPED"):
+                consent.add(run, "maintainer", action, AGREE_REF, NOW)
+
+    def test_admission_only_between_freeze_and_run(self):
+        from tests.lab.helpers import prepare_run
+        run = prepare_run(self, "toy-verification-run", "toy-receipts")
+        with self.assertRaisesRegex(GateError, "FROZEN"):
+            admit(run, "within")
+
+    def test_review_ack_only_after_delivery(self):
+        run = frozen_run(self, "toy-verification-run", "toy-receipts")
+        with self.assertRaisesRegex(GateError, "SHARED_PRIVATE"):
+            consent.add(run, "maintainer", "review_ack", AGREE_REF, NOW)
+
+    def test_withdrawn_consent_stops_freeze_and_run(self):
+        from tests.lab.helpers import agree, prepare_run
+        run = prepare_run(self, "toy-verification-run", "toy-receipts")
+        lifecycle.pin(run)
+        agree(run)
+        consent.add(run, "tester", "withdrawn", AGREE_REF, NOW)
+        with self.assertRaisesRegex(GateError, "withdrew"):
+            lifecycle.freeze(run, NOW)
+        run2 = frozen_run(self, "toy-run", "toy-subject")
+        consent.add(run2, "tester", "withdrawn", AGREE_REF, NOW)
+        with self.assertRaisesRegex(GateError, "withdrew"):
+            runner.run(run2, NOW)

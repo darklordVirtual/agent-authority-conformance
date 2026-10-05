@@ -91,6 +91,9 @@ def require_agreement(run_dir, scope, now=None, workdir=None):
     if not (isinstance(scope.get("agreement_ref"), str) and scope["agreement_ref"].startswith("https://")):
         raise GateError("agreement_ref must link the issue or comment where the scope was agreed")
     events = consent.load(run_dir)
+    withdrew = consent.withdrawn_parties(events, scope["agreement_parties"])
+    if withdrew:
+        raise GateError(f"{', '.join(withdrew)} withdrew; this run cannot proceed (start a new run)")
     for action in ("scope_agreed", "run_authorized"):
         missing = sorted(set(scope["agreement_parties"]) - {e["who"] for e in events if e["action"] == action})
         if missing:

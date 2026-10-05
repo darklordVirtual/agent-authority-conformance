@@ -132,8 +132,10 @@ class CliTracksTest(LabTest):
 
     def test_export_old_scope_defaults(self):
         run = frozen_run(self, "toy-verification-run", "toy-receipts")
-        consent.add(run, "tester", "review_ack", AGREE_REF, NOW, drafted_by="agent:claude", ai_assisted=True)
         runner.run(run, NOW)
+        lifecycle.package(run, NOW)
+        lifecycle.share(run, ORG, [], NOW)
+        consent.add(run, "maintainer", "review_ack", AGREE_REF, NOW, drafted_by="agent:claude", ai_assisted=True)
         record = evidence_record(run, include_unpublished=True)
         self.assertEqual(record["runner_authored"], [])
         self.assertEqual(sorted(record["independent_for"]), ["cap_compliance", "exact_call", "signature"])

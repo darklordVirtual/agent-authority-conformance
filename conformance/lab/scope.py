@@ -59,6 +59,9 @@ def validate_scope(scope, *, require_pins=False):
         p.append(f"independence must be one of {', '.join(INDEPENDENCE)}")
     if independence == "INDEPENDENT_IMPLEMENTATION" and not _text(scope.get("independence_statement")):
         p.append("INDEPENDENT_IMPLEMENTATION requires independence_statement")
+    for key in ("verifier_authors", "trust_material"):
+        if key in scope and not _texts(scope[key]):
+            p.append(f"{key} must be a nonempty list of strings when present")
     authored = scope.get("runner_authored")
     if authored is not None and not (isinstance(authored, list) and all(_text(a) for a in authored)):
         p.append("runner_authored must be a list of nonempty strings")

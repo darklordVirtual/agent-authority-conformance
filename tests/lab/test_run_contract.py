@@ -33,6 +33,8 @@ class CaptureTest(LabTest):
         self.assertIn("admission", attempts[0]["error"])
         for attempt in attempts:
             self.assertEqual(attempt["argv"], ["run", "toy-verification"])
+            self.assertIn(attempt["cwd_relative_to_workspace"], ("<outside the lab workspace>",))
+            self.assertIn(attempt["procedure_revision"]["source"], ("git", "vendored"))
             self.assertTrue(attempt["started_at"] <= attempt["ended_at"])
             self.assertNotIn(str(self.tmp), str(attempt))
         lifecycle.package(run, NOW)  # leak scan passes and the capture is in the manifest
