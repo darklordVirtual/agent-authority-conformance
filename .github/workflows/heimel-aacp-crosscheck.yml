@@ -1,0 +1,52 @@
+name: HEIMEL AACP cross-check
+
+on:
+  pull_request:
+    paths:
+      - "aacp/adversarial.py"
+      - "experiments/heimel_public_reference_crosscheck.py"
+      - ".github/workflows/heimel-aacp-crosscheck.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  heimel-public-reference:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out AACP probe
+        uses: actions/checkout@v4
+        with:
+          path: aacp
+          persist-credentials: false
+
+      - name: Check out pinned HEIMEL v0.2.0
+        uses: actions/checkout@v4
+        with:
+          repository: Heimel-open/Heimel-
+          ref: 456e16935ac2cf0b4f47bc1343b5663cad240dea
+          path: heimel
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run AACP C/F/G diagnostic against HEIMEL public reference
+        working-directory: aacp
+        run: |
+          python experiments/heimel_public_reference_crosscheck.py \
+            --heimel-root ../heimel \
+            --json-out "$RUNNER_TEMP/heimel-aacp-crosscheck.json" \
+            --fail-on-contradiction
+
+      - name: Upload diagnostic record
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: heimel-aacp-crosscheck-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/heimel-aacp-crosscheck.json
+          if-no-files-found: warn
+          retention-days: 14
