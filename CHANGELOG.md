@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Add `AACP-OBSERVED-EFFECT-VANTAGE-1`, a neutral bounded profile derived from the pinned public RFC189 OE-08 candidate. Self-vantage cannot establish independent observation; verifier-owned trust material stays outside producer input. Includes positive/adversarial controls and a public byte-resolution adapter without granting A-G, RFC-189 or CoSAI credit.
+
 - Add optional federation tracks ([docs/FEDERATION-TRACKS.md](docs/FEDERATION-TRACKS.md)):
   self-service runs under a producer-owned open verification offer
   (`schema/lab/offers.schema.json`), and stricter manual runs with conditional scope

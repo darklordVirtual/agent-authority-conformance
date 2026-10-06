@@ -12,6 +12,7 @@ on:
           - adapters/remora-evidence-sufficiency-v1/adapter.json
           - adapters/agentavow-e1-tool-digest-v1/adapter.json
           - adapters/agentid-verifier-attestation-battery/adapter.json
+          - adapters/rfc189-observed-effect-oe08-vantage-v1/adapter.json
       fixture_author:
         description: Actual fixture author identity (REMORA-research for the default exercise)
         type: string
@@ -61,6 +62,7 @@ jobs:
               "adapters/remora-evidence-sufficiency-v1/adapter.json",
               "adapters/agentavow-e1-tool-digest-v1/adapter.json",
               "adapters/agentid-verifier-attestation-battery/adapter.json",
+              "adapters/rfc189-observed-effect-oe08-vantage-v1/adapter.json",
           }
           path = os.environ["ADAPTER"]
           if path not in allowed:
