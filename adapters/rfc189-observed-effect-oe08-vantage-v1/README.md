@@ -11,7 +11,7 @@ The AACP-owned inference rule that uses the semantic discriminator is separate:
 
 - profile: `profiles/AACP-OBSERVED-EFFECT-VANTAGE-1.md`
 - procedure: `conformance/observed_effect_vantage.py`
-- normalized case: `tests/fixtures/rfc189-oe-08-self-vantage.json`
+- normalized case: `interop/fixtures/rfc189-oe-08-self-vantage.json`
 
 That separation prevents a producer-authored expected answer from becoming
 checker input.
