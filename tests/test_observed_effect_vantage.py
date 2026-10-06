@@ -1,4 +1,6 @@
+import contextlib
 import copy
+import io
 import json
 from pathlib import Path
 import unittest
@@ -8,6 +10,7 @@ from conformance.validation import load_validator
 from conformance.observed_effect_vantage import (
     VantageResult,
     evaluate_observation_vantage,
+    main,
 )
 
 ADAPTER = Path(__file__).parents[1] / "adapters" / "rfc189-observed-effect-oe08-vantage-v1" / "adapter.json"
@@ -119,6 +122,18 @@ class ObservedEffectVantageTests(unittest.TestCase):
         case = load_case()
         self.assertNotIn("expected", case["input"])
         self.assertNotIn("native_expected", case["input"])
+
+    def test_cli_rejects_non_object_case_files_as_invalid_input(self):
+        import tempfile
+        for document in ([], {"input": {}, "runner_trust": []}, "text"):
+            with self.subTest(document=document), tempfile.TemporaryDirectory() as tmp:
+                path = Path(tmp) / "case.json"
+                path.write_text(json.dumps(document), encoding="utf-8")
+                out = io.StringIO()
+                with contextlib.redirect_stdout(out):
+                    code = main([str(path)])
+                self.assertEqual(code, 2)
+                self.assertEqual(json.loads(out.getvalue())["result"], "INVALID_INPUT")
 
     def test_public_source_adapter_is_schema_valid(self):
         manifest = json.loads(ADAPTER.read_text(encoding="utf-8"))

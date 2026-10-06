@@ -38,10 +38,8 @@ python -m conformance.observed_effect_vantage \
 ```
 
 The second command evaluates AACP's normalized facts. It does not import or run
-the upstream verifier and does not import a target implementation such as
-REMORA.
+the upstream verifier and does not import any target implementation.
 
-A later REMORA, Heimel or other implementation run should adapt that
-implementation's native result to the frozen profile contract and record the
+An implementation run should adapt that implementation's native result to the frozen profile contract and record the
 implementation revision, adapter/procedure revision and operator provenance
 separately.

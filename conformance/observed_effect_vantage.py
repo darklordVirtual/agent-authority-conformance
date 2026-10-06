@@ -148,8 +148,12 @@ def main(argv: list[str] | None = None) -> int:
 
     try:
         document = json.loads(args.case.read_text(encoding="utf-8"))
+        if not isinstance(document, dict):
+            raise ValueError("case file must be a JSON object")
         record = document["input"] if "input" in document else document
         trust = document.get("runner_trust", {})
+        if not isinstance(trust, dict):
+            raise ValueError("runner_trust must be an object")
         domains = trust.get("trusted_control_domains", ())
         if not isinstance(domains, list) or not all(type(x) is str for x in domains):
             raise ValueError("trusted_control_domains must be a list of strings")
