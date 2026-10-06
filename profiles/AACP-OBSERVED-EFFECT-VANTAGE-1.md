@@ -87,7 +87,7 @@ A conforming second implementation should exercise at least:
 
 ```sh
 python -m conformance.observed_effect_vantage \
-  tests/fixtures/rfc189-oe-08-self-vantage.json
+  interop/fixtures/rfc189-oe-08-self-vantage.json
 ```
 
 Expected AACP output:
