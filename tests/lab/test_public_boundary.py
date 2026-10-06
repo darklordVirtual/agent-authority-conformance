@@ -36,6 +36,7 @@ class PublicBoundaryScopeTest(unittest.TestCase):
 
     def test_public_boundary_does_not_require_offer_terms_after_pin(self):
         scope = self.scope()
+        scope["subjects"][0]["files_sha256"] = {"receipts/r1.json": "c" * 64}
         self.assertNotIn("offer_terms", scope)
         validate_scope(scope, require_pins=True)
 
