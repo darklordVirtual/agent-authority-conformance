@@ -14,6 +14,7 @@ ADAPTER = Path(__file__).parents[1] / "adapters" / "rfc189-observed-effect-oe08-
 
 FIXTURE = (
     Path(__file__).parent
+    / "interop"
     / "fixtures"
     / "rfc189-oe-08-self-vantage.json"
 )
