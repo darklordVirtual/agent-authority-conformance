@@ -388,7 +388,7 @@ def classify(case: dict[str, Any], observation: Any) -> dict[str, Any]:
             if status == "EFFECT_VERIFIED":
                 return _classified(case, "CONTRADICTED", "missing field was falsely treated as exact null")
             return _classified(case, "NOT_ESTABLISHED", "no decisive effect comparison result")
-        if outcome in {"REFUSED", "INVALID_INPUT"} or observation.get("execution") == "INVALID_INPUT":
+        if outcome in {"REFUSED", "INVALID_INPUT"}:
             return _classified(case, "ESTABLISHED", "invalid postcondition contract was rejected")
         if status == "EFFECT_VERIFIED":
             return _classified(case, "CONTRADICTED", "invalid postcondition structure produced a verified effect")

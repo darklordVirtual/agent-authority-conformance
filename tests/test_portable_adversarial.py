@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+import contextlib
+import io
 import json
 from pathlib import Path
 import unittest
 
 from jsonschema import Draft202012Validator
 
+from aacp.cli import main as cli_main
 from aacp.adversarial import CASES, PROPERTIES, classify, run
 
 
