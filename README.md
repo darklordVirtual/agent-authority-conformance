@@ -73,7 +73,8 @@ No percentage, star rating, “5/7 conformant”, security grade or ranking is v
 | [`SPECIFICATION.md`](SPECIFICATION.md) | Preserved normative v0.1 specification |
 | [`schema/assessment.schema.json`](schema/assessment.schema.json) | Preserved v0.1 schema |
 | [`examples/`](examples/) | Versioned examples and historical assessments |
-| [`conformance/`](conformance/) | Validation and bounded E reference inference |
+| [`profiles/`](profiles/) | Bounded, implementation-neutral reproduction profiles; includes observed-effect vantage |
+| [`conformance/`](conformance/) | Validation and bounded reference inference |
 | [`conformance/mutations-v0.2.json`](conformance/mutations-v0.2.json) | Seeded faults for the E rule; `python -m conformance.mutations` scores the fixtures against them |
 | [`conformance/invariants.py`](conformance/invariants.py) | Metamorphic relations and a differential reference model for the E rule over a generated space |
 | [`conformance/coverage.py`](conformance/coverage.py) | Strict, score-free A–G component matrix for cross-platform assessment comparison |
