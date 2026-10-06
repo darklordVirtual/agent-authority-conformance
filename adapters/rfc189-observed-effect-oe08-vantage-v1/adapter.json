@@ -1,0 +1,58 @@
+{
+  "schema_version": "federation-adapter-v1",
+  "subject": {
+    "repository": "astrogilda/ws4-secure-design-agentic-systems",
+    "revision": "7deaf432394e8a332423a70b5e699d20e990b137"
+  },
+  "adapter": {
+    "id": "rfc189-observed-effect-oe08-vantage-v1-resolution",
+    "revision": "d6ef0f884597c3573d400bae5cc83d8dd1948d4d"
+  },
+  "artifacts": [
+    {
+      "id": "oe08-self-vantage-case",
+      "path": "conformance/RFC-189/observed-effect/cases/RFC189-OE-08-NE-SELF-VANTAGE-CLAIMING-INDEPENDENCE.json",
+      "sha256": "5a1aa5bcfdc7afaf6af9ae830f5a09c84234cf07c95888a155d72332dd4c8a6b",
+      "source_class": "test_fixture",
+      "required": true
+    }
+  ],
+  "claims": [
+    {
+      "claim_id": "rfc189-oe08-public-fixture-resolution",
+      "native_claim": {
+        "producer": "astrogilda/ws4-secure-design-agentic-systems",
+        "claim_id": "RFC189-OE-08-NE-SELF-VANTAGE-CLAIMING-INDEPENDENCE",
+        "source_status": "candidate",
+        "result_vocabulary": [
+          "not_established"
+        ]
+      },
+      "aac_mapping": {
+        "property": "G",
+        "relationship": "partial",
+        "rationale": "Observation vantage is a prerequisite to some bounded effect-verification claims, but resolving OE-08 bytes grants no AACP property G credit."
+      },
+      "procedure": "sha256-resolution-only",
+      "artifacts": [
+        "oe08-self-vantage-case"
+      ],
+      "claim_ceiling": "This adapter establishes only byte identity for the pinned public OE-08 candidate fixture. It does not establish RFC-189 conformance, correctness of the upstream reference verifier, AACP property G, REMORA conformance, independent verification, CoSAI endorsement or production security."
+    }
+  ],
+  "explicit_non_claims": [
+    "RFC-189 conformance",
+    "upstream verifier correctness",
+    "AACP A-G conformance",
+    "REMORA conformance",
+    "independent verification",
+    "CoSAI endorsement",
+    "production security"
+  ],
+  "review": {
+    "mode": "PUBLIC_IMMEDIATE",
+    "producer_review": "OPTIONAL",
+    "review_window_days": null,
+    "unresolved_disagreement": "PUBLISH_WITH_DISAGREEMENT"
+  }
+}
