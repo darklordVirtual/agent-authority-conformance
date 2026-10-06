@@ -3,10 +3,14 @@ import json
 from pathlib import Path
 import unittest
 
+from conformance.adapter import validate_manifest
+from conformance.validation import load_validator
 from conformance.observed_effect_vantage import (
     VantageResult,
     evaluate_observation_vantage,
 )
+
+ADAPTER = Path(__file__).parents[1] / "adapters" / "rfc189-observed-effect-oe08-vantage-v1" / "adapter.json"
 
 FIXTURE = (
     Path(__file__).parent
@@ -114,6 +118,19 @@ class ObservedEffectVantageTests(unittest.TestCase):
         case = load_case()
         self.assertNotIn("expected", case["input"])
         self.assertNotIn("native_expected", case["input"])
+
+    def test_public_source_adapter_is_schema_valid(self):
+        manifest = json.loads(ADAPTER.read_text(encoding="utf-8"))
+        load_validator("federation-adapter-v1.schema.json").validate(manifest)
+        validate_manifest(manifest)
+        self.assertEqual(
+            manifest["subject"]["revision"],
+            load_case()["source"]["revision"],
+        )
+        self.assertEqual(
+            manifest["artifacts"][0]["sha256"],
+            load_case()["source"]["sha256"],
+        )
 
     def test_source_pin_is_explicit(self):
         source = load_case()["source"]
