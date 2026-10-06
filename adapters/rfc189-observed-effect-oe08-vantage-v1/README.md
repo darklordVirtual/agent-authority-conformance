@@ -34,7 +34,7 @@ python -m scripts.run_federation_adapter \
 
 ```sh
 python -m conformance.observed_effect_vantage \
-  tests/fixtures/rfc189-oe-08-self-vantage.json
+  interop/fixtures/rfc189-oe-08-self-vantage.json
 ```
 
 The second command evaluates AACP's normalized facts. It does not import or run
