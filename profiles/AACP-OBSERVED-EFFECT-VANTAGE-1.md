@@ -46,6 +46,19 @@ The verifier consumes only these normalized facts:
 Trust in an external control domain is **not** accepted from the record.
 `trusted_control_domains` is runner-owned trust material supplied separately.
 
+Positive observer-independence credit additionally requires runner-owned evidence
+for two separate premises:
+
+- **identity basis:** the observer identity is established outside the producer
+  trust domain, and the producer cannot issue or revoke that identity;
+- **signing-key custody basis:** the producer cannot access the observer signing
+  key.
+
+Hardware attestation is not mandatory. A software-only deployment may satisfy
+the identity premise with an externally administered identity that the producer
+cannot issue or revoke. Distinct identity strings, key IDs, or signatures alone
+do not establish either premise.
+
 Expected results are outside checker input.
 
 ## Procedure
@@ -59,10 +72,13 @@ following bounded rules:
 2. If the observed party can forge or suppress the observation, independence is
    `NOT_ESTABLISHED`.
 3. Shared control domain is not independent.
-4. A distinct control domain establishes independence only when that domain is
-   in verifier-owned trust material **and** explicit forge/suppress facts are
-   both false.
-5. Missing evidence stays `NOT_ESTABLISHED`; malformed typed input is
+4. A distinct control domain is necessary but not sufficient: it must be in
+   verifier-owned trust material.
+5. Positive independence additionally requires runner-admitted identity evidence
+   that the producer cannot issue/revoke the observer identity, plus custody
+   evidence that the producer cannot access the observer signing key.
+6. Explicit forge/suppress facts must both be false.
+7. Missing evidence stays `NOT_ESTABLISHED`; malformed typed input is
    `INVALID_INPUT`, a non-verdict.
 
 The reason `authoritative-vantage-not-independent` is retained for the OE-08
@@ -77,7 +93,12 @@ A conforming second implementation should exercise at least:
 - self-vantage with a nominally different/trusted domain label -> still
   `NOT_ESTABLISHED`;
 - external observer, distinct trusted control domain, explicit no-forge and
-  no-suppress -> `ESTABLISHED`;
+  no-suppress, but no identity/custody basis -> `NOT_ESTABLISHED`;
+- distinct observer/key IDs with no custody proof -> `NOT_ESTABLISHED`;
+- producer-issued or producer-revocable observer identity -> `NOT_ESTABLISHED`;
+- producer-accessible observer signing key -> `NOT_ESTABLISHED`;
+- external observer with trusted domain, externally established identity,
+  producer-inaccessible signing key, explicit no-forge/no-suppress -> `ESTABLISHED`;
 - external observer in the same control domain -> `NOT_ESTABLISHED`;
 - external observer in an untrusted domain -> `NOT_ESTABLISHED`;
 - forge or suppress capability -> `NOT_ESTABLISHED`;
@@ -112,6 +133,7 @@ It does **not** establish:
 - truth or falsity of the observed effect;
 - observation coverage completeness;
 - source authenticity merely from a key or digest;
+- observation coverage completeness merely from observer independence;
 - causation;
 - authorization;
 - global non-bypassability;
