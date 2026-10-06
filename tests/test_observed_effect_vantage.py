@@ -61,10 +61,70 @@ class ObservedEffectVantageTests(unittest.TestCase):
         }
         without_trust = evaluate_observation_vantage(record)
         with_trust = evaluate_observation_vantage(
-            record, trusted_control_domains={"verifier-domain"}
+            record,
+            trusted_control_domains={"verifier-domain"},
+            observer_identity_basis={"verifier": {
+                "established_outside_producer": True,
+                "producer_can_issue": False,
+                "producer_can_revoke": False,
+            }},
+            observer_key_custody_basis={"verifier": {
+                "producer_can_access_signing_key": False,
+            }},
         )
         self.assertEqual(without_trust.result, VantageResult.NOT_ESTABLISHED)
         self.assertEqual(with_trust.result, VantageResult.ESTABLISHED)
+
+
+    def test_distinct_labels_do_not_establish_independence(self):
+        record = {
+            "observer_id": "verifier", "observed_party": "agent",
+            "control_domain": "verifier-domain", "observed_control_domain": "agent-domain",
+            "can_observed_party_forge": False, "can_observed_party_suppress": False,
+        }
+        verdict = evaluate_observation_vantage(
+            record, trusted_control_domains={"verifier-domain"}
+        )
+        self.assertEqual(verdict.result, VantageResult.NOT_ESTABLISHED)
+        self.assertEqual(verdict.unmet_obligation, "observer_identity_basis")
+
+    def test_producer_controlled_observer_identity_blocks_independence(self):
+        record = {
+            "observer_id": "verifier", "observed_party": "agent",
+            "control_domain": "verifier-domain", "observed_control_domain": "agent-domain",
+            "can_observed_party_forge": False, "can_observed_party_suppress": False,
+        }
+        verdict = evaluate_observation_vantage(
+            record,
+            trusted_control_domains={"verifier-domain"},
+            observer_identity_basis={"verifier": {
+                "established_outside_producer": True,
+                "producer_can_issue": True,
+                "producer_can_revoke": False,
+            }},
+            observer_key_custody_basis={"verifier": {"producer_can_access_signing_key": False}},
+        )
+        self.assertEqual(verdict.result, VantageResult.NOT_ESTABLISHED)
+        self.assertEqual(verdict.unmet_obligation, "observer_identity_basis")
+
+    def test_producer_accessible_signing_key_blocks_independence(self):
+        record = {
+            "observer_id": "verifier", "observed_party": "agent",
+            "control_domain": "verifier-domain", "observed_control_domain": "agent-domain",
+            "can_observed_party_forge": False, "can_observed_party_suppress": False,
+        }
+        verdict = evaluate_observation_vantage(
+            record,
+            trusted_control_domains={"verifier-domain"},
+            observer_identity_basis={"verifier": {
+                "established_outside_producer": True,
+                "producer_can_issue": False,
+                "producer_can_revoke": False,
+            }},
+            observer_key_custody_basis={"verifier": {"producer_can_access_signing_key": True}},
+        )
+        self.assertEqual(verdict.result, VantageResult.NOT_ESTABLISHED)
+        self.assertEqual(verdict.unmet_obligation, "observer_key_custody_basis")
 
     def test_shared_control_domain_is_not_independent(self):
         record = {

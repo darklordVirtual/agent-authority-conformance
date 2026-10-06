@@ -1,8 +1,11 @@
 """Independence per claim, and how lab labels read in federation-run-v1 and BCR terms.
 
 A run label describes who implemented and ran the procedure. It is the ceiling for
-every claim: a claim can be marked not independent (with a reason), never more
-independent than its run.
+run/reproduction independence only: a claim can be marked not independent (with
+a reason), never more independent than its run. It does NOT establish observer
+independence, trust-domain separation, signing-key custody, or observation
+coverage. Those require property-specific evidence (for example
+AACP-OBSERVED-EFFECT-VANTAGE-1).
 """
 
 FEDERATION = {
