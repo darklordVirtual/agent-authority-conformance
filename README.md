@@ -126,6 +126,10 @@ artifacts, inspect credential custody or establish coverage itself. Its syntheti
 fixtures test inference semantics, not the security of a deployed product.
 See [the input trust boundary](SPECIFICATION-v0.2.md#6-bounded-reference-rule-and-corpus).
 
+## Published bounded reproductions
+
+- [AEGIS Core 3.4.0, Run 002](https://github.com/darklordVirtual/agent-authority-conformance/blob/026097b21c2c5544448e05ca275dc0104d4f873a/publications/aegis-issue-21-run-002/PUBLICATION.md): operator-controlled manual reproduction of a producer-authored fixture, **REPRODUCTION / BCR-1 at most**. The producer [confirmed the published archive and representation](https://github.com/darklordVirtual/agent-authority-conformance/issues/21#issuecomment-6366973494). The publication note links the approved archive and report and states the claim limits.
+
 ## Running a pilot against another project
 
 The v0.3 run protocol turns an agreed, bounded question about another project's
