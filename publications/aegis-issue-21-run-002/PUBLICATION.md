@@ -44,6 +44,6 @@ The report and archive retain their October 15 preapproval wording, including `P
 
 ## Follow-up
 
-The public record is available for LortuArte to check against the approved scope. Post-publication producer verification has not yet been recorded; it must not be implied. The October 18 authorization already permits this bounded publication; no further run or broader classification is required to cite it accurately.
+On 2026-10-23, [LortuArte confirmed post-publication review](https://github.com/darklordVirtual/agent-authority-conformance/issues/21#issuecomment-6366973494): they downloaded the public wheel-free archive, independently confirmed its SHA-256 against the approved value, reviewed the file inventory and public report, and found the bounded REPRODUCTION / BCR-1 classification, observations and limitations accurately represented. No factual or scope corrections were requested. This review concerns the public representation and archive integrity; it adds no new technical run, property verdict or classification credit. The October 18 authorization already permits this bounded publication.
 
 AEGIS producer-authored fixture and distribution: copyright 2026 Iraitz (Lortu) / AEGIS, MIT; upstream license preserved inside the archive. AACP methodology: Apache-2.0. Publication prepared with AI assistance for darklordVirtual.
