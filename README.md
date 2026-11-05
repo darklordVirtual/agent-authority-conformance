@@ -79,6 +79,8 @@ No percentage, star rating, “5/7 conformant”, security grade or ranking is v
 | [`conformance/invariants.py`](conformance/invariants.py) | Metamorphic relations and a differential reference model for the E rule over a generated space |
 | [`conformance/coverage.py`](conformance/coverage.py) | Strict, score-free A–G component matrix for cross-platform assessment comparison |
 | [`MUTATIONS-AND-INVARIANTS.md`](MUTATIONS-AND-INVARIANTS.md) | What the two adequacy checks establish, and what they do not |
+| [`vectors/aacp-reference-vectors-v1/`](vectors/aacp-reference-vectors-v1/) | Frozen, digest-pinned input/answer pairs for nine operations, for checking a separately written implementation in any language |
+| [`docs/REFERENCE-VECTORS.md`](docs/REFERENCE-VECTORS.md) | Where each expected answer comes from, the stdio protocol, and what agreement does and does not establish |
 | [`tests/fixtures/`](tests/fixtures/) | Synthetic, committed evidence-sufficiency cases |
 | [`CONTRIBUTING.md`](CONTRIBUTING.md) | Evidence and contribution discipline |
 
@@ -101,8 +103,14 @@ python -m conformance.check
 python -m conformance.mutations
 python -m conformance.invariants
 python -m conformance.coverage tests/adversarial/assessment-pass.json
+python -m conformance.vectors verify
+python -m conformance.vectors check
 python -m unittest discover -s tests -v
 ```
+
+To check another implementation against the frozen reference vectors, in any
+language, see [docs/REFERENCE-VECTORS.md](docs/REFERENCE-VECTORS.md):
+`python -m conformance.vectors run --impl "<your command>"`.
 
 Activate the environment with the command for your platform before installing.
 For the first installer-backed self-service commands (`aacp init`, `validate`

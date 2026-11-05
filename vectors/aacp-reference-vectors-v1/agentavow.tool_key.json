@@ -1,0 +1,151 @@
+{
+  "contract": "Input is {name}. The result is the map key string \"tool:...\".",
+  "operation": "agentavow.tool_key",
+  "specification": "interop/fixtures/agentavow-tool-manifest-digest-v1.json derivation.tool_key (AgentAvow v1)",
+  "suite": "aacp-reference-vectors-v1",
+  "vectors": [
+    {
+      "description": "Key encoding of 'ask_wiki_question'.",
+      "expected": {
+        "result": "tool:ask_wiki_question"
+      },
+      "expected_source": "producer:interop/fixtures/agentavow-tool-manifest-digest-v1.json key_encoding[0] (verbatim)",
+      "id": "avow-key-00",
+      "input": {
+        "name": "ask_wiki_question"
+      }
+    },
+    {
+      "description": "Key encoding of 'a=b'.",
+      "expected": {
+        "result": "tool:a%3Db"
+      },
+      "expected_source": "producer:interop/fixtures/agentavow-tool-manifest-digest-v1.json key_encoding[1] (verbatim)",
+      "id": "avow-key-01",
+      "input": {
+        "name": "a=b"
+      }
+    },
+    {
+      "description": "Key encoding of 'x%y'.",
+      "expected": {
+        "result": "tool:x%25y"
+      },
+      "expected_source": "producer:interop/fixtures/agentavow-tool-manifest-digest-v1.json key_encoding[2] (verbatim)",
+      "id": "avow-key-02",
+      "input": {
+        "name": "x%y"
+      }
+    },
+    {
+      "description": "Key encoding of 'read file'.",
+      "expected": {
+        "result": "tool:read%20file"
+      },
+      "expected_source": "producer:interop/fixtures/agentavow-tool-manifest-digest-v1.json key_encoding[3] (verbatim)",
+      "id": "avow-key-03",
+      "input": {
+        "name": "read file"
+      }
+    },
+    {
+      "description": "Key encoding of 'tab\\there'.",
+      "expected": {
+        "result": "tool:tab%09here"
+      },
+      "expected_source": "producer:interop/fixtures/agentavow-tool-manifest-digest-v1.json key_encoding[4] (verbatim)",
+      "id": "avow-key-04",
+      "input": {
+        "name": "tab\there"
+      }
+    },
+    {
+      "description": "Key encoding of 'héllo'.",
+      "expected": {
+        "result": "tool:h%C3%A9llo"
+      },
+      "expected_source": "producer:interop/fixtures/agentavow-tool-manifest-digest-v1.json key_encoding[5] (verbatim)",
+      "id": "avow-key-05",
+      "input": {
+        "name": "héllo"
+      }
+    },
+    {
+      "description": "Key encoding of 'search 🙂'.",
+      "expected": {
+        "result": "tool:search%20%F0%9F%99%82"
+      },
+      "expected_source": "producer:interop/fixtures/agentavow-tool-manifest-digest-v1.json key_encoding[6] (verbatim)",
+      "id": "avow-key-06",
+      "input": {
+        "name": "search 🙂"
+      }
+    },
+    {
+      "description": "Key encoding of 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'.",
+      "expected": {
+        "result": "tool:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      },
+      "expected_source": "producer:interop/fixtures/agentavow-tool-manifest-digest-v1.json key_encoding[7] (verbatim)",
+      "id": "avow-key-07",
+      "input": {
+        "name": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      }
+    },
+    {
+      "description": "Key encoding of 'ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'.",
+      "expected": {
+        "result": "tool:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc~a2efa32a90eaeb9b"
+      },
+      "expected_source": "producer:interop/fixtures/agentavow-tool-manifest-digest-v1.json key_encoding[8] (verbatim)",
+      "id": "avow-key-08",
+      "input": {
+        "name": "ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      }
+    },
+    {
+      "description": "Key encoding of 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'.",
+      "expected": {
+        "result": "tool:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa~c2a908d98f5df987"
+      },
+      "expected_source": "producer:interop/fixtures/agentavow-tool-manifest-digest-v1.json key_encoding[9] (verbatim)",
+      "id": "avow-key-09",
+      "input": {
+        "name": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    },
+    {
+      "description": "Key encoding of 'éééééééééééééééééééééééééééééééééééééééééééééééééé'.",
+      "expected": {
+        "result": "tool:%C3%A9%C3%A9%C3%A9%C3%A9%C3%A9%C3%A9%C3%A9%C3%A9%C3%A9%C3%A9%C3%A9%C3%A9%C3%A9%C3%A9%C3%A9%C3%A9~2d18fe4b61f01139"
+      },
+      "expected_source": "producer:interop/fixtures/agentavow-tool-manifest-digest-v1.json key_encoding[10] (verbatim)",
+      "id": "avow-key-10",
+      "input": {
+        "name": "éééééééééééééééééééééééééééééééééééééééééééééééééé"
+      }
+    },
+    {
+      "description": "Key encoding of 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaéééééééééééééééééééé'.",
+      "expected": {
+        "result": "tool:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa%~cbaf05a1cc450848"
+      },
+      "expected_source": "producer:interop/fixtures/agentavow-tool-manifest-digest-v1.json key_encoding[11] (verbatim)",
+      "id": "avow-key-11",
+      "input": {
+        "name": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaéééééééééééééééééééé"
+      }
+    },
+    {
+      "description": "Key encoding of 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaéééééééééééééééééééé'.",
+      "expected": {
+        "result": "tool:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa%C~a1a40b6757b6805f"
+      },
+      "expected_source": "producer:interop/fixtures/agentavow-tool-manifest-digest-v1.json key_encoding[12] (verbatim)",
+      "id": "avow-key-12",
+      "input": {
+        "name": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaéééééééééééééééééééé"
+      }
+    }
+  ]
+}
