@@ -1,0 +1,157 @@
+{
+  "file_form": "sorted keys, two-space indent, UTF-8, final newline",
+  "files": [
+    {
+      "operation": "e_rule.evaluate",
+      "path": "e_rule.evaluate.json",
+      "sha256": "2c64caf34b2d5a809d968ccf917def5063326474fbd5fe6ba40bcdcbd617e65a",
+      "vector_ids": [
+        "e-all-obligations-open",
+        "e-bounded-pass",
+        "e-empty-attempts",
+        "e-expectation-in-input",
+        "e-extra-class-pass",
+        "e-mismatched-coverage",
+        "e-mismatched-topology",
+        "e-missing-authenticated-client",
+        "e-missing-coverage",
+        "e-missing-extracted-callable",
+        "e-missing-outcome",
+        "e-missing-shared-process-credential",
+        "e-missing-topology",
+        "e-missing-unregistered-tool",
+        "e-missing-without-authorization",
+        "e-mixed-outcomes",
+        "e-observed-bypass",
+        "e-out-of-scope-attempts",
+        "e-unknown-attempt",
+        "e-unrelated-bypass",
+        "e-unsupported-property"
+      ]
+    },
+    {
+      "operation": "oe08.observation_vantage",
+      "path": "oe08.observation_vantage.json",
+      "sha256": "dc7bdcf13d01445e187017657b808f8e62609a8a346e502a54039ef1cbcc6179",
+      "vector_ids": [
+        "oe08-producer-self-vantage-claiming-independence",
+        "oe08-self-vantage-trusted-label",
+        "oe08-independent-trusted-domain",
+        "oe08-independent-without-runner-trust",
+        "oe08-shared-control-domain",
+        "oe08-untrusted-domain",
+        "oe08-observed-party-can-forge",
+        "oe08-observed-party-can-suppress",
+        "oe08-forge-and-suppress-facts-missing",
+        "oe08-one-negative-fact-missing",
+        "oe08-control-domain-missing",
+        "oe08-malformed-declared-independence",
+        "oe08-malformed-forge-fact",
+        "oe08-blank-observer",
+        "oe08-record-not-an-object"
+      ]
+    },
+    {
+      "operation": "agentavow.tool_key",
+      "path": "agentavow.tool_key.json",
+      "sha256": "ffb972100a941644ecfdb915e2197a24020db1f1102c82c5c34758f6400e3d88",
+      "vector_ids": [
+        "avow-key-00",
+        "avow-key-01",
+        "avow-key-02",
+        "avow-key-03",
+        "avow-key-04",
+        "avow-key-05",
+        "avow-key-06",
+        "avow-key-07",
+        "avow-key-08",
+        "avow-key-09",
+        "avow-key-10",
+        "avow-key-11",
+        "avow-key-12"
+      ]
+    },
+    {
+      "operation": "agentavow.tool_digest",
+      "path": "agentavow.tool_digest.json",
+      "sha256": "5c02964f0032b5b89d0420eaf9341d795d9ff2bd86ae0a9a000bff3a0d0cff0a",
+      "vector_ids": [
+        "avow-digest-ask_wiki_question",
+        "avow-digest-read_wiki_contents",
+        "avow-digest-read_wiki_structure",
+        "avow-digest-meta-and-unknown-fields-ignored"
+      ]
+    },
+    {
+      "operation": "agentavow.binding",
+      "path": "agentavow.binding.json",
+      "sha256": "72387a15a1470f00f495f84a3d8a22e5b9441c94227b28fb1bb5573f0c5efe52",
+      "vector_ids": [
+        "avow-binding-tool-match",
+        "avow-binding-unknown-tool",
+        "avow-binding-tool-drift",
+        "avow-binding-wrong-subject",
+        "avow-binding-past-expiry",
+        "avow-binding-tampered-payload"
+      ]
+    },
+    {
+      "operation": "lab.canonical_json",
+      "path": "lab.canonical_json.json",
+      "sha256": "75cc546dec62a489fd2726795fc84f4c77f2115cb0575a8608f8ad94ca070ef9",
+      "vector_ids": [
+        "canon-empty-object",
+        "canon-empty-array",
+        "canon-key-order",
+        "canon-nesting",
+        "canon-non-ascii-literal",
+        "canon-escapes",
+        "canon-line-separator-literal",
+        "canon-key-order-code-point",
+        "canon-key-order-case",
+        "canon-large-integer",
+        "canon-float-forms"
+      ]
+    },
+    {
+      "operation": "lab.read_json",
+      "path": "lab.read_json.json",
+      "sha256": "5401cc0822cd7a40045ba244b01950a20e7cfcd7d0bc028ce76fe63cc40384d2",
+      "vector_ids": [
+        "read-valid",
+        "read-duplicate-top-level",
+        "read-duplicate-nested",
+        "read-same-key-different-objects",
+        "read-not-json"
+      ]
+    },
+    {
+      "operation": "lab.forbidden_keys",
+      "path": "lab.forbidden_keys.json",
+      "sha256": "9555772b670f93fb237f8d64618fde066dfb7ffdc58a50e6cc9725d024ce9a26",
+      "vector_ids": [
+        "agg-none",
+        "agg-top-level-score",
+        "agg-nested-and-listed",
+        "agg-every-name",
+        "agg-value-is-not-a-key"
+      ]
+    },
+    {
+      "operation": "coverage.component_matrix",
+      "path": "coverage.component_matrix.json",
+      "sha256": "dbf23e67ff8e7ba6f2450cb76db7d315ccb5e1aacae9510ed0dbff26b385a745",
+      "vector_ids": [
+        "cov-pass",
+        "cov-fail",
+        "cov-untested",
+        "cov-missing-component",
+        "cov-duplicate-component",
+        "cov-invalid-assessment"
+      ]
+    }
+  ],
+  "protocol": "docs/REFERENCE-VECTORS.md",
+  "status": "frozen",
+  "suite": "aacp-reference-vectors-v1"
+}
