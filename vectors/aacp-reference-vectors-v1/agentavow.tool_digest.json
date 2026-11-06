@@ -1,0 +1,209 @@
+{
+  "contract": "Input is {tool}, a served MCP tool definition. The result is \"sha256:\" + hex digest of the JCS form of {profile, tool restricted to name, title, description, inputSchema, outputSchema, annotations}.",
+  "operation": "agentavow.tool_digest",
+  "specification": "interop/fixtures/agentavow-tool-manifest-digest-v1.json derivation.tool_digest (AgentAvow v1)",
+  "suite": "aacp-reference-vectors-v1",
+  "vectors": [
+    {
+      "description": "Definition digest of the served tool 'ask_wiki_question'; _meta is never hashed.",
+      "expected": {
+        "result": "sha256:171a53c9725874258b0b1125bc1d1c517e1b02f91a236096a37f53cc3a763dc9"
+      },
+      "expected_source": "producer:interop/fixtures/agentavow-tool-manifest-digest-v1.json attestation.jws payload scan.toolDigests['tool:ask_wiki_question'] (issuer-signed)",
+      "id": "avow-digest-ask_wiki_question",
+      "input": {
+        "tool": {
+          "_meta": {
+            "_fastmcp": {
+              "tags": []
+            }
+          },
+          "description": "Ask any question about a GitHub repository's codebase and get an AI-powered answer\ngrounded in its DeepWiki.",
+          "inputSchema": {
+            "properties": {
+              "question": {
+                "description": "The question to ask about the repository.",
+                "type": "string"
+              },
+              "repoName": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  }
+                ],
+                "description": "GitHub repository or list of repositories (max 10) in owner/repo format."
+              }
+            },
+            "required": [
+              "repoName",
+              "question"
+            ],
+            "type": "object"
+          },
+          "name": "ask_wiki_question",
+          "outputSchema": {
+            "properties": {
+              "result": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "type": "object",
+            "x-fastmcp-wrap-result": true
+          }
+        }
+      }
+    },
+    {
+      "description": "Definition digest of the served tool 'read_wiki_contents'; _meta is never hashed.",
+      "expected": {
+        "result": "sha256:3582a81089d120634d681ccf94e9ab7f15f471ddd48f4a82e06b05d10905d9c4"
+      },
+      "expected_source": "producer:interop/fixtures/agentavow-tool-manifest-digest-v1.json attestation.jws payload scan.toolDigests['tool:read_wiki_contents'] (issuer-signed)",
+      "id": "avow-digest-read_wiki_contents",
+      "input": {
+        "tool": {
+          "_meta": {
+            "_fastmcp": {
+              "tags": []
+            }
+          },
+          "description": "View documentation about a GitHub repository.",
+          "inputSchema": {
+            "properties": {
+              "repoName": {
+                "description": "GitHub repository in owner/repo format (e.g. \"facebook/react\").",
+                "type": "string"
+              }
+            },
+            "required": [
+              "repoName"
+            ],
+            "type": "object"
+          },
+          "name": "read_wiki_contents",
+          "outputSchema": {
+            "properties": {
+              "result": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "type": "object",
+            "x-fastmcp-wrap-result": true
+          }
+        }
+      }
+    },
+    {
+      "description": "Definition digest of the served tool 'read_wiki_structure'; _meta is never hashed.",
+      "expected": {
+        "result": "sha256:9bd57ff3e9534bbed54167ef1a74b2bc0e4b46128db28218767f0eed6e8f79a8"
+      },
+      "expected_source": "producer:interop/fixtures/agentavow-tool-manifest-digest-v1.json attestation.jws payload scan.toolDigests['tool:read_wiki_structure'] (issuer-signed)",
+      "id": "avow-digest-read_wiki_structure",
+      "input": {
+        "tool": {
+          "_meta": {
+            "_fastmcp": {
+              "tags": []
+            }
+          },
+          "description": "Get a list of documentation topics for a GitHub repository.",
+          "inputSchema": {
+            "properties": {
+              "repoName": {
+                "description": "GitHub repository in owner/repo format (e.g. \"facebook/react\").",
+                "type": "string"
+              }
+            },
+            "required": [
+              "repoName"
+            ],
+            "type": "object"
+          },
+          "name": "read_wiki_structure",
+          "outputSchema": {
+            "properties": {
+              "result": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "type": "object",
+            "x-fastmcp-wrap-result": true
+          }
+        }
+      }
+    },
+    {
+      "description": "The first tool with _meta changed and an unknown field added: the digest is unchanged.",
+      "expected": {
+        "result": "sha256:171a53c9725874258b0b1125bc1d1c517e1b02f91a236096a37f53cc3a763dc9"
+      },
+      "expected_source": "producer:interop/fixtures/agentavow-tool-manifest-digest-v1.json derivation.tool_digest ('_meta and unknown fields are never hashed') and the issuer-signed digest of the unmodified definition",
+      "id": "avow-digest-meta-and-unknown-fields-ignored",
+      "input": {
+        "tool": {
+          "_meta": {
+            "injected": "never hashed"
+          },
+          "description": "Ask any question about a GitHub repository's codebase and get an AI-powered answer\ngrounded in its DeepWiki.",
+          "inputSchema": {
+            "properties": {
+              "question": {
+                "description": "The question to ask about the repository.",
+                "type": "string"
+              },
+              "repoName": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  }
+                ],
+                "description": "GitHub repository or list of repositories (max 10) in owner/repo format."
+              }
+            },
+            "required": [
+              "repoName",
+              "question"
+            ],
+            "type": "object"
+          },
+          "name": "ask_wiki_question",
+          "outputSchema": {
+            "properties": {
+              "result": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "type": "object",
+            "x-fastmcp-wrap-result": true
+          },
+          "x-unknown": "never hashed"
+        }
+      }
+    }
+  ]
+}

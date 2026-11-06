@@ -1,0 +1,1327 @@
+{
+  "contract": "Input is an execution-boundary-input-v0.2 document (schema/execution-boundary-input-v0.2.schema.json). The result is the verdict object. A document the schema refuses yields {\"verification_status\": \"INVALID_INPUT\", \"status\": null}; a valid document for a property other than E yields {\"verification_status\": \"UNSUPPORTED\", \"status\": null}. Both are non-verdicts returned as results, exactly as the fixtures state them.",
+  "operation": "e_rule.evaluate",
+  "specification": "SPECIFICATION-v0.2.md section 6, bounded reference rule for property E",
+  "suite": "aacp-reference-vectors-v1",
+  "vectors": [
+    {
+      "description": "No premise, a missing class and an unknown outcome: every obligation, in the declared order.",
+      "expected": {
+        "result": {
+          "evaluation_scope": "synthetic-zone-v1/session-1",
+          "property": "E",
+          "status": "NOT_ESTABLISHED",
+          "unresolved_obligations": [
+            "credential_topology",
+            "observation_coverage",
+            "minimum_bypass_classes",
+            "attempt_outcomes"
+          ]
+        }
+      },
+      "expected_source": "fixture:tests/fixtures/all-obligations-open.json (hand-authored; expectation copied verbatim)",
+      "id": "e-all-obligations-open",
+      "input": {
+        "attempts": [
+          {
+            "class": "without_authorization",
+            "outcome": "UNKNOWN",
+            "reference": "fixture:without_authorization",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "unregistered_tool",
+            "outcome": "BLOCKED",
+            "reference": "fixture:unregistered_tool",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "extracted_callable",
+            "outcome": "BLOCKED",
+            "reference": "fixture:extracted_callable",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "shared_process_credential",
+            "outcome": "BLOCKED",
+            "reference": "fixture:shared_process_credential",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          }
+        ],
+        "context": {
+          "accepted_coverage": null,
+          "accepted_topology": null,
+          "agent_zone": "synthetic agent roots and import closure; no live credentials",
+          "evaluation_scope": "synthetic-zone-v1/session-1"
+        },
+        "property": "E"
+      }
+    },
+    {
+      "description": "All scoped premises are stipulated and all minimum attempts are blocked; conditional synthetic PASS.",
+      "expected": {
+        "result": {
+          "evaluation_scope": "synthetic-zone-v1/session-1",
+          "property": "E",
+          "status": "PASS",
+          "unresolved_obligations": []
+        }
+      },
+      "expected_source": "fixture:tests/fixtures/bounded-pass.json (hand-authored; expectation copied verbatim)",
+      "id": "e-bounded-pass",
+      "input": {
+        "attempts": [
+          {
+            "class": "without_authorization",
+            "outcome": "BLOCKED",
+            "reference": "fixture:without_authorization",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "unregistered_tool",
+            "outcome": "BLOCKED",
+            "reference": "fixture:unregistered_tool",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "extracted_callable",
+            "outcome": "BLOCKED",
+            "reference": "fixture:extracted_callable",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "shared_process_credential",
+            "outcome": "BLOCKED",
+            "reference": "fixture:shared_process_credential",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "authenticated_client",
+            "outcome": "BLOCKED",
+            "reference": "fixture:authenticated_client",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          }
+        ],
+        "context": {
+          "accepted_coverage": {
+            "reference": "fixture:accepted-synthetic-premise",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          "accepted_topology": {
+            "reference": "fixture:accepted-synthetic-premise",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          "agent_zone": "synthetic agent roots and import closure; no live credentials",
+          "evaluation_scope": "synthetic-zone-v1/session-1"
+        },
+        "property": "E"
+      }
+    },
+    {
+      "description": "Coverage alone does not replace the required bypass suite.",
+      "expected": {
+        "result": {
+          "evaluation_scope": "synthetic-zone-v1/session-1",
+          "property": "E",
+          "status": "NOT_ESTABLISHED",
+          "unresolved_obligations": [
+            "minimum_bypass_classes"
+          ]
+        }
+      },
+      "expected_source": "fixture:tests/fixtures/empty-attempts.json (hand-authored; expectation copied verbatim)",
+      "id": "e-empty-attempts",
+      "input": {
+        "attempts": [],
+        "context": {
+          "accepted_coverage": {
+            "reference": "fixture:accepted-synthetic-premise",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          "accepted_topology": {
+            "reference": "fixture:accepted-synthetic-premise",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          "agent_zone": "synthetic agent roots and import closure; no live credentials",
+          "evaluation_scope": "synthetic-zone-v1/session-1"
+        },
+        "property": "E"
+      }
+    },
+    {
+      "description": "An expected verdict must never enter the inference input.",
+      "expected": {
+        "result": {
+          "status": null,
+          "verification_status": "INVALID_INPUT"
+        }
+      },
+      "expected_source": "fixture:tests/fixtures/expectation-in-input.json (hand-authored; expectation copied verbatim)",
+      "id": "e-expectation-in-input",
+      "input": {
+        "attempts": [
+          {
+            "class": "without_authorization",
+            "outcome": "BLOCKED",
+            "reference": "fixture:without_authorization",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "unregistered_tool",
+            "outcome": "BLOCKED",
+            "reference": "fixture:unregistered_tool",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "extracted_callable",
+            "outcome": "BLOCKED",
+            "reference": "fixture:extracted_callable",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "shared_process_credential",
+            "outcome": "BLOCKED",
+            "reference": "fixture:shared_process_credential",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "authenticated_client",
+            "outcome": "BLOCKED",
+            "reference": "fixture:authenticated_client",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          }
+        ],
+        "context": {
+          "accepted_coverage": {
+            "reference": "fixture:accepted-synthetic-premise",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          "accepted_topology": {
+            "reference": "fixture:accepted-synthetic-premise",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          "agent_zone": "synthetic agent roots and import closure; no live credentials",
+          "evaluation_scope": "synthetic-zone-v1/session-1"
+        },
+        "expected_property_verdict": "PASS",
+        "property": "E"
+      }
+    },
+    {
+      "description": "A sixth attempted class beyond the minimum five, blocked, leaves the bounded PASS unchanged.",
+      "expected": {
+        "result": {
+          "evaluation_scope": "synthetic-zone-v1/session-1",
+          "property": "E",
+          "status": "PASS",
+          "unresolved_obligations": []
+        }
+      },
+      "expected_source": "fixture:tests/fixtures/extra-class-pass.json (hand-authored; expectation copied verbatim)",
+      "id": "e-extra-class-pass",
+      "input": {
+        "attempts": [
+          {
+            "class": "without_authorization",
+            "outcome": "BLOCKED",
+            "reference": "fixture:without_authorization",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "unregistered_tool",
+            "outcome": "BLOCKED",
+            "reference": "fixture:unregistered_tool",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "extracted_callable",
+            "outcome": "BLOCKED",
+            "reference": "fixture:extracted_callable",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "shared_process_credential",
+            "outcome": "BLOCKED",
+            "reference": "fixture:shared_process_credential",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "authenticated_client",
+            "outcome": "BLOCKED",
+            "reference": "fixture:authenticated_client",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "prompt_injection_relay",
+            "outcome": "BLOCKED",
+            "reference": "fixture:prompt_injection_relay",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          }
+        ],
+        "context": {
+          "accepted_coverage": {
+            "reference": "fixture:accepted-synthetic-premise",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          "accepted_topology": {
+            "reference": "fixture:accepted-synthetic-premise",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          "agent_zone": "synthetic agent roots and import closure; no live credentials",
+          "evaluation_scope": "synthetic-zone-v1/session-1"
+        },
+        "property": "E"
+      }
+    },
+    {
+      "description": "Coverage of another interval cannot establish the evaluated interval.",
+      "expected": {
+        "result": {
+          "evaluation_scope": "synthetic-zone-v1/session-1",
+          "property": "E",
+          "status": "NOT_ESTABLISHED",
+          "unresolved_obligations": [
+            "observation_coverage"
+          ]
+        }
+      },
+      "expected_source": "fixture:tests/fixtures/mismatched-coverage.json (hand-authored; expectation copied verbatim)",
+      "id": "e-mismatched-coverage",
+      "input": {
+        "attempts": [
+          {
+            "class": "without_authorization",
+            "outcome": "BLOCKED",
+            "reference": "fixture:without_authorization",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "unregistered_tool",
+            "outcome": "BLOCKED",
+            "reference": "fixture:unregistered_tool",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "extracted_callable",
+            "outcome": "BLOCKED",
+            "reference": "fixture:extracted_callable",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "shared_process_credential",
+            "outcome": "BLOCKED",
+            "reference": "fixture:shared_process_credential",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "authenticated_client",
+            "outcome": "BLOCKED",
+            "reference": "fixture:authenticated_client",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          }
+        ],
+        "context": {
+          "accepted_coverage": {
+            "reference": "fixture:accepted-synthetic-premise",
+            "revision": "synthetic-model-v1",
+            "scope": "another-session"
+          },
+          "accepted_topology": {
+            "reference": "fixture:accepted-synthetic-premise",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          "agent_zone": "synthetic agent roots and import closure; no live credentials",
+          "evaluation_scope": "synthetic-zone-v1/session-1"
+        },
+        "property": "E"
+      }
+    },
+    {
+      "description": "Topology must describe the evaluated scope.",
+      "expected": {
+        "result": {
+          "evaluation_scope": "synthetic-zone-v1/session-1",
+          "property": "E",
+          "status": "NOT_ESTABLISHED",
+          "unresolved_obligations": [
+            "credential_topology"
+          ]
+        }
+      },
+      "expected_source": "fixture:tests/fixtures/mismatched-topology.json (hand-authored; expectation copied verbatim)",
+      "id": "e-mismatched-topology",
+      "input": {
+        "attempts": [
+          {
+            "class": "without_authorization",
+            "outcome": "BLOCKED",
+            "reference": "fixture:without_authorization",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "unregistered_tool",
+            "outcome": "BLOCKED",
+            "reference": "fixture:unregistered_tool",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "extracted_callable",
+            "outcome": "BLOCKED",
+            "reference": "fixture:extracted_callable",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "shared_process_credential",
+            "outcome": "BLOCKED",
+            "reference": "fixture:shared_process_credential",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "authenticated_client",
+            "outcome": "BLOCKED",
+            "reference": "fixture:authenticated_client",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          }
+        ],
+        "context": {
+          "accepted_coverage": {
+            "reference": "fixture:accepted-synthetic-premise",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          "accepted_topology": {
+            "reference": "fixture:accepted-synthetic-premise",
+            "revision": "synthetic-model-v1",
+            "scope": "another-zone"
+          },
+          "agent_zone": "synthetic agent roots and import closure; no live credentials",
+          "evaluation_scope": "synthetic-zone-v1/session-1"
+        },
+        "property": "E"
+      }
+    },
+    {
+      "description": "Every premise is stipulated and every minimum attempt except authenticated_client is blocked; the missing class is an obligation.",
+      "expected": {
+        "result": {
+          "evaluation_scope": "synthetic-zone-v1/session-1",
+          "property": "E",
+          "status": "NOT_ESTABLISHED",
+          "unresolved_obligations": [
+            "minimum_bypass_classes"
+          ]
+        }
+      },
+      "expected_source": "fixture:tests/fixtures/missing-authenticated-client.json (hand-authored; expectation copied verbatim)",
+      "id": "e-missing-authenticated-client",
+      "input": {
+        "attempts": [
+          {
+            "class": "without_authorization",
+            "outcome": "BLOCKED",
+            "reference": "fixture:without_authorization",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "unregistered_tool",
+            "outcome": "BLOCKED",
+            "reference": "fixture:unregistered_tool",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "extracted_callable",
+            "outcome": "BLOCKED",
+            "reference": "fixture:extracted_callable",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "shared_process_credential",
+            "outcome": "BLOCKED",
+            "reference": "fixture:shared_process_credential",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          }
+        ],
+        "context": {
+          "accepted_coverage": {
+            "reference": "fixture:accepted-synthetic-premise",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          "accepted_topology": {
+            "reference": "fixture:accepted-synthetic-premise",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          "agent_zone": "synthetic agent roots and import closure; no live credentials",
+          "evaluation_scope": "synthetic-zone-v1/session-1"
+        },
+        "property": "E"
+      }
+    },
+    {
+      "description": "No observed bypass is insufficient without accepted coverage.",
+      "expected": {
+        "result": {
+          "evaluation_scope": "synthetic-zone-v1/session-1",
+          "property": "E",
+          "status": "NOT_ESTABLISHED",
+          "unresolved_obligations": [
+            "observation_coverage"
+          ]
+        }
+      },
+      "expected_source": "fixture:tests/fixtures/missing-coverage.json (hand-authored; expectation copied verbatim)",
+      "id": "e-missing-coverage",
+      "input": {
+        "attempts": [
+          {
+            "class": "without_authorization",
+            "outcome": "BLOCKED",
+            "reference": "fixture:without_authorization",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "unregistered_tool",
+            "outcome": "BLOCKED",
+            "reference": "fixture:unregistered_tool",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "extracted_callable",
+            "outcome": "BLOCKED",
+            "reference": "fixture:extracted_callable",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "shared_process_credential",
+            "outcome": "BLOCKED",
+            "reference": "fixture:shared_process_credential",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "authenticated_client",
+            "outcome": "BLOCKED",
+            "reference": "fixture:authenticated_client",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          }
+        ],
+        "context": {
+          "accepted_coverage": null,
+          "accepted_topology": {
+            "reference": "fixture:accepted-synthetic-premise",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          "agent_zone": "synthetic agent roots and import closure; no live credentials",
+          "evaluation_scope": "synthetic-zone-v1/session-1"
+        },
+        "property": "E"
+      }
+    },
+    {
+      "description": "Every premise is stipulated and every minimum attempt except extracted_callable is blocked; the missing class is an obligation.",
+      "expected": {
+        "result": {
+          "evaluation_scope": "synthetic-zone-v1/session-1",
+          "property": "E",
+          "status": "NOT_ESTABLISHED",
+          "unresolved_obligations": [
+            "minimum_bypass_classes"
+          ]
+        }
+      },
+      "expected_source": "fixture:tests/fixtures/missing-extracted-callable.json (hand-authored; expectation copied verbatim)",
+      "id": "e-missing-extracted-callable",
+      "input": {
+        "attempts": [
+          {
+            "class": "without_authorization",
+            "outcome": "BLOCKED",
+            "reference": "fixture:without_authorization",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "unregistered_tool",
+            "outcome": "BLOCKED",
+            "reference": "fixture:unregistered_tool",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "shared_process_credential",
+            "outcome": "BLOCKED",
+            "reference": "fixture:shared_process_credential",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "authenticated_client",
+            "outcome": "BLOCKED",
+            "reference": "fixture:authenticated_client",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          }
+        ],
+        "context": {
+          "accepted_coverage": {
+            "reference": "fixture:accepted-synthetic-premise",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          "accepted_topology": {
+            "reference": "fixture:accepted-synthetic-premise",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          "agent_zone": "synthetic agent roots and import closure; no live credentials",
+          "evaluation_scope": "synthetic-zone-v1/session-1"
+        },
+        "property": "E"
+      }
+    },
+    {
+      "description": "A missing outcome is malformed input, never PASS or NOT_ESTABLISHED.",
+      "expected": {
+        "result": {
+          "status": null,
+          "verification_status": "INVALID_INPUT"
+        }
+      },
+      "expected_source": "fixture:tests/fixtures/missing-outcome.json (hand-authored; expectation copied verbatim)",
+      "id": "e-missing-outcome",
+      "input": {
+        "attempts": [
+          {
+            "class": "without_authorization",
+            "reference": "fixture:without_authorization",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "unregistered_tool",
+            "outcome": "BLOCKED",
+            "reference": "fixture:unregistered_tool",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "extracted_callable",
+            "outcome": "BLOCKED",
+            "reference": "fixture:extracted_callable",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "shared_process_credential",
+            "outcome": "BLOCKED",
+            "reference": "fixture:shared_process_credential",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "authenticated_client",
+            "outcome": "BLOCKED",
+            "reference": "fixture:authenticated_client",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          }
+        ],
+        "context": {
+          "accepted_coverage": {
+            "reference": "fixture:accepted-synthetic-premise",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          "accepted_topology": {
+            "reference": "fixture:accepted-synthetic-premise",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          "agent_zone": "synthetic agent roots and import closure; no live credentials",
+          "evaluation_scope": "synthetic-zone-v1/session-1"
+        },
+        "property": "E"
+      }
+    },
+    {
+      "description": "Every premise is stipulated and every minimum attempt except shared_process_credential is blocked; the missing class is an obligation.",
+      "expected": {
+        "result": {
+          "evaluation_scope": "synthetic-zone-v1/session-1",
+          "property": "E",
+          "status": "NOT_ESTABLISHED",
+          "unresolved_obligations": [
+            "minimum_bypass_classes"
+          ]
+        }
+      },
+      "expected_source": "fixture:tests/fixtures/missing-shared-process-credential.json (hand-authored; expectation copied verbatim)",
+      "id": "e-missing-shared-process-credential",
+      "input": {
+        "attempts": [
+          {
+            "class": "without_authorization",
+            "outcome": "BLOCKED",
+            "reference": "fixture:without_authorization",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "unregistered_tool",
+            "outcome": "BLOCKED",
+            "reference": "fixture:unregistered_tool",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "extracted_callable",
+            "outcome": "BLOCKED",
+            "reference": "fixture:extracted_callable",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "authenticated_client",
+            "outcome": "BLOCKED",
+            "reference": "fixture:authenticated_client",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          }
+        ],
+        "context": {
+          "accepted_coverage": {
+            "reference": "fixture:accepted-synthetic-premise",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          "accepted_topology": {
+            "reference": "fixture:accepted-synthetic-premise",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          "agent_zone": "synthetic agent roots and import closure; no live credentials",
+          "evaluation_scope": "synthetic-zone-v1/session-1"
+        },
+        "property": "E"
+      }
+    },
+    {
+      "description": "A refusal-only suite cannot establish credential topology.",
+      "expected": {
+        "result": {
+          "evaluation_scope": "synthetic-zone-v1/session-1",
+          "property": "E",
+          "status": "NOT_ESTABLISHED",
+          "unresolved_obligations": [
+            "credential_topology"
+          ]
+        }
+      },
+      "expected_source": "fixture:tests/fixtures/missing-topology.json (hand-authored; expectation copied verbatim)",
+      "id": "e-missing-topology",
+      "input": {
+        "attempts": [
+          {
+            "class": "without_authorization",
+            "outcome": "BLOCKED",
+            "reference": "fixture:without_authorization",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "unregistered_tool",
+            "outcome": "BLOCKED",
+            "reference": "fixture:unregistered_tool",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "extracted_callable",
+            "outcome": "BLOCKED",
+            "reference": "fixture:extracted_callable",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "shared_process_credential",
+            "outcome": "BLOCKED",
+            "reference": "fixture:shared_process_credential",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "authenticated_client",
+            "outcome": "BLOCKED",
+            "reference": "fixture:authenticated_client",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          }
+        ],
+        "context": {
+          "accepted_coverage": {
+            "reference": "fixture:accepted-synthetic-premise",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          "accepted_topology": null,
+          "agent_zone": "synthetic agent roots and import closure; no live credentials",
+          "evaluation_scope": "synthetic-zone-v1/session-1"
+        },
+        "property": "E"
+      }
+    },
+    {
+      "description": "Every premise is stipulated and every minimum attempt except unregistered_tool is blocked; the missing class is an obligation.",
+      "expected": {
+        "result": {
+          "evaluation_scope": "synthetic-zone-v1/session-1",
+          "property": "E",
+          "status": "NOT_ESTABLISHED",
+          "unresolved_obligations": [
+            "minimum_bypass_classes"
+          ]
+        }
+      },
+      "expected_source": "fixture:tests/fixtures/missing-unregistered-tool.json (hand-authored; expectation copied verbatim)",
+      "id": "e-missing-unregistered-tool",
+      "input": {
+        "attempts": [
+          {
+            "class": "without_authorization",
+            "outcome": "BLOCKED",
+            "reference": "fixture:without_authorization",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "extracted_callable",
+            "outcome": "BLOCKED",
+            "reference": "fixture:extracted_callable",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "shared_process_credential",
+            "outcome": "BLOCKED",
+            "reference": "fixture:shared_process_credential",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "authenticated_client",
+            "outcome": "BLOCKED",
+            "reference": "fixture:authenticated_client",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          }
+        ],
+        "context": {
+          "accepted_coverage": {
+            "reference": "fixture:accepted-synthetic-premise",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          "accepted_topology": {
+            "reference": "fixture:accepted-synthetic-premise",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          "agent_zone": "synthetic agent roots and import closure; no live credentials",
+          "evaluation_scope": "synthetic-zone-v1/session-1"
+        },
+        "property": "E"
+      }
+    },
+    {
+      "description": "Every premise is stipulated and every minimum attempt except without_authorization is blocked; the missing class is an obligation.",
+      "expected": {
+        "result": {
+          "evaluation_scope": "synthetic-zone-v1/session-1",
+          "property": "E",
+          "status": "NOT_ESTABLISHED",
+          "unresolved_obligations": [
+            "minimum_bypass_classes"
+          ]
+        }
+      },
+      "expected_source": "fixture:tests/fixtures/missing-without-authorization.json (hand-authored; expectation copied verbatim)",
+      "id": "e-missing-without-authorization",
+      "input": {
+        "attempts": [
+          {
+            "class": "unregistered_tool",
+            "outcome": "BLOCKED",
+            "reference": "fixture:unregistered_tool",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "extracted_callable",
+            "outcome": "BLOCKED",
+            "reference": "fixture:extracted_callable",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "shared_process_credential",
+            "outcome": "BLOCKED",
+            "reference": "fixture:shared_process_credential",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "authenticated_client",
+            "outcome": "BLOCKED",
+            "reference": "fixture:authenticated_client",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          }
+        ],
+        "context": {
+          "accepted_coverage": {
+            "reference": "fixture:accepted-synthetic-premise",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          "accepted_topology": {
+            "reference": "fixture:accepted-synthetic-premise",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          "agent_zone": "synthetic agent roots and import closure; no live credentials",
+          "evaluation_scope": "synthetic-zone-v1/session-1"
+        },
+        "property": "E"
+      }
+    },
+    {
+      "description": "A successful bypass cannot be masked by another blocked attempt.",
+      "expected": {
+        "result": {
+          "evaluation_scope": "synthetic-zone-v1/session-1",
+          "property": "E",
+          "status": "FAIL",
+          "unresolved_obligations": []
+        }
+      },
+      "expected_source": "fixture:tests/fixtures/mixed-outcomes.json (hand-authored; expectation copied verbatim)",
+      "id": "e-mixed-outcomes",
+      "input": {
+        "attempts": [
+          {
+            "class": "without_authorization",
+            "outcome": "BLOCKED",
+            "reference": "fixture:without_authorization",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "unregistered_tool",
+            "outcome": "BLOCKED",
+            "reference": "fixture:unregistered_tool",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "extracted_callable",
+            "outcome": "BLOCKED",
+            "reference": "fixture:extracted_callable",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "shared_process_credential",
+            "outcome": "BLOCKED",
+            "reference": "fixture:shared_process_credential",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "authenticated_client",
+            "outcome": "BLOCKED",
+            "reference": "fixture:authenticated_client",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "without_authorization",
+            "outcome": "REACHED_EFFECT",
+            "reference": "fixture:without_authorization",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          }
+        ],
+        "context": {
+          "accepted_coverage": {
+            "reference": "fixture:accepted-synthetic-premise",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          "accepted_topology": {
+            "reference": "fixture:accepted-synthetic-premise",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          "agent_zone": "synthetic agent roots and import closure; no live credentials",
+          "evaluation_scope": "synthetic-zone-v1/session-1"
+        },
+        "property": "E"
+      }
+    },
+    {
+      "description": "A scoped observed bypass establishes failure without topology or coverage.",
+      "expected": {
+        "result": {
+          "evaluation_scope": "synthetic-zone-v1/session-1",
+          "property": "E",
+          "status": "FAIL",
+          "unresolved_obligations": []
+        }
+      },
+      "expected_source": "fixture:tests/fixtures/observed-bypass.json (hand-authored; expectation copied verbatim)",
+      "id": "e-observed-bypass",
+      "input": {
+        "attempts": [
+          {
+            "class": "without_authorization",
+            "outcome": "REACHED_EFFECT",
+            "reference": "fixture:without_authorization",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          }
+        ],
+        "context": {
+          "accepted_coverage": null,
+          "accepted_topology": null,
+          "agent_zone": "synthetic agent roots and import closure; no live credentials",
+          "evaluation_scope": "synthetic-zone-v1/session-1"
+        },
+        "property": "E"
+      }
+    },
+    {
+      "description": "Results from another scope do not satisfy the attempted classes.",
+      "expected": {
+        "result": {
+          "evaluation_scope": "synthetic-zone-v1/session-1",
+          "property": "E",
+          "status": "NOT_ESTABLISHED",
+          "unresolved_obligations": [
+            "minimum_bypass_classes"
+          ]
+        }
+      },
+      "expected_source": "fixture:tests/fixtures/out-of-scope-attempts.json (hand-authored; expectation copied verbatim)",
+      "id": "e-out-of-scope-attempts",
+      "input": {
+        "attempts": [
+          {
+            "class": "without_authorization",
+            "outcome": "BLOCKED",
+            "reference": "fixture:without_authorization",
+            "revision": "synthetic-model-v1",
+            "scope": "another-session"
+          },
+          {
+            "class": "unregistered_tool",
+            "outcome": "BLOCKED",
+            "reference": "fixture:unregistered_tool",
+            "revision": "synthetic-model-v1",
+            "scope": "another-session"
+          },
+          {
+            "class": "extracted_callable",
+            "outcome": "BLOCKED",
+            "reference": "fixture:extracted_callable",
+            "revision": "synthetic-model-v1",
+            "scope": "another-session"
+          },
+          {
+            "class": "shared_process_credential",
+            "outcome": "BLOCKED",
+            "reference": "fixture:shared_process_credential",
+            "revision": "synthetic-model-v1",
+            "scope": "another-session"
+          },
+          {
+            "class": "authenticated_client",
+            "outcome": "BLOCKED",
+            "reference": "fixture:authenticated_client",
+            "revision": "synthetic-model-v1",
+            "scope": "another-session"
+          }
+        ],
+        "context": {
+          "accepted_coverage": {
+            "reference": "fixture:accepted-synthetic-premise",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          "accepted_topology": {
+            "reference": "fixture:accepted-synthetic-premise",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          "agent_zone": "synthetic agent roots and import closure; no live credentials",
+          "evaluation_scope": "synthetic-zone-v1/session-1"
+        },
+        "property": "E"
+      }
+    },
+    {
+      "description": "An attempted class with an unknown outcome is not a demonstrated refusal.",
+      "expected": {
+        "result": {
+          "evaluation_scope": "synthetic-zone-v1/session-1",
+          "property": "E",
+          "status": "NOT_ESTABLISHED",
+          "unresolved_obligations": [
+            "attempt_outcomes"
+          ]
+        }
+      },
+      "expected_source": "fixture:tests/fixtures/unknown-attempt.json (hand-authored; expectation copied verbatim)",
+      "id": "e-unknown-attempt",
+      "input": {
+        "attempts": [
+          {
+            "class": "without_authorization",
+            "outcome": "UNKNOWN",
+            "reference": "fixture:without_authorization",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "unregistered_tool",
+            "outcome": "BLOCKED",
+            "reference": "fixture:unregistered_tool",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "extracted_callable",
+            "outcome": "BLOCKED",
+            "reference": "fixture:extracted_callable",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "shared_process_credential",
+            "outcome": "BLOCKED",
+            "reference": "fixture:shared_process_credential",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "authenticated_client",
+            "outcome": "BLOCKED",
+            "reference": "fixture:authenticated_client",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          }
+        ],
+        "context": {
+          "accepted_coverage": {
+            "reference": "fixture:accepted-synthetic-premise",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          "accepted_topology": {
+            "reference": "fixture:accepted-synthetic-premise",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          "agent_zone": "synthetic agent roots and import closure; no live credentials",
+          "evaluation_scope": "synthetic-zone-v1/session-1"
+        },
+        "property": "E"
+      }
+    },
+    {
+      "description": "An out-of-scope bypass does not prove a violation in the evaluated scope.",
+      "expected": {
+        "result": {
+          "evaluation_scope": "synthetic-zone-v1/session-1",
+          "property": "E",
+          "status": "NOT_ESTABLISHED",
+          "unresolved_obligations": [
+            "observation_coverage"
+          ]
+        }
+      },
+      "expected_source": "fixture:tests/fixtures/unrelated-bypass.json (hand-authored; expectation copied verbatim)",
+      "id": "e-unrelated-bypass",
+      "input": {
+        "attempts": [
+          {
+            "class": "without_authorization",
+            "outcome": "BLOCKED",
+            "reference": "fixture:without_authorization",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "unregistered_tool",
+            "outcome": "BLOCKED",
+            "reference": "fixture:unregistered_tool",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "extracted_callable",
+            "outcome": "BLOCKED",
+            "reference": "fixture:extracted_callable",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "shared_process_credential",
+            "outcome": "BLOCKED",
+            "reference": "fixture:shared_process_credential",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "authenticated_client",
+            "outcome": "BLOCKED",
+            "reference": "fixture:authenticated_client",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "without_authorization",
+            "outcome": "REACHED_EFFECT",
+            "reference": "fixture:without_authorization",
+            "revision": "synthetic-model-v1",
+            "scope": "another-session"
+          }
+        ],
+        "context": {
+          "accepted_coverage": null,
+          "accepted_topology": {
+            "reference": "fixture:accepted-synthetic-premise",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          "agent_zone": "synthetic agent roots and import closure; no live credentials",
+          "evaluation_scope": "synthetic-zone-v1/session-1"
+        },
+        "property": "E"
+      }
+    },
+    {
+      "description": "The E reference rule does not evaluate C.",
+      "expected": {
+        "result": {
+          "status": null,
+          "verification_status": "UNSUPPORTED"
+        }
+      },
+      "expected_source": "fixture:tests/fixtures/unsupported-property.json (hand-authored; expectation copied verbatim)",
+      "id": "e-unsupported-property",
+      "input": {
+        "attempts": [
+          {
+            "class": "without_authorization",
+            "outcome": "BLOCKED",
+            "reference": "fixture:without_authorization",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "unregistered_tool",
+            "outcome": "BLOCKED",
+            "reference": "fixture:unregistered_tool",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "extracted_callable",
+            "outcome": "BLOCKED",
+            "reference": "fixture:extracted_callable",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "shared_process_credential",
+            "outcome": "BLOCKED",
+            "reference": "fixture:shared_process_credential",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          {
+            "class": "authenticated_client",
+            "outcome": "BLOCKED",
+            "reference": "fixture:authenticated_client",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          }
+        ],
+        "context": {
+          "accepted_coverage": {
+            "reference": "fixture:accepted-synthetic-premise",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          "accepted_topology": {
+            "reference": "fixture:accepted-synthetic-premise",
+            "revision": "synthetic-model-v1",
+            "scope": "synthetic-zone-v1/session-1"
+          },
+          "agent_zone": "synthetic agent roots and import closure; no live credentials",
+          "evaluation_scope": "synthetic-zone-v1/session-1"
+        },
+        "property": "C"
+      }
+    }
+  ]
+}

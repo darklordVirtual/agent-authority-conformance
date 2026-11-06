@@ -79,6 +79,8 @@ No percentage, star rating, “5/7 conformant”, security grade or ranking is v
 | [`conformance/invariants.py`](conformance/invariants.py) | Metamorphic relations and a differential reference model for the E rule over a generated space |
 | [`conformance/coverage.py`](conformance/coverage.py) | Strict, score-free A–G component matrix for cross-platform assessment comparison |
 | [`MUTATIONS-AND-INVARIANTS.md`](MUTATIONS-AND-INVARIANTS.md) | What the two adequacy checks establish, and what they do not |
+| [`vectors/aacp-reference-vectors-v1/`](vectors/aacp-reference-vectors-v1/) | Frozen, digest-pinned input/answer pairs for nine operations, for checking a separately written implementation in any language |
+| [`docs/REFERENCE-VECTORS.md`](docs/REFERENCE-VECTORS.md) | Where each expected answer comes from, the stdio protocol, and what agreement does and does not establish |
 | [`tests/fixtures/`](tests/fixtures/) | Synthetic, committed evidence-sufficiency cases |
 | [`CONTRIBUTING.md`](CONTRIBUTING.md) | Evidence and contribution discipline |
 
@@ -101,8 +103,14 @@ python -m conformance.check
 python -m conformance.mutations
 python -m conformance.invariants
 python -m conformance.coverage tests/adversarial/assessment-pass.json
+python -m conformance.vectors verify
+python -m conformance.vectors check
 python -m unittest discover -s tests -v
 ```
+
+To check another implementation against the frozen reference vectors, in any
+language, see [docs/REFERENCE-VECTORS.md](docs/REFERENCE-VECTORS.md):
+`python -m conformance.vectors run --impl "<your command>"`.
 
 Activate the environment with the command for your platform before installing.
 For the first installer-backed self-service commands (`aacp init`, `validate`
@@ -125,6 +133,10 @@ The E reference rule consumes **already accepted evidence**. It does not verify
 artifacts, inspect credential custody or establish coverage itself. Its synthetic
 fixtures test inference semantics, not the security of a deployed product.
 See [the input trust boundary](SPECIFICATION-v0.2.md#6-bounded-reference-rule-and-corpus).
+
+## Published bounded reproductions
+
+- [AEGIS Core 3.4.0, Run 002](https://github.com/darklordVirtual/agent-authority-conformance/blob/026097b21c2c5544448e05ca275dc0104d4f873a/publications/aegis-issue-21-run-002/PUBLICATION.md): operator-controlled manual reproduction of a producer-authored fixture, **REPRODUCTION / BCR-1 at most**. The producer [confirmed the published archive and representation](https://github.com/darklordVirtual/agent-authority-conformance/issues/21#issuecomment-6366973494). The publication note links the approved archive and report and states the claim limits.
 
 ## Running a pilot against another project
 

@@ -1,0 +1,272 @@
+{
+  "contract": "Input is {vector: {gate, jws}, fixture: {issuer, attestation}}; jws is the compact JWS or \"reference\" for fixture.attestation.jws. The result is the six axes and rely, as the producer states them. Needs Ed25519 verification.",
+  "operation": "agentavow.binding",
+  "specification": "interop/fixtures/agentavow-tool-manifest-digest-v1.json (AgentAvow tool-manifest-digest-v1, E1 per-tool binding)",
+  "suite": "aacp-reference-vectors-v1",
+  "vectors": [
+    {
+      "description": "The positive case. The gate authorizes one named tool on the same server, computes the digest of the definition it was served, and that digest equals the one the scan signed for that tool, inside the validity window. Every axis passes.",
+      "expected": {
+        "result": {
+          "canonical_bytes": true,
+          "fresh": true,
+          "rely": true,
+          "signature_valid": true,
+          "subject_binds": true,
+          "tool_binds": true,
+          "tool_digest_binds": true
+        }
+      },
+      "expected_source": "producer:interop/fixtures/agentavow-tool-manifest-digest-v1.json vectors[0].expect (verbatim)",
+      "id": "avow-binding-tool-match",
+      "input": {
+        "fixture": {
+          "attestation": {
+            "jws": "eyJhbGciOiJFZERTQSIsImtpZCI6ImFnZW50Z3JhcGgtc2VjdXJpdHktdjEifQ.eyJAY29udGV4dCI6Imh0dHBzOi8vc2NoZW1hLmFnZW50Z3JhcGguY28vYXR0ZXN0YXRpb24vc2VjdXJpdHkvdjEiLCJleHBpcmVzQXQiOiIyMDI2LTEwLTAyVDIxOjI4OjM0LjA4NTE5NyswMDowMCIsImlzc3VlZEF0IjoiMjAyNi0xMC0wMVQyMToyODozNC4wODUxOTcrMDA6MDAiLCJpc3N1ZXIiOnsiaWQiOiJkaWQ6d2ViOmFnZW50Z3JhcGguY28iLCJuYW1lIjoiQWdlbnRBdm93IiwidXJsIjoiaHR0cHM6Ly9hZ2VudGdyYXBoLmNvIn0sInJlY29tbWVuZGVkTGltaXRzIjp7Im1heF90b2tlbnNfcGVyX2NhbGwiOjQwOTYsInJlcXVlc3RzX3Blcl9taW51dGUiOjMwLCJyZXF1aXJlX3VzZXJfY29uZmlybWF0aW9uIjpmYWxzZX0sInNjYW4iOnsiY2F0ZWdvcnlTY29yZXMiOnsiY29kZV9zYWZldHkiOjEwMCwiZGF0YV9oYW5kbGluZyI6MTAwLCJkZXBlbmRlbmN5X2hlYWx0aCI6MTAwLCJmaWxlc3lzdGVtX2FjY2VzcyI6MTAwLCJzZWNyZXRfaHlnaWVuZSI6MTAwfSwiY292ZXJhZ2UiOnsiZGJfc25hcHNob3RzIjp7fSwibGl2ZV9vYnNlcnZlZCI6dHJ1ZSwicG9pbnRfaW5fdGltZSI6IjIwMjYtMTAtMDFUMjE6Mjg6MjIuNjU3MDY0WiIsInByb3ZlbmFuY2VfYmluZGluZyI6Im4vYSIsInNjYW5fZGVwdGgiOiJhcnRpZmFjdCtsaXZlIiwic3VyZmFjZSI6Im1jcCJ9LCJmaWxlc1NjYW5uZWQiOjMsImZpbGVzVG90YWwiOjMsImZpbmRpbmdzIjp7ImNhdGVnb3JpZXMiOnt9LCJjcml0aWNhbCI6MCwiY3JpdGljYWxfYWxsIjowLCJoaWdoIjowLCJoaWdoX2FsbCI6MCwiaXRlbXMiOltdLCJtZWRpdW0iOjAsInN1cHByZXNzZWRfbGluZXMiOjAsInRvdGFsIjowfSwicG9zaXRpdmVTaWduYWxzIjpbIjMgdG9vbHMgZW51bWVyYXRlZCDCtyBubyBsZXRoYWwgdHJpZmVjdGEiXSwicHJpbWFyeUxhbmd1YWdlIjoiTUNQIiwicmVzdWx0Ijoid2FybmluZ3MiLCJzYW1wbGVkIjpmYWxzZSwidG9vbERpZ2VzdHMiOnsidG9vbDphc2tfd2lraV9xdWVzdGlvbiI6InNoYTI1NjoxNzFhNTNjOTcyNTg3NDI1OGIwYjExMjViYzFkMWM1MTdlMWIwMmY5MWEyMzYwOTZhMzdmNTNjYzNhNzYzZGM5IiwidG9vbDpyZWFkX3dpa2lfY29udGVudHMiOiJzaGEyNTY6MzU4MmE4MTA4OWQxMjA2MzRkNjgxY2NmOTRlOWFiN2YxNWY0NzFkZGQ0OGY0YTgyZTA2YjA1ZDEwOTA1ZDljNCIsInRvb2w6cmVhZF93aWtpX3N0cnVjdHVyZSI6InNoYTI1Njo5YmQ1N2ZmM2U5NTM0YmJlZDU0MTY3ZWYxYTc0YjJiYzBlNGI0NjEyOGRiMjgyMTg3NjdmMGVlZDZlOGY3OWE4In0sInRvb2xNYW5pZmVzdERpZ2VzdCI6InNoYTI1Njo5ZDRhN2Q0MmUyYjZjMDI1MDk5NTcwYjZkZmZmOTc3ZjllNThlYTNmY2U5OGY3MjdjNTg0NTRlOTM2MDI1ZTg0IiwidHJ1c3RTY29yZSI6NzQsInRydXN0VGllciI6InN0YW5kYXJkIn0sInNjYW5uZWRBdCI6IjIwMjYtMTAtMDFUMjE6Mjg6MjIuNjU3MjQzKzAwOjAwIiwic3ViamVjdCI6eyJpZCI6Im1jcDpodHRwczovL21jcC5kZWVwd2lraS5jb20vbWNwIiwicmVwbyI6Im1jcDpodHRwczovL21jcC5kZWVwd2lraS5jb20vbWNwIn0sInR5cGUiOiJTZWN1cml0eVBvc3R1cmVBdHRlc3RhdGlvbiJ9.YjzVmszp_aYR-Lc1YBgwMUgkZ0_nupNuxd-9eU4z62BJlnRjlgANMwSHcVKYHVe0bSXSGdk9_SOZXcWf-r9ZDQ"
+          },
+          "issuer": {
+            "id": "did:web:agentgraph.co",
+            "jwk": {
+              "alg": "EdDSA",
+              "crv": "Ed25519",
+              "kid": "agentgraph-security-v1",
+              "kty": "OKP",
+              "use": "sig",
+              "x": "JwovTLVbpgk85zlMNruTiLzp85dAucsZWngs8NisBFg"
+            },
+            "jwks_url": "https://agentgraph.co/.well-known/jwks.json"
+          }
+        },
+        "vector": {
+          "gate": {
+            "evaluation_time": "2026-10-01T22:28:34.085Z",
+            "observed_tool_digest": "sha256:171a53c9725874258b0b1125bc1d1c517e1b02f91a236096a37f53cc3a763dc9",
+            "subject_id": "mcp:https://mcp.deepwiki.com/mcp",
+            "tool_name": "ask_wiki_question"
+          },
+          "jws": "reference"
+        }
+      }
+    },
+    {
+      "description": "The gate authorizes a tool name the scan never observed. The server, signature and freshness all check; the attestation says nothing about this tool. tool_digest_binds is not evaluated because there is no signed digest to compare. Do not rely.",
+      "expected": {
+        "result": {
+          "canonical_bytes": true,
+          "fresh": true,
+          "rely": false,
+          "signature_valid": true,
+          "subject_binds": true,
+          "tool_binds": false,
+          "tool_digest_binds": "not_evaluated"
+        }
+      },
+      "expected_source": "producer:interop/fixtures/agentavow-tool-manifest-digest-v1.json vectors[1].expect (verbatim)",
+      "id": "avow-binding-unknown-tool",
+      "input": {
+        "fixture": {
+          "attestation": {
+            "jws": "eyJhbGciOiJFZERTQSIsImtpZCI6ImFnZW50Z3JhcGgtc2VjdXJpdHktdjEifQ.eyJAY29udGV4dCI6Imh0dHBzOi8vc2NoZW1hLmFnZW50Z3JhcGguY28vYXR0ZXN0YXRpb24vc2VjdXJpdHkvdjEiLCJleHBpcmVzQXQiOiIyMDI2LTEwLTAyVDIxOjI4OjM0LjA4NTE5NyswMDowMCIsImlzc3VlZEF0IjoiMjAyNi0xMC0wMVQyMToyODozNC4wODUxOTcrMDA6MDAiLCJpc3N1ZXIiOnsiaWQiOiJkaWQ6d2ViOmFnZW50Z3JhcGguY28iLCJuYW1lIjoiQWdlbnRBdm93IiwidXJsIjoiaHR0cHM6Ly9hZ2VudGdyYXBoLmNvIn0sInJlY29tbWVuZGVkTGltaXRzIjp7Im1heF90b2tlbnNfcGVyX2NhbGwiOjQwOTYsInJlcXVlc3RzX3Blcl9taW51dGUiOjMwLCJyZXF1aXJlX3VzZXJfY29uZmlybWF0aW9uIjpmYWxzZX0sInNjYW4iOnsiY2F0ZWdvcnlTY29yZXMiOnsiY29kZV9zYWZldHkiOjEwMCwiZGF0YV9oYW5kbGluZyI6MTAwLCJkZXBlbmRlbmN5X2hlYWx0aCI6MTAwLCJmaWxlc3lzdGVtX2FjY2VzcyI6MTAwLCJzZWNyZXRfaHlnaWVuZSI6MTAwfSwiY292ZXJhZ2UiOnsiZGJfc25hcHNob3RzIjp7fSwibGl2ZV9vYnNlcnZlZCI6dHJ1ZSwicG9pbnRfaW5fdGltZSI6IjIwMjYtMTAtMDFUMjE6Mjg6MjIuNjU3MDY0WiIsInByb3ZlbmFuY2VfYmluZGluZyI6Im4vYSIsInNjYW5fZGVwdGgiOiJhcnRpZmFjdCtsaXZlIiwic3VyZmFjZSI6Im1jcCJ9LCJmaWxlc1NjYW5uZWQiOjMsImZpbGVzVG90YWwiOjMsImZpbmRpbmdzIjp7ImNhdGVnb3JpZXMiOnt9LCJjcml0aWNhbCI6MCwiY3JpdGljYWxfYWxsIjowLCJoaWdoIjowLCJoaWdoX2FsbCI6MCwiaXRlbXMiOltdLCJtZWRpdW0iOjAsInN1cHByZXNzZWRfbGluZXMiOjAsInRvdGFsIjowfSwicG9zaXRpdmVTaWduYWxzIjpbIjMgdG9vbHMgZW51bWVyYXRlZCDCtyBubyBsZXRoYWwgdHJpZmVjdGEiXSwicHJpbWFyeUxhbmd1YWdlIjoiTUNQIiwicmVzdWx0Ijoid2FybmluZ3MiLCJzYW1wbGVkIjpmYWxzZSwidG9vbERpZ2VzdHMiOnsidG9vbDphc2tfd2lraV9xdWVzdGlvbiI6InNoYTI1NjoxNzFhNTNjOTcyNTg3NDI1OGIwYjExMjViYzFkMWM1MTdlMWIwMmY5MWEyMzYwOTZhMzdmNTNjYzNhNzYzZGM5IiwidG9vbDpyZWFkX3dpa2lfY29udGVudHMiOiJzaGEyNTY6MzU4MmE4MTA4OWQxMjA2MzRkNjgxY2NmOTRlOWFiN2YxNWY0NzFkZGQ0OGY0YTgyZTA2YjA1ZDEwOTA1ZDljNCIsInRvb2w6cmVhZF93aWtpX3N0cnVjdHVyZSI6InNoYTI1Njo5YmQ1N2ZmM2U5NTM0YmJlZDU0MTY3ZWYxYTc0YjJiYzBlNGI0NjEyOGRiMjgyMTg3NjdmMGVlZDZlOGY3OWE4In0sInRvb2xNYW5pZmVzdERpZ2VzdCI6InNoYTI1Njo5ZDRhN2Q0MmUyYjZjMDI1MDk5NTcwYjZkZmZmOTc3ZjllNThlYTNmY2U5OGY3MjdjNTg0NTRlOTM2MDI1ZTg0IiwidHJ1c3RTY29yZSI6NzQsInRydXN0VGllciI6InN0YW5kYXJkIn0sInNjYW5uZWRBdCI6IjIwMjYtMTAtMDFUMjE6Mjg6MjIuNjU3MjQzKzAwOjAwIiwic3ViamVjdCI6eyJpZCI6Im1jcDpodHRwczovL21jcC5kZWVwd2lraS5jb20vbWNwIiwicmVwbyI6Im1jcDpodHRwczovL21jcC5kZWVwd2lraS5jb20vbWNwIn0sInR5cGUiOiJTZWN1cml0eVBvc3R1cmVBdHRlc3RhdGlvbiJ9.YjzVmszp_aYR-Lc1YBgwMUgkZ0_nupNuxd-9eU4z62BJlnRjlgANMwSHcVKYHVe0bSXSGdk9_SOZXcWf-r9ZDQ"
+          },
+          "issuer": {
+            "id": "did:web:agentgraph.co",
+            "jwk": {
+              "alg": "EdDSA",
+              "crv": "Ed25519",
+              "kid": "agentgraph-security-v1",
+              "kty": "OKP",
+              "use": "sig",
+              "x": "JwovTLVbpgk85zlMNruTiLzp85dAucsZWngs8NisBFg"
+            },
+            "jwks_url": "https://agentgraph.co/.well-known/jwks.json"
+          }
+        },
+        "vector": {
+          "gate": {
+            "evaluation_time": "2026-10-01T22:28:34.085Z",
+            "observed_tool_digest": "sha256:171a53c9725874258b0b1125bc1d1c517e1b02f91a236096a37f53cc3a763dc9",
+            "subject_id": "mcp:https://mcp.deepwiki.com/mcp",
+            "tool_name": "delete_wiki_page"
+          },
+          "jws": "reference"
+        }
+      }
+    },
+    {
+      "description": "The named tool exists, but the definition the gate was served differs from the one the scan graded: one sentence was added to its description after the grade (the rug-pull, per tool). Do not rely.",
+      "expected": {
+        "result": {
+          "canonical_bytes": true,
+          "fresh": true,
+          "rely": false,
+          "signature_valid": true,
+          "subject_binds": true,
+          "tool_binds": true,
+          "tool_digest_binds": false
+        }
+      },
+      "expected_source": "producer:interop/fixtures/agentavow-tool-manifest-digest-v1.json vectors[2].expect (verbatim)",
+      "id": "avow-binding-tool-drift",
+      "input": {
+        "fixture": {
+          "attestation": {
+            "jws": "eyJhbGciOiJFZERTQSIsImtpZCI6ImFnZW50Z3JhcGgtc2VjdXJpdHktdjEifQ.eyJAY29udGV4dCI6Imh0dHBzOi8vc2NoZW1hLmFnZW50Z3JhcGguY28vYXR0ZXN0YXRpb24vc2VjdXJpdHkvdjEiLCJleHBpcmVzQXQiOiIyMDI2LTEwLTAyVDIxOjI4OjM0LjA4NTE5NyswMDowMCIsImlzc3VlZEF0IjoiMjAyNi0xMC0wMVQyMToyODozNC4wODUxOTcrMDA6MDAiLCJpc3N1ZXIiOnsiaWQiOiJkaWQ6d2ViOmFnZW50Z3JhcGguY28iLCJuYW1lIjoiQWdlbnRBdm93IiwidXJsIjoiaHR0cHM6Ly9hZ2VudGdyYXBoLmNvIn0sInJlY29tbWVuZGVkTGltaXRzIjp7Im1heF90b2tlbnNfcGVyX2NhbGwiOjQwOTYsInJlcXVlc3RzX3Blcl9taW51dGUiOjMwLCJyZXF1aXJlX3VzZXJfY29uZmlybWF0aW9uIjpmYWxzZX0sInNjYW4iOnsiY2F0ZWdvcnlTY29yZXMiOnsiY29kZV9zYWZldHkiOjEwMCwiZGF0YV9oYW5kbGluZyI6MTAwLCJkZXBlbmRlbmN5X2hlYWx0aCI6MTAwLCJmaWxlc3lzdGVtX2FjY2VzcyI6MTAwLCJzZWNyZXRfaHlnaWVuZSI6MTAwfSwiY292ZXJhZ2UiOnsiZGJfc25hcHNob3RzIjp7fSwibGl2ZV9vYnNlcnZlZCI6dHJ1ZSwicG9pbnRfaW5fdGltZSI6IjIwMjYtMTAtMDFUMjE6Mjg6MjIuNjU3MDY0WiIsInByb3ZlbmFuY2VfYmluZGluZyI6Im4vYSIsInNjYW5fZGVwdGgiOiJhcnRpZmFjdCtsaXZlIiwic3VyZmFjZSI6Im1jcCJ9LCJmaWxlc1NjYW5uZWQiOjMsImZpbGVzVG90YWwiOjMsImZpbmRpbmdzIjp7ImNhdGVnb3JpZXMiOnt9LCJjcml0aWNhbCI6MCwiY3JpdGljYWxfYWxsIjowLCJoaWdoIjowLCJoaWdoX2FsbCI6MCwiaXRlbXMiOltdLCJtZWRpdW0iOjAsInN1cHByZXNzZWRfbGluZXMiOjAsInRvdGFsIjowfSwicG9zaXRpdmVTaWduYWxzIjpbIjMgdG9vbHMgZW51bWVyYXRlZCDCtyBubyBsZXRoYWwgdHJpZmVjdGEiXSwicHJpbWFyeUxhbmd1YWdlIjoiTUNQIiwicmVzdWx0Ijoid2FybmluZ3MiLCJzYW1wbGVkIjpmYWxzZSwidG9vbERpZ2VzdHMiOnsidG9vbDphc2tfd2lraV9xdWVzdGlvbiI6InNoYTI1NjoxNzFhNTNjOTcyNTg3NDI1OGIwYjExMjViYzFkMWM1MTdlMWIwMmY5MWEyMzYwOTZhMzdmNTNjYzNhNzYzZGM5IiwidG9vbDpyZWFkX3dpa2lfY29udGVudHMiOiJzaGEyNTY6MzU4MmE4MTA4OWQxMjA2MzRkNjgxY2NmOTRlOWFiN2YxNWY0NzFkZGQ0OGY0YTgyZTA2YjA1ZDEwOTA1ZDljNCIsInRvb2w6cmVhZF93aWtpX3N0cnVjdHVyZSI6InNoYTI1Njo5YmQ1N2ZmM2U5NTM0YmJlZDU0MTY3ZWYxYTc0YjJiYzBlNGI0NjEyOGRiMjgyMTg3NjdmMGVlZDZlOGY3OWE4In0sInRvb2xNYW5pZmVzdERpZ2VzdCI6InNoYTI1Njo5ZDRhN2Q0MmUyYjZjMDI1MDk5NTcwYjZkZmZmOTc3ZjllNThlYTNmY2U5OGY3MjdjNTg0NTRlOTM2MDI1ZTg0IiwidHJ1c3RTY29yZSI6NzQsInRydXN0VGllciI6InN0YW5kYXJkIn0sInNjYW5uZWRBdCI6IjIwMjYtMTAtMDFUMjE6Mjg6MjIuNjU3MjQzKzAwOjAwIiwic3ViamVjdCI6eyJpZCI6Im1jcDpodHRwczovL21jcC5kZWVwd2lraS5jb20vbWNwIiwicmVwbyI6Im1jcDpodHRwczovL21jcC5kZWVwd2lraS5jb20vbWNwIn0sInR5cGUiOiJTZWN1cml0eVBvc3R1cmVBdHRlc3RhdGlvbiJ9.YjzVmszp_aYR-Lc1YBgwMUgkZ0_nupNuxd-9eU4z62BJlnRjlgANMwSHcVKYHVe0bSXSGdk9_SOZXcWf-r9ZDQ"
+          },
+          "issuer": {
+            "id": "did:web:agentgraph.co",
+            "jwk": {
+              "alg": "EdDSA",
+              "crv": "Ed25519",
+              "kid": "agentgraph-security-v1",
+              "kty": "OKP",
+              "use": "sig",
+              "x": "JwovTLVbpgk85zlMNruTiLzp85dAucsZWngs8NisBFg"
+            },
+            "jwks_url": "https://agentgraph.co/.well-known/jwks.json"
+          }
+        },
+        "vector": {
+          "gate": {
+            "evaluation_time": "2026-10-01T22:28:34.085Z",
+            "observed_tool_digest": "sha256:93eb4ba06e95b9f5f9277f7958494a3aae3e967ba0674de077d018ce1f6ce28b",
+            "subject_id": "mcp:https://mcp.deepwiki.com/mcp",
+            "tool_name": "ask_wiki_question"
+          },
+          "jws": "reference"
+        }
+      }
+    },
+    {
+      "description": "A valid grade for one server presented for another. Same tool name, same digest, wrong subject. Do not rely.",
+      "expected": {
+        "result": {
+          "canonical_bytes": true,
+          "fresh": true,
+          "rely": false,
+          "signature_valid": true,
+          "subject_binds": false,
+          "tool_binds": true,
+          "tool_digest_binds": true
+        }
+      },
+      "expected_source": "producer:interop/fixtures/agentavow-tool-manifest-digest-v1.json vectors[3].expect (verbatim)",
+      "id": "avow-binding-wrong-subject",
+      "input": {
+        "fixture": {
+          "attestation": {
+            "jws": "eyJhbGciOiJFZERTQSIsImtpZCI6ImFnZW50Z3JhcGgtc2VjdXJpdHktdjEifQ.eyJAY29udGV4dCI6Imh0dHBzOi8vc2NoZW1hLmFnZW50Z3JhcGguY28vYXR0ZXN0YXRpb24vc2VjdXJpdHkvdjEiLCJleHBpcmVzQXQiOiIyMDI2LTEwLTAyVDIxOjI4OjM0LjA4NTE5NyswMDowMCIsImlzc3VlZEF0IjoiMjAyNi0xMC0wMVQyMToyODozNC4wODUxOTcrMDA6MDAiLCJpc3N1ZXIiOnsiaWQiOiJkaWQ6d2ViOmFnZW50Z3JhcGguY28iLCJuYW1lIjoiQWdlbnRBdm93IiwidXJsIjoiaHR0cHM6Ly9hZ2VudGdyYXBoLmNvIn0sInJlY29tbWVuZGVkTGltaXRzIjp7Im1heF90b2tlbnNfcGVyX2NhbGwiOjQwOTYsInJlcXVlc3RzX3Blcl9taW51dGUiOjMwLCJyZXF1aXJlX3VzZXJfY29uZmlybWF0aW9uIjpmYWxzZX0sInNjYW4iOnsiY2F0ZWdvcnlTY29yZXMiOnsiY29kZV9zYWZldHkiOjEwMCwiZGF0YV9oYW5kbGluZyI6MTAwLCJkZXBlbmRlbmN5X2hlYWx0aCI6MTAwLCJmaWxlc3lzdGVtX2FjY2VzcyI6MTAwLCJzZWNyZXRfaHlnaWVuZSI6MTAwfSwiY292ZXJhZ2UiOnsiZGJfc25hcHNob3RzIjp7fSwibGl2ZV9vYnNlcnZlZCI6dHJ1ZSwicG9pbnRfaW5fdGltZSI6IjIwMjYtMTAtMDFUMjE6Mjg6MjIuNjU3MDY0WiIsInByb3ZlbmFuY2VfYmluZGluZyI6Im4vYSIsInNjYW5fZGVwdGgiOiJhcnRpZmFjdCtsaXZlIiwic3VyZmFjZSI6Im1jcCJ9LCJmaWxlc1NjYW5uZWQiOjMsImZpbGVzVG90YWwiOjMsImZpbmRpbmdzIjp7ImNhdGVnb3JpZXMiOnt9LCJjcml0aWNhbCI6MCwiY3JpdGljYWxfYWxsIjowLCJoaWdoIjowLCJoaWdoX2FsbCI6MCwiaXRlbXMiOltdLCJtZWRpdW0iOjAsInN1cHByZXNzZWRfbGluZXMiOjAsInRvdGFsIjowfSwicG9zaXRpdmVTaWduYWxzIjpbIjMgdG9vbHMgZW51bWVyYXRlZCDCtyBubyBsZXRoYWwgdHJpZmVjdGEiXSwicHJpbWFyeUxhbmd1YWdlIjoiTUNQIiwicmVzdWx0Ijoid2FybmluZ3MiLCJzYW1wbGVkIjpmYWxzZSwidG9vbERpZ2VzdHMiOnsidG9vbDphc2tfd2lraV9xdWVzdGlvbiI6InNoYTI1NjoxNzFhNTNjOTcyNTg3NDI1OGIwYjExMjViYzFkMWM1MTdlMWIwMmY5MWEyMzYwOTZhMzdmNTNjYzNhNzYzZGM5IiwidG9vbDpyZWFkX3dpa2lfY29udGVudHMiOiJzaGEyNTY6MzU4MmE4MTA4OWQxMjA2MzRkNjgxY2NmOTRlOWFiN2YxNWY0NzFkZGQ0OGY0YTgyZTA2YjA1ZDEwOTA1ZDljNCIsInRvb2w6cmVhZF93aWtpX3N0cnVjdHVyZSI6InNoYTI1Njo5YmQ1N2ZmM2U5NTM0YmJlZDU0MTY3ZWYxYTc0YjJiYzBlNGI0NjEyOGRiMjgyMTg3NjdmMGVlZDZlOGY3OWE4In0sInRvb2xNYW5pZmVzdERpZ2VzdCI6InNoYTI1Njo5ZDRhN2Q0MmUyYjZjMDI1MDk5NTcwYjZkZmZmOTc3ZjllNThlYTNmY2U5OGY3MjdjNTg0NTRlOTM2MDI1ZTg0IiwidHJ1c3RTY29yZSI6NzQsInRydXN0VGllciI6InN0YW5kYXJkIn0sInNjYW5uZWRBdCI6IjIwMjYtMTAtMDFUMjE6Mjg6MjIuNjU3MjQzKzAwOjAwIiwic3ViamVjdCI6eyJpZCI6Im1jcDpodHRwczovL21jcC5kZWVwd2lraS5jb20vbWNwIiwicmVwbyI6Im1jcDpodHRwczovL21jcC5kZWVwd2lraS5jb20vbWNwIn0sInR5cGUiOiJTZWN1cml0eVBvc3R1cmVBdHRlc3RhdGlvbiJ9.YjzVmszp_aYR-Lc1YBgwMUgkZ0_nupNuxd-9eU4z62BJlnRjlgANMwSHcVKYHVe0bSXSGdk9_SOZXcWf-r9ZDQ"
+          },
+          "issuer": {
+            "id": "did:web:agentgraph.co",
+            "jwk": {
+              "alg": "EdDSA",
+              "crv": "Ed25519",
+              "kid": "agentgraph-security-v1",
+              "kty": "OKP",
+              "use": "sig",
+              "x": "JwovTLVbpgk85zlMNruTiLzp85dAucsZWngs8NisBFg"
+            },
+            "jwks_url": "https://agentgraph.co/.well-known/jwks.json"
+          }
+        },
+        "vector": {
+          "gate": {
+            "evaluation_time": "2026-10-01T22:28:34.085Z",
+            "observed_tool_digest": "sha256:171a53c9725874258b0b1125bc1d1c517e1b02f91a236096a37f53cc3a763dc9",
+            "subject_id": "mcp:https://mcp.example.com/mcp",
+            "tool_name": "ask_wiki_question"
+          },
+          "jws": "reference"
+        }
+      }
+    },
+    {
+      "description": "Same attestation, evaluated after expiresAt. A signed verdict does not verify forever. Treated as unsigned.",
+      "expected": {
+        "result": {
+          "canonical_bytes": true,
+          "fresh": false,
+          "rely": false,
+          "signature_valid": true,
+          "subject_binds": true,
+          "tool_binds": true,
+          "tool_digest_binds": true
+        }
+      },
+      "expected_source": "producer:interop/fixtures/agentavow-tool-manifest-digest-v1.json vectors[4].expect (verbatim)",
+      "id": "avow-binding-past-expiry",
+      "input": {
+        "fixture": {
+          "attestation": {
+            "jws": "eyJhbGciOiJFZERTQSIsImtpZCI6ImFnZW50Z3JhcGgtc2VjdXJpdHktdjEifQ.eyJAY29udGV4dCI6Imh0dHBzOi8vc2NoZW1hLmFnZW50Z3JhcGguY28vYXR0ZXN0YXRpb24vc2VjdXJpdHkvdjEiLCJleHBpcmVzQXQiOiIyMDI2LTEwLTAyVDIxOjI4OjM0LjA4NTE5NyswMDowMCIsImlzc3VlZEF0IjoiMjAyNi0xMC0wMVQyMToyODozNC4wODUxOTcrMDA6MDAiLCJpc3N1ZXIiOnsiaWQiOiJkaWQ6d2ViOmFnZW50Z3JhcGguY28iLCJuYW1lIjoiQWdlbnRBdm93IiwidXJsIjoiaHR0cHM6Ly9hZ2VudGdyYXBoLmNvIn0sInJlY29tbWVuZGVkTGltaXRzIjp7Im1heF90b2tlbnNfcGVyX2NhbGwiOjQwOTYsInJlcXVlc3RzX3Blcl9taW51dGUiOjMwLCJyZXF1aXJlX3VzZXJfY29uZmlybWF0aW9uIjpmYWxzZX0sInNjYW4iOnsiY2F0ZWdvcnlTY29yZXMiOnsiY29kZV9zYWZldHkiOjEwMCwiZGF0YV9oYW5kbGluZyI6MTAwLCJkZXBlbmRlbmN5X2hlYWx0aCI6MTAwLCJmaWxlc3lzdGVtX2FjY2VzcyI6MTAwLCJzZWNyZXRfaHlnaWVuZSI6MTAwfSwiY292ZXJhZ2UiOnsiZGJfc25hcHNob3RzIjp7fSwibGl2ZV9vYnNlcnZlZCI6dHJ1ZSwicG9pbnRfaW5fdGltZSI6IjIwMjYtMTAtMDFUMjE6Mjg6MjIuNjU3MDY0WiIsInByb3ZlbmFuY2VfYmluZGluZyI6Im4vYSIsInNjYW5fZGVwdGgiOiJhcnRpZmFjdCtsaXZlIiwic3VyZmFjZSI6Im1jcCJ9LCJmaWxlc1NjYW5uZWQiOjMsImZpbGVzVG90YWwiOjMsImZpbmRpbmdzIjp7ImNhdGVnb3JpZXMiOnt9LCJjcml0aWNhbCI6MCwiY3JpdGljYWxfYWxsIjowLCJoaWdoIjowLCJoaWdoX2FsbCI6MCwiaXRlbXMiOltdLCJtZWRpdW0iOjAsInN1cHByZXNzZWRfbGluZXMiOjAsInRvdGFsIjowfSwicG9zaXRpdmVTaWduYWxzIjpbIjMgdG9vbHMgZW51bWVyYXRlZCDCtyBubyBsZXRoYWwgdHJpZmVjdGEiXSwicHJpbWFyeUxhbmd1YWdlIjoiTUNQIiwicmVzdWx0Ijoid2FybmluZ3MiLCJzYW1wbGVkIjpmYWxzZSwidG9vbERpZ2VzdHMiOnsidG9vbDphc2tfd2lraV9xdWVzdGlvbiI6InNoYTI1NjoxNzFhNTNjOTcyNTg3NDI1OGIwYjExMjViYzFkMWM1MTdlMWIwMmY5MWEyMzYwOTZhMzdmNTNjYzNhNzYzZGM5IiwidG9vbDpyZWFkX3dpa2lfY29udGVudHMiOiJzaGEyNTY6MzU4MmE4MTA4OWQxMjA2MzRkNjgxY2NmOTRlOWFiN2YxNWY0NzFkZGQ0OGY0YTgyZTA2YjA1ZDEwOTA1ZDljNCIsInRvb2w6cmVhZF93aWtpX3N0cnVjdHVyZSI6InNoYTI1Njo5YmQ1N2ZmM2U5NTM0YmJlZDU0MTY3ZWYxYTc0YjJiYzBlNGI0NjEyOGRiMjgyMTg3NjdmMGVlZDZlOGY3OWE4In0sInRvb2xNYW5pZmVzdERpZ2VzdCI6InNoYTI1Njo5ZDRhN2Q0MmUyYjZjMDI1MDk5NTcwYjZkZmZmOTc3ZjllNThlYTNmY2U5OGY3MjdjNTg0NTRlOTM2MDI1ZTg0IiwidHJ1c3RTY29yZSI6NzQsInRydXN0VGllciI6InN0YW5kYXJkIn0sInNjYW5uZWRBdCI6IjIwMjYtMTAtMDFUMjE6Mjg6MjIuNjU3MjQzKzAwOjAwIiwic3ViamVjdCI6eyJpZCI6Im1jcDpodHRwczovL21jcC5kZWVwd2lraS5jb20vbWNwIiwicmVwbyI6Im1jcDpodHRwczovL21jcC5kZWVwd2lraS5jb20vbWNwIn0sInR5cGUiOiJTZWN1cml0eVBvc3R1cmVBdHRlc3RhdGlvbiJ9.YjzVmszp_aYR-Lc1YBgwMUgkZ0_nupNuxd-9eU4z62BJlnRjlgANMwSHcVKYHVe0bSXSGdk9_SOZXcWf-r9ZDQ"
+          },
+          "issuer": {
+            "id": "did:web:agentgraph.co",
+            "jwk": {
+              "alg": "EdDSA",
+              "crv": "Ed25519",
+              "kid": "agentgraph-security-v1",
+              "kty": "OKP",
+              "use": "sig",
+              "x": "JwovTLVbpgk85zlMNruTiLzp85dAucsZWngs8NisBFg"
+            },
+            "jwks_url": "https://agentgraph.co/.well-known/jwks.json"
+          }
+        },
+        "vector": {
+          "gate": {
+            "evaluation_time": "2026-10-02T22:28:34.085Z",
+            "observed_tool_digest": "sha256:171a53c9725874258b0b1125bc1d1c517e1b02f91a236096a37f53cc3a763dc9",
+            "subject_id": "mcp:https://mcp.deepwiki.com/mcp",
+            "tool_name": "ask_wiki_question"
+          },
+          "jws": "reference"
+        }
+      }
+    },
+    {
+      "description": "Payload edited after signing (trustScore raised to 99), re-canonicalized, original signature kept. Canonical bytes still check; the signature does not. Canonical form is not authenticity. Do not rely.",
+      "expected": {
+        "result": {
+          "canonical_bytes": true,
+          "fresh": true,
+          "rely": false,
+          "signature_valid": false,
+          "subject_binds": true,
+          "tool_binds": true,
+          "tool_digest_binds": true
+        }
+      },
+      "expected_source": "producer:interop/fixtures/agentavow-tool-manifest-digest-v1.json vectors[5].expect (verbatim)",
+      "id": "avow-binding-tampered-payload",
+      "input": {
+        "fixture": {
+          "attestation": {
+            "jws": "eyJhbGciOiJFZERTQSIsImtpZCI6ImFnZW50Z3JhcGgtc2VjdXJpdHktdjEifQ.eyJAY29udGV4dCI6Imh0dHBzOi8vc2NoZW1hLmFnZW50Z3JhcGguY28vYXR0ZXN0YXRpb24vc2VjdXJpdHkvdjEiLCJleHBpcmVzQXQiOiIyMDI2LTEwLTAyVDIxOjI4OjM0LjA4NTE5NyswMDowMCIsImlzc3VlZEF0IjoiMjAyNi0xMC0wMVQyMToyODozNC4wODUxOTcrMDA6MDAiLCJpc3N1ZXIiOnsiaWQiOiJkaWQ6d2ViOmFnZW50Z3JhcGguY28iLCJuYW1lIjoiQWdlbnRBdm93IiwidXJsIjoiaHR0cHM6Ly9hZ2VudGdyYXBoLmNvIn0sInJlY29tbWVuZGVkTGltaXRzIjp7Im1heF90b2tlbnNfcGVyX2NhbGwiOjQwOTYsInJlcXVlc3RzX3Blcl9taW51dGUiOjMwLCJyZXF1aXJlX3VzZXJfY29uZmlybWF0aW9uIjpmYWxzZX0sInNjYW4iOnsiY2F0ZWdvcnlTY29yZXMiOnsiY29kZV9zYWZldHkiOjEwMCwiZGF0YV9oYW5kbGluZyI6MTAwLCJkZXBlbmRlbmN5X2hlYWx0aCI6MTAwLCJmaWxlc3lzdGVtX2FjY2VzcyI6MTAwLCJzZWNyZXRfaHlnaWVuZSI6MTAwfSwiY292ZXJhZ2UiOnsiZGJfc25hcHNob3RzIjp7fSwibGl2ZV9vYnNlcnZlZCI6dHJ1ZSwicG9pbnRfaW5fdGltZSI6IjIwMjYtMTAtMDFUMjE6Mjg6MjIuNjU3MDY0WiIsInByb3ZlbmFuY2VfYmluZGluZyI6Im4vYSIsInNjYW5fZGVwdGgiOiJhcnRpZmFjdCtsaXZlIiwic3VyZmFjZSI6Im1jcCJ9LCJmaWxlc1NjYW5uZWQiOjMsImZpbGVzVG90YWwiOjMsImZpbmRpbmdzIjp7ImNhdGVnb3JpZXMiOnt9LCJjcml0aWNhbCI6MCwiY3JpdGljYWxfYWxsIjowLCJoaWdoIjowLCJoaWdoX2FsbCI6MCwiaXRlbXMiOltdLCJtZWRpdW0iOjAsInN1cHByZXNzZWRfbGluZXMiOjAsInRvdGFsIjowfSwicG9zaXRpdmVTaWduYWxzIjpbIjMgdG9vbHMgZW51bWVyYXRlZCDCtyBubyBsZXRoYWwgdHJpZmVjdGEiXSwicHJpbWFyeUxhbmd1YWdlIjoiTUNQIiwicmVzdWx0Ijoid2FybmluZ3MiLCJzYW1wbGVkIjpmYWxzZSwidG9vbERpZ2VzdHMiOnsidG9vbDphc2tfd2lraV9xdWVzdGlvbiI6InNoYTI1NjoxNzFhNTNjOTcyNTg3NDI1OGIwYjExMjViYzFkMWM1MTdlMWIwMmY5MWEyMzYwOTZhMzdmNTNjYzNhNzYzZGM5IiwidG9vbDpyZWFkX3dpa2lfY29udGVudHMiOiJzaGEyNTY6MzU4MmE4MTA4OWQxMjA2MzRkNjgxY2NmOTRlOWFiN2YxNWY0NzFkZGQ0OGY0YTgyZTA2YjA1ZDEwOTA1ZDljNCIsInRvb2w6cmVhZF93aWtpX3N0cnVjdHVyZSI6InNoYTI1Njo5YmQ1N2ZmM2U5NTM0YmJlZDU0MTY3ZWYxYTc0YjJiYzBlNGI0NjEyOGRiMjgyMTg3NjdmMGVlZDZlOGY3OWE4In0sInRvb2xNYW5pZmVzdERpZ2VzdCI6InNoYTI1Njo5ZDRhN2Q0MmUyYjZjMDI1MDk5NTcwYjZkZmZmOTc3ZjllNThlYTNmY2U5OGY3MjdjNTg0NTRlOTM2MDI1ZTg0IiwidHJ1c3RTY29yZSI6NzQsInRydXN0VGllciI6InN0YW5kYXJkIn0sInNjYW5uZWRBdCI6IjIwMjYtMTAtMDFUMjE6Mjg6MjIuNjU3MjQzKzAwOjAwIiwic3ViamVjdCI6eyJpZCI6Im1jcDpodHRwczovL21jcC5kZWVwd2lraS5jb20vbWNwIiwicmVwbyI6Im1jcDpodHRwczovL21jcC5kZWVwd2lraS5jb20vbWNwIn0sInR5cGUiOiJTZWN1cml0eVBvc3R1cmVBdHRlc3RhdGlvbiJ9.YjzVmszp_aYR-Lc1YBgwMUgkZ0_nupNuxd-9eU4z62BJlnRjlgANMwSHcVKYHVe0bSXSGdk9_SOZXcWf-r9ZDQ"
+          },
+          "issuer": {
+            "id": "did:web:agentgraph.co",
+            "jwk": {
+              "alg": "EdDSA",
+              "crv": "Ed25519",
+              "kid": "agentgraph-security-v1",
+              "kty": "OKP",
+              "use": "sig",
+              "x": "JwovTLVbpgk85zlMNruTiLzp85dAucsZWngs8NisBFg"
+            },
+            "jwks_url": "https://agentgraph.co/.well-known/jwks.json"
+          }
+        },
+        "vector": {
+          "gate": {
+            "evaluation_time": "2026-10-01T22:28:34.085Z",
+            "observed_tool_digest": "sha256:171a53c9725874258b0b1125bc1d1c517e1b02f91a236096a37f53cc3a763dc9",
+            "subject_id": "mcp:https://mcp.deepwiki.com/mcp",
+            "tool_name": "ask_wiki_question"
+          },
+          "jws": "eyJhbGciOiJFZERTQSIsImtpZCI6ImFnZW50Z3JhcGgtc2VjdXJpdHktdjEifQ.eyJAY29udGV4dCI6Imh0dHBzOi8vc2NoZW1hLmFnZW50Z3JhcGguY28vYXR0ZXN0YXRpb24vc2VjdXJpdHkvdjEiLCJleHBpcmVzQXQiOiIyMDI2LTEwLTAyVDIxOjI4OjM0LjA4NTE5NyswMDowMCIsImlzc3VlZEF0IjoiMjAyNi0xMC0wMVQyMToyODozNC4wODUxOTcrMDA6MDAiLCJpc3N1ZXIiOnsiaWQiOiJkaWQ6d2ViOmFnZW50Z3JhcGguY28iLCJuYW1lIjoiQWdlbnRBdm93IiwidXJsIjoiaHR0cHM6Ly9hZ2VudGdyYXBoLmNvIn0sInJlY29tbWVuZGVkTGltaXRzIjp7Im1heF90b2tlbnNfcGVyX2NhbGwiOjQwOTYsInJlcXVlc3RzX3Blcl9taW51dGUiOjMwLCJyZXF1aXJlX3VzZXJfY29uZmlybWF0aW9uIjpmYWxzZX0sInNjYW4iOnsiY2F0ZWdvcnlTY29yZXMiOnsiY29kZV9zYWZldHkiOjEwMCwiZGF0YV9oYW5kbGluZyI6MTAwLCJkZXBlbmRlbmN5X2hlYWx0aCI6MTAwLCJmaWxlc3lzdGVtX2FjY2VzcyI6MTAwLCJzZWNyZXRfaHlnaWVuZSI6MTAwfSwiY292ZXJhZ2UiOnsiZGJfc25hcHNob3RzIjp7fSwibGl2ZV9vYnNlcnZlZCI6dHJ1ZSwicG9pbnRfaW5fdGltZSI6IjIwMjYtMTAtMDFUMjE6Mjg6MjIuNjU3MDY0WiIsInByb3ZlbmFuY2VfYmluZGluZyI6Im4vYSIsInNjYW5fZGVwdGgiOiJhcnRpZmFjdCtsaXZlIiwic3VyZmFjZSI6Im1jcCJ9LCJmaWxlc1NjYW5uZWQiOjMsImZpbGVzVG90YWwiOjMsImZpbmRpbmdzIjp7ImNhdGVnb3JpZXMiOnt9LCJjcml0aWNhbCI6MCwiY3JpdGljYWxfYWxsIjowLCJoaWdoIjowLCJoaWdoX2FsbCI6MCwiaXRlbXMiOltdLCJtZWRpdW0iOjAsInN1cHByZXNzZWRfbGluZXMiOjAsInRvdGFsIjowfSwicG9zaXRpdmVTaWduYWxzIjpbIjMgdG9vbHMgZW51bWVyYXRlZCDCtyBubyBsZXRoYWwgdHJpZmVjdGEiXSwicHJpbWFyeUxhbmd1YWdlIjoiTUNQIiwicmVzdWx0Ijoid2FybmluZ3MiLCJzYW1wbGVkIjpmYWxzZSwidG9vbERpZ2VzdHMiOnsidG9vbDphc2tfd2lraV9xdWVzdGlvbiI6InNoYTI1NjoxNzFhNTNjOTcyNTg3NDI1OGIwYjExMjViYzFkMWM1MTdlMWIwMmY5MWEyMzYwOTZhMzdmNTNjYzNhNzYzZGM5IiwidG9vbDpyZWFkX3dpa2lfY29udGVudHMiOiJzaGEyNTY6MzU4MmE4MTA4OWQxMjA2MzRkNjgxY2NmOTRlOWFiN2YxNWY0NzFkZGQ0OGY0YTgyZTA2YjA1ZDEwOTA1ZDljNCIsInRvb2w6cmVhZF93aWtpX3N0cnVjdHVyZSI6InNoYTI1Njo5YmQ1N2ZmM2U5NTM0YmJlZDU0MTY3ZWYxYTc0YjJiYzBlNGI0NjEyOGRiMjgyMTg3NjdmMGVlZDZlOGY3OWE4In0sInRvb2xNYW5pZmVzdERpZ2VzdCI6InNoYTI1Njo5ZDRhN2Q0MmUyYjZjMDI1MDk5NTcwYjZkZmZmOTc3ZjllNThlYTNmY2U5OGY3MjdjNTg0NTRlOTM2MDI1ZTg0IiwidHJ1c3RTY29yZSI6OTksInRydXN0VGllciI6InZlcmlmaWVkIn0sInNjYW5uZWRBdCI6IjIwMjYtMTAtMDFUMjE6Mjg6MjIuNjU3MjQzKzAwOjAwIiwic3ViamVjdCI6eyJpZCI6Im1jcDpodHRwczovL21jcC5kZWVwd2lraS5jb20vbWNwIiwicmVwbyI6Im1jcDpodHRwczovL21jcC5kZWVwd2lraS5jb20vbWNwIn0sInR5cGUiOiJTZWN1cml0eVBvc3R1cmVBdHRlc3RhdGlvbiJ9.YjzVmszp_aYR-Lc1YBgwMUgkZ0_nupNuxd-9eU4z62BJlnRjlgANMwSHcVKYHVe0bSXSGdk9_SOZXcWf-r9ZDQ"
+        }
+      }
+    }
+  ]
+}

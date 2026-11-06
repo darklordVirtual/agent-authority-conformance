@@ -1,0 +1,104 @@
+{
+  "contract": "Input is {value}. The result is the list of JSONPath-like locations ($.key, [i]) of every key named overall, score, total, aggregate or grade. The order is the order of the vector file, whose keys are sorted; compare the list as a set if your parser does not keep key order.",
+  "operation": "lab.forbidden_keys",
+  "specification": "CHARTER.md (no aggregate score) and conformance/lab/canonical.py FORBIDDEN_KEYS",
+  "suite": "aacp-reference-vectors-v1",
+  "vectors": [
+    {
+      "description": "No aggregate-like key anywhere.",
+      "expected": {
+        "result": []
+      },
+      "expected_source": "specification:CHARTER.md and FORBIDDEN_KEYS, written out by hand",
+      "id": "agg-none",
+      "input": {
+        "value": {
+          "A": {
+            "status": "PASS"
+          }
+        }
+      }
+    },
+    {
+      "description": "A score at the top level.",
+      "expected": {
+        "result": [
+          "$.score"
+        ]
+      },
+      "expected_source": "specification:CHARTER.md and FORBIDDEN_KEYS, written out by hand",
+      "id": "agg-top-level-score",
+      "input": {
+        "value": {
+          "score": 5
+        }
+      }
+    },
+    {
+      "description": "Aggregate keys nested in an object and inside a list, in file order.",
+      "expected": {
+        "result": [
+          "$.meta.grade",
+          "$.meta.overall",
+          "$.rows[1].total"
+        ]
+      },
+      "expected_source": "specification:CHARTER.md and FORBIDDEN_KEYS, written out by hand",
+      "id": "agg-nested-and-listed",
+      "input": {
+        "value": {
+          "meta": {
+            "grade": "B",
+            "overall": "ok"
+          },
+          "rows": [
+            {
+              "id": "A"
+            },
+            {
+              "total": 7
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "All five names: overall, score, total, aggregate, grade.",
+      "expected": {
+        "result": [
+          "$.aggregate",
+          "$.grade",
+          "$.overall",
+          "$.score",
+          "$.total"
+        ]
+      },
+      "expected_source": "specification:CHARTER.md and FORBIDDEN_KEYS, written out by hand",
+      "id": "agg-every-name",
+      "input": {
+        "value": {
+          "aggregate": 1,
+          "grade": 1,
+          "overall": 1,
+          "score": 1,
+          "total": 1
+        }
+      }
+    },
+    {
+      "description": "The words as values or in other keys are not refused.",
+      "expected": {
+        "result": []
+      },
+      "expected_source": "specification:CHARTER.md and FORBIDDEN_KEYS, written out by hand",
+      "id": "agg-value-is-not-a-key",
+      "input": {
+        "value": {
+          "Total": 1,
+          "note": "score",
+          "scoreboard": 1
+        }
+      }
+    }
+  ]
+}
