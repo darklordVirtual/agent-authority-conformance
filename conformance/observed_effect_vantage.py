@@ -49,15 +49,45 @@ def evaluate_observation_vantage(
     record: Mapping[str, Any],
     *,
     trusted_control_domains: Collection[str] = (),
+) -> VantageVerdict:
+    """Derive whether the observation vantage is independent (profile revision 1).
+
+    ``trusted_control_domains`` is supplied by the verifier/runner and therefore
+    sits outside the producer record. Merely naming another control domain does
+    not establish independence unless that domain is in this trust set.
+
+    Revision 1 is frozen as published (GOVERNANCE.md); revision 2 adds two
+    premises, see :func:`evaluate_observation_vantage_r2`.
+    """
+    return _evaluate(record, trusted_control_domains, None, None, revision=1)
+
+
+def evaluate_observation_vantage_r2(
+    record: Mapping[str, Any],
+    *,
+    trusted_control_domains: Collection[str] = (),
     observer_identity_basis: Mapping[str, Mapping[str, Any]] | None = None,
     observer_key_custody_basis: Mapping[str, Mapping[str, Any]] | None = None,
 ) -> VantageVerdict:
-    """Derive whether the observation vantage is independent.
+    """Profile revision 2: revision 1, plus evidence for observer identity and key custody.
 
     ``trusted_control_domains`` and the two basis maps are supplied by the
     verifier/runner and therefore sit outside the producer record. A distinct
-    observer id, domain label, or key id is never sufficient by itself.
+    observer id, domain label, or key id is never sufficient by itself
+    (profiles/AACP-OBSERVED-EFFECT-VANTAGE-2.md).
     """
+    return _evaluate(record, trusted_control_domains, observer_identity_basis,
+                     observer_key_custody_basis, revision=2)
+
+
+def _evaluate(
+    record: Mapping[str, Any],
+    trusted_control_domains: Collection[str],
+    observer_identity_basis: Mapping[str, Mapping[str, Any]] | None,
+    observer_key_custody_basis: Mapping[str, Mapping[str, Any]] | None,
+    *,
+    revision: int,
+) -> VantageVerdict:
     if not isinstance(record, Mapping):
         return VantageVerdict(
             VantageResult.INVALID_INPUT, None, "record-not-an-object"
@@ -126,40 +156,32 @@ def evaluate_observation_vantage(
             "observation-vantage-not-established",
         )
 
-    # Observer independence needs runner-admitted evidence for identity and
-    # signing-key custody. Distinct identifiers or key ids are not evidence
-    # that the producer cannot mint/revoke the identity or reach the key.
-    identity_basis = (observer_identity_basis or {}).get(observer_id)
-    if not isinstance(identity_basis, Mapping):
-        return VantageVerdict(
-            VantageResult.NOT_ESTABLISHED,
-            "observer_identity_basis",
-            "observer-identity-not-independently-established",
-        )
-    if (
-        identity_basis.get("established_outside_producer") is not True
-        or identity_basis.get("producer_can_issue") is not False
-        or identity_basis.get("producer_can_revoke") is not False
-    ):
-        return VantageVerdict(
-            VantageResult.NOT_ESTABLISHED,
-            "observer_identity_basis",
-            "observer-identity-not-independently-established",
-        )
-
-    custody_basis = (observer_key_custody_basis or {}).get(observer_id)
-    if not isinstance(custody_basis, Mapping):
-        return VantageVerdict(
-            VantageResult.NOT_ESTABLISHED,
-            "observer_key_custody_basis",
-            "observer-key-custody-not-established",
-        )
-    if custody_basis.get("producer_can_access_signing_key") is not False:
-        return VantageVerdict(
-            VantageResult.NOT_ESTABLISHED,
-            "observer_key_custody_basis",
-            "observer-key-custody-not-established",
-        )
+    if revision >= 2:
+        # Observer independence needs runner-admitted evidence for identity and
+        # signing-key custody. Distinct identifiers or key ids are not evidence
+        # that the producer cannot mint/revoke the identity or reach the key.
+        identity_basis = (observer_identity_basis or {}).get(observer_id)
+        if (
+            not isinstance(identity_basis, Mapping)
+            or identity_basis.get("established_outside_producer") is not True
+            or identity_basis.get("producer_can_issue") is not False
+            or identity_basis.get("producer_can_revoke") is not False
+        ):
+            return VantageVerdict(
+                VantageResult.NOT_ESTABLISHED,
+                "observer_identity_basis",
+                "observer-identity-not-independently-established",
+            )
+        custody_basis = (observer_key_custody_basis or {}).get(observer_id)
+        if (
+            not isinstance(custody_basis, Mapping)
+            or custody_basis.get("producer_can_access_signing_key") is not False
+        ):
+            return VantageVerdict(
+                VantageResult.NOT_ESTABLISHED,
+                "observer_key_custody_basis",
+                "observer-key-custody-not-established",
+            )
 
     # Absence of explicit forge/suppress facts is not positive evidence.
     if can_forge is not False or can_suppress is not False:
@@ -181,6 +203,8 @@ def main(argv: list[str] | None = None) -> int:
         description="Evaluate the AACP bounded observation-vantage profile."
     )
     parser.add_argument("case", type=Path)
+    parser.add_argument("--profile-revision", type=int, choices=(1, 2), default=1,
+                        help="profile revision to apply (default 1, frozen as published)")
     args = parser.parse_args(argv)
 
     try:
@@ -207,12 +231,14 @@ def main(argv: list[str] | None = None) -> int:
         }, sort_keys=True))
         return 2
 
-    verdict = evaluate_observation_vantage(
-        record,
-        trusted_control_domains=tuple(domains),
-        observer_identity_basis=identity_basis,
-        observer_key_custody_basis=custody_basis,
-    )
+    if args.profile_revision == 2:
+        verdict = evaluate_observation_vantage_r2(
+            record, trusted_control_domains=tuple(domains),
+            observer_identity_basis=identity_basis,
+            observer_key_custody_basis=custody_basis,
+        )
+    else:
+        verdict = evaluate_observation_vantage(record, trusted_control_domains=tuple(domains))
     print(json.dumps(verdict.as_dict(), sort_keys=True))
     return 2 if verdict.result is VantageResult.INVALID_INPUT else 0
 
