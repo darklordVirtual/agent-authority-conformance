@@ -1,0 +1,429 @@
+{
+  "contract": "Input is {record, trusted_control_domains}; trust material is runner-owned and never read from the record. The result is {result, unmet_obligation, reason}. Compare only the keys a vector lists in `compare`: the profile fixes result and unmet_obligation, and keeps reason wording normative only for the OE-08 discriminator.",
+  "operation": "oe08.observation_vantage",
+  "specification": "profiles/AACP-OBSERVED-EFFECT-VANTAGE-1.md",
+  "suite": "aacp-reference-vectors-v1",
+  "vectors": [
+    {
+      "compare": [
+        "result",
+        "unmet_obligation",
+        "reason"
+      ],
+      "description": "The pinned RFC189 OE-08 producer case: self-vantage that declares independence.",
+      "expected": {
+        "result": {
+          "reason": "authoritative-vantage-not-independent",
+          "result": "NOT_ESTABLISHED",
+          "unmet_obligation": "observation_vantage"
+        }
+      },
+      "expected_source": "producer:interop/fixtures/rfc189-oe-08-self-vantage.json (expected and the producer's native_expected not_established/observation_vantage, verbatim)",
+      "id": "oe08-producer-self-vantage-claiming-independence",
+      "input": {
+        "record": {
+          "can_observed_party_forge": false,
+          "can_observed_party_suppress": false,
+          "control_domain": "observed-party-domain",
+          "declared_independence": true,
+          "observed_control_domain": "observed-party-domain",
+          "observed_party": "observed-party",
+          "observer_id": "observed-party"
+        },
+        "trusted_control_domains": []
+      }
+    },
+    {
+      "compare": [
+        "result",
+        "unmet_obligation"
+      ],
+      "description": "Self-vantage with a nominally different, trusted control-domain label (rule 1).",
+      "expected": {
+        "result": {
+          "reason": "authoritative-vantage-not-independent",
+          "result": "NOT_ESTABLISHED",
+          "unmet_obligation": "observation_vantage"
+        }
+      },
+      "expected_source": "specification:profiles/AACP-OBSERVED-EFFECT-VANTAGE-1.md 'Procedure' and 'Required discriminators' (written out by hand)",
+      "id": "oe08-self-vantage-trusted-label",
+      "input": {
+        "record": {
+          "can_observed_party_forge": false,
+          "can_observed_party_suppress": false,
+          "control_domain": "nominally-external-domain",
+          "declared_independence": true,
+          "observed_control_domain": "observed-party-domain",
+          "observed_party": "observed-party",
+          "observer_id": "observed-party"
+        },
+        "trusted_control_domains": [
+          "nominally-external-domain"
+        ]
+      }
+    },
+    {
+      "compare": [
+        "result",
+        "unmet_obligation"
+      ],
+      "description": "External observer, distinct trusted domain, explicit no-forge and no-suppress (rule 4).",
+      "expected": {
+        "result": {
+          "reason": "independent-vantage-established",
+          "result": "ESTABLISHED",
+          "unmet_obligation": null
+        }
+      },
+      "expected_source": "specification:profiles/AACP-OBSERVED-EFFECT-VANTAGE-1.md 'Procedure' and 'Required discriminators' (written out by hand)",
+      "id": "oe08-independent-trusted-domain",
+      "input": {
+        "record": {
+          "can_observed_party_forge": false,
+          "can_observed_party_suppress": false,
+          "control_domain": "verifier-domain",
+          "declared_independence": true,
+          "observed_control_domain": "agent-domain",
+          "observed_party": "agent",
+          "observer_id": "verifier"
+        },
+        "trusted_control_domains": [
+          "verifier-domain"
+        ]
+      }
+    },
+    {
+      "compare": [
+        "result",
+        "unmet_obligation"
+      ],
+      "description": "The same record with no runner-owned trust material: not established (rule 4).",
+      "expected": {
+        "result": {
+          "reason": "observation-vantage-not-established",
+          "result": "NOT_ESTABLISHED",
+          "unmet_obligation": "observation_vantage"
+        }
+      },
+      "expected_source": "specification:profiles/AACP-OBSERVED-EFFECT-VANTAGE-1.md 'Procedure' and 'Required discriminators' (written out by hand)",
+      "id": "oe08-independent-without-runner-trust",
+      "input": {
+        "record": {
+          "can_observed_party_forge": false,
+          "can_observed_party_suppress": false,
+          "control_domain": "verifier-domain",
+          "declared_independence": true,
+          "observed_control_domain": "agent-domain",
+          "observed_party": "agent",
+          "observer_id": "verifier"
+        },
+        "trusted_control_domains": []
+      }
+    },
+    {
+      "compare": [
+        "result",
+        "unmet_obligation"
+      ],
+      "description": "External observer in the observed party's control domain (rule 3).",
+      "expected": {
+        "result": {
+          "reason": "authoritative-vantage-not-independent",
+          "result": "NOT_ESTABLISHED",
+          "unmet_obligation": "observation_vantage"
+        }
+      },
+      "expected_source": "specification:profiles/AACP-OBSERVED-EFFECT-VANTAGE-1.md 'Procedure' and 'Required discriminators' (written out by hand)",
+      "id": "oe08-shared-control-domain",
+      "input": {
+        "record": {
+          "can_observed_party_forge": false,
+          "can_observed_party_suppress": false,
+          "control_domain": "shared-domain",
+          "observed_control_domain": "shared-domain",
+          "observed_party": "agent",
+          "observer_id": "verifier"
+        },
+        "trusted_control_domains": [
+          "shared-domain"
+        ]
+      }
+    },
+    {
+      "compare": [
+        "result",
+        "unmet_obligation"
+      ],
+      "description": "External observer in a distinct domain the runner does not trust (rule 4).",
+      "expected": {
+        "result": {
+          "reason": "observation-vantage-not-established",
+          "result": "NOT_ESTABLISHED",
+          "unmet_obligation": "observation_vantage"
+        }
+      },
+      "expected_source": "specification:profiles/AACP-OBSERVED-EFFECT-VANTAGE-1.md 'Procedure' and 'Required discriminators' (written out by hand)",
+      "id": "oe08-untrusted-domain",
+      "input": {
+        "record": {
+          "can_observed_party_forge": false,
+          "can_observed_party_suppress": false,
+          "control_domain": "verifier-domain",
+          "observed_control_domain": "agent-domain",
+          "observed_party": "agent",
+          "observer_id": "verifier"
+        },
+        "trusted_control_domains": [
+          "some-other-domain"
+        ]
+      }
+    },
+    {
+      "compare": [
+        "result",
+        "unmet_obligation"
+      ],
+      "description": "The observed party can forge the observation (rule 2).",
+      "expected": {
+        "result": {
+          "reason": "authoritative-vantage-not-independent",
+          "result": "NOT_ESTABLISHED",
+          "unmet_obligation": "observation_vantage"
+        }
+      },
+      "expected_source": "specification:profiles/AACP-OBSERVED-EFFECT-VANTAGE-1.md 'Procedure' and 'Required discriminators' (written out by hand)",
+      "id": "oe08-observed-party-can-forge",
+      "input": {
+        "record": {
+          "can_observed_party_forge": true,
+          "can_observed_party_suppress": false,
+          "control_domain": "verifier-domain",
+          "observed_control_domain": "agent-domain",
+          "observed_party": "agent",
+          "observer_id": "verifier"
+        },
+        "trusted_control_domains": [
+          "verifier-domain"
+        ]
+      }
+    },
+    {
+      "compare": [
+        "result",
+        "unmet_obligation"
+      ],
+      "description": "The observed party can suppress the observation (rule 2).",
+      "expected": {
+        "result": {
+          "reason": "authoritative-vantage-not-independent",
+          "result": "NOT_ESTABLISHED",
+          "unmet_obligation": "observation_vantage"
+        }
+      },
+      "expected_source": "specification:profiles/AACP-OBSERVED-EFFECT-VANTAGE-1.md 'Procedure' and 'Required discriminators' (written out by hand)",
+      "id": "oe08-observed-party-can-suppress",
+      "input": {
+        "record": {
+          "can_observed_party_forge": false,
+          "can_observed_party_suppress": true,
+          "control_domain": "verifier-domain",
+          "observed_control_domain": "agent-domain",
+          "observed_party": "agent",
+          "observer_id": "verifier"
+        },
+        "trusted_control_domains": [
+          "verifier-domain"
+        ]
+      }
+    },
+    {
+      "compare": [
+        "result",
+        "unmet_obligation"
+      ],
+      "description": "Distinct trusted domain, but no explicit forge/suppress facts: missing evidence (rule 5).",
+      "expected": {
+        "result": {
+          "reason": "observation-vantage-not-established",
+          "result": "NOT_ESTABLISHED",
+          "unmet_obligation": "observation_vantage"
+        }
+      },
+      "expected_source": "specification:profiles/AACP-OBSERVED-EFFECT-VANTAGE-1.md 'Procedure' and 'Required discriminators' (written out by hand)",
+      "id": "oe08-forge-and-suppress-facts-missing",
+      "input": {
+        "record": {
+          "control_domain": "verifier-domain",
+          "observed_control_domain": "agent-domain",
+          "observed_party": "agent",
+          "observer_id": "verifier"
+        },
+        "trusted_control_domains": [
+          "verifier-domain"
+        ]
+      }
+    },
+    {
+      "compare": [
+        "result",
+        "unmet_obligation"
+      ],
+      "description": "Distinct trusted domain, no-forge stated, suppress fact missing (rules 4 and 5).",
+      "expected": {
+        "result": {
+          "reason": "observation-vantage-not-established",
+          "result": "NOT_ESTABLISHED",
+          "unmet_obligation": "observation_vantage"
+        }
+      },
+      "expected_source": "specification:profiles/AACP-OBSERVED-EFFECT-VANTAGE-1.md 'Procedure' and 'Required discriminators' (written out by hand)",
+      "id": "oe08-one-negative-fact-missing",
+      "input": {
+        "record": {
+          "can_observed_party_forge": false,
+          "control_domain": "verifier-domain",
+          "observed_control_domain": "agent-domain",
+          "observed_party": "agent",
+          "observer_id": "verifier"
+        },
+        "trusted_control_domains": [
+          "verifier-domain"
+        ]
+      }
+    },
+    {
+      "compare": [
+        "result",
+        "unmet_obligation"
+      ],
+      "description": "External observer with no control_domain (rule 5).",
+      "expected": {
+        "result": {
+          "reason": "observation-vantage-not-established",
+          "result": "NOT_ESTABLISHED",
+          "unmet_obligation": "observation_vantage"
+        }
+      },
+      "expected_source": "specification:profiles/AACP-OBSERVED-EFFECT-VANTAGE-1.md 'Procedure' and 'Required discriminators' (written out by hand)",
+      "id": "oe08-control-domain-missing",
+      "input": {
+        "record": {
+          "can_observed_party_forge": false,
+          "can_observed_party_suppress": false,
+          "observed_control_domain": "agent-domain",
+          "observed_party": "agent",
+          "observer_id": "verifier"
+        },
+        "trusted_control_domains": [
+          "verifier-domain"
+        ]
+      }
+    },
+    {
+      "compare": [
+        "result",
+        "unmet_obligation"
+      ],
+      "description": "declared_independence is the string \"true\": malformed typed input (rule 5).",
+      "expected": {
+        "result": {
+          "result": "INVALID_INPUT",
+          "unmet_obligation": null
+        }
+      },
+      "expected_source": "specification:profiles/AACP-OBSERVED-EFFECT-VANTAGE-1.md 'Procedure' and 'Required discriminators' (written out by hand)",
+      "id": "oe08-malformed-declared-independence",
+      "input": {
+        "record": {
+          "can_observed_party_forge": false,
+          "can_observed_party_suppress": false,
+          "control_domain": "observed-party-domain",
+          "declared_independence": "true",
+          "observed_control_domain": "observed-party-domain",
+          "observed_party": "observed-party",
+          "observer_id": "observed-party"
+        },
+        "trusted_control_domains": []
+      }
+    },
+    {
+      "compare": [
+        "result",
+        "unmet_obligation"
+      ],
+      "description": "can_observed_party_forge is the integer 0: malformed typed input (rule 5).",
+      "expected": {
+        "result": {
+          "result": "INVALID_INPUT",
+          "unmet_obligation": null
+        }
+      },
+      "expected_source": "specification:profiles/AACP-OBSERVED-EFFECT-VANTAGE-1.md 'Procedure' and 'Required discriminators' (written out by hand)",
+      "id": "oe08-malformed-forge-fact",
+      "input": {
+        "record": {
+          "can_observed_party_forge": 0,
+          "can_observed_party_suppress": false,
+          "control_domain": "verifier-domain",
+          "observed_control_domain": "agent-domain",
+          "observed_party": "agent",
+          "observer_id": "verifier"
+        },
+        "trusted_control_domains": [
+          "verifier-domain"
+        ]
+      }
+    },
+    {
+      "compare": [
+        "result",
+        "unmet_obligation"
+      ],
+      "description": "observer_id is blank: the record names no observer (rule 5).",
+      "expected": {
+        "result": {
+          "result": "INVALID_INPUT",
+          "unmet_obligation": null
+        }
+      },
+      "expected_source": "specification:profiles/AACP-OBSERVED-EFFECT-VANTAGE-1.md 'Procedure' and 'Required discriminators' (written out by hand)",
+      "id": "oe08-blank-observer",
+      "input": {
+        "record": {
+          "can_observed_party_forge": false,
+          "can_observed_party_suppress": false,
+          "control_domain": "verifier-domain",
+          "observed_control_domain": "agent-domain",
+          "observed_party": "agent",
+          "observer_id": "  "
+        },
+        "trusted_control_domains": [
+          "verifier-domain"
+        ]
+      }
+    },
+    {
+      "compare": [
+        "result",
+        "unmet_obligation"
+      ],
+      "description": "The record is a list, not an object (rule 5).",
+      "expected": {
+        "result": {
+          "result": "INVALID_INPUT",
+          "unmet_obligation": null
+        }
+      },
+      "expected_source": "specification:profiles/AACP-OBSERVED-EFFECT-VANTAGE-1.md 'Procedure' and 'Required discriminators' (written out by hand)",
+      "id": "oe08-record-not-an-object",
+      "input": {
+        "record": [
+          "observer_id",
+          "agent"
+        ],
+        "trusted_control_domains": []
+      }
+    }
+  ]
+}

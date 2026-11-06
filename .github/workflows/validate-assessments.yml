@@ -55,6 +55,21 @@ jobs:
       - name: Score the fixtures against the seeded faults
         run: python -m conformance.mutations
 
+      - name: Verify the frozen reference vectors without AACP code
+        working-directory: vectors/aacp-reference-vectors-v1
+        run: sha256sum --check SHA256SUMS
+
+      - name: Rebuild the reference vectors from their sources and check the reference
+        run: |
+          python -m conformance.vectors verify
+          python scripts/build_reference_vectors.py --check
+          python -m conformance.vectors check
+
+      - name: Run the reference and the stdlib example over the stdio protocol
+        run: |
+          python -m conformance.vectors run --impl "python -m conformance.vectors serve"
+          python -m conformance.vectors run --impl "python templates/vector-impl/stdlib_impl.py"
+
       - name: Check the E rule's invariants over the generated space
         run: python -m conformance.invariants
 

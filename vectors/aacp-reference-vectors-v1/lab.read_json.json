@@ -1,0 +1,76 @@
+{
+  "contract": "Input is {text}. The result is the parsed value; a repeated key in any object is {\"error\": \"DUPLICATE_KEY\"}, text that is not JSON is {\"error\": \"INVALID_JSON\"}.",
+  "operation": "lab.read_json",
+  "specification": "conformance/lab/canonical.py read_json()",
+  "suite": "aacp-reference-vectors-v1",
+  "vectors": [
+    {
+      "description": "A well-formed object.",
+      "expected": {
+        "result": {
+          "a": 1,
+          "b": [
+            true,
+            null
+          ]
+        }
+      },
+      "expected_source": "specification:conformance/lab/canonical.py read_json() (duplicate keys refused), written out by hand",
+      "id": "read-valid",
+      "input": {
+        "text": "{\"a\": 1, \"b\": [true, null]}"
+      }
+    },
+    {
+      "description": "A key repeated at the top level is refused.",
+      "expected": {
+        "error": "DUPLICATE_KEY"
+      },
+      "expected_source": "specification:conformance/lab/canonical.py read_json() (duplicate keys refused), written out by hand",
+      "id": "read-duplicate-top-level",
+      "input": {
+        "text": "{\"a\": 1, \"a\": 2}"
+      }
+    },
+    {
+      "description": "A key repeated inside a nested object is refused.",
+      "expected": {
+        "error": "DUPLICATE_KEY"
+      },
+      "expected_source": "specification:conformance/lab/canonical.py read_json() (duplicate keys refused), written out by hand",
+      "id": "read-duplicate-nested",
+      "input": {
+        "text": "{\"a\": {\"x\": 1, \"x\": 1}}"
+      }
+    },
+    {
+      "description": "The same key in two sibling objects is fine.",
+      "expected": {
+        "result": [
+          {
+            "x": 1
+          },
+          {
+            "x": 2
+          }
+        ]
+      },
+      "expected_source": "specification:conformance/lab/canonical.py read_json() (duplicate keys refused), written out by hand",
+      "id": "read-same-key-different-objects",
+      "input": {
+        "text": "[{\"x\": 1}, {\"x\": 2}]"
+      }
+    },
+    {
+      "description": "Text that is not JSON is refused.",
+      "expected": {
+        "error": "INVALID_JSON"
+      },
+      "expected_source": "specification:conformance/lab/canonical.py read_json() (duplicate keys refused), written out by hand",
+      "id": "read-not-json",
+      "input": {
+        "text": "{\"a\": 1,}"
+      }
+    }
+  ]
+}

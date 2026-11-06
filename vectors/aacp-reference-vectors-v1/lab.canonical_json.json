@@ -1,0 +1,162 @@
+{
+  "contract": "The lab hashes json.dumps(obj, sort_keys=True, indent=2, ensure_ascii=False) plus a final newline, encoded as UTF-8 (conformance/lab/canonical.py). This is NOT RFC 8785: keys sort by code point, non-ASCII is literal, numbers use Python's repr. A verifier of a lab package digest must reproduce these bytes exactly. Input is {text}, a JSON document in its own key order; parse it and canonicalize the value. The result is {canonical_utf8, sha256}.",
+  "operation": "lab.canonical_json",
+  "specification": "conformance/lab/canonical.py",
+  "suite": "aacp-reference-vectors-v1",
+  "vectors": [
+    {
+      "description": "An empty object.",
+      "expected": {
+        "result": {
+          "canonical_utf8": "{}\n",
+          "sha256": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356"
+        }
+      },
+      "expected_source": "specification:conformance/lab/canonical.py dumps() rule, bytes written out by hand; sha256 of those bytes",
+      "id": "canon-empty-object",
+      "input": {
+        "text": "{}"
+      }
+    },
+    {
+      "description": "An empty array at the top level.",
+      "expected": {
+        "result": {
+          "canonical_utf8": "[]\n",
+          "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+        }
+      },
+      "expected_source": "specification:conformance/lab/canonical.py dumps() rule, bytes written out by hand; sha256 of those bytes",
+      "id": "canon-empty-array",
+      "input": {
+        "text": "[]"
+      }
+    },
+    {
+      "description": "Keys are sorted.",
+      "expected": {
+        "result": {
+          "canonical_utf8": "{\n  \"a\": 2,\n  \"b\": 1\n}\n",
+          "sha256": "9f067750b94f2bcd18ca4aa8b877af2391d89150e5c679618a75951795c4e7ec"
+        }
+      },
+      "expected_source": "specification:conformance/lab/canonical.py dumps() rule, bytes written out by hand; sha256 of those bytes",
+      "id": "canon-key-order",
+      "input": {
+        "text": "{\"b\": 1, \"a\": 2}"
+      }
+    },
+    {
+      "description": "Nested containers, an empty array, null, booleans.",
+      "expected": {
+        "result": {
+          "canonical_utf8": "{\n  \"y\": {\n    \"u\": false,\n    \"v\": true,\n    \"x\": [\n      1,\n      {\n        \"w\": null\n      }\n    ]\n  },\n  \"z\": []\n}\n",
+          "sha256": "738ceb8b176649d291cff22b267aa7701658cf69a0030a0ae52e2c58aace467f"
+        }
+      },
+      "expected_source": "specification:conformance/lab/canonical.py dumps() rule, bytes written out by hand; sha256 of those bytes",
+      "id": "canon-nesting",
+      "input": {
+        "text": "{\"z\": [], \"y\": {\"x\": [1, {\"w\": null}], \"v\": true, \"u\": false}}"
+      }
+    },
+    {
+      "description": "Non-ASCII stays literal UTF-8, including a non-BMP character.",
+      "expected": {
+        "result": {
+          "canonical_utf8": "{\n  \"name\": \"héllo 🙂\"\n}\n",
+          "sha256": "e5fe5db4fc38f3d8cfb69efc929415ec74742cab7788b42cee93fd90c2288b0b"
+        }
+      },
+      "expected_source": "specification:conformance/lab/canonical.py dumps() rule, bytes written out by hand; sha256 of those bytes",
+      "id": "canon-non-ascii-literal",
+      "input": {
+        "text": "{\"name\": \"h\\u00e9llo \\ud83d\\ude42\"}"
+      }
+    },
+    {
+      "description": "Quote, backslash, newline, tab and a control character are escaped.",
+      "expected": {
+        "result": {
+          "canonical_utf8": "{\n  \"s\": \"q\\\" b\\\\ n\\n t\\t c\\u0001\"\n}\n",
+          "sha256": "ab22f09b6cfdcd6a4130b0a1d76e756c2f753800c0fc02386692ecff94654ccb"
+        }
+      },
+      "expected_source": "specification:conformance/lab/canonical.py dumps() rule, bytes written out by hand; sha256 of those bytes",
+      "id": "canon-escapes",
+      "input": {
+        "text": "{\"s\": \"q\\\" b\\\\ n\\n t\\t c\\u0001\"}"
+      }
+    },
+    {
+      "description": "U+2028 is not escaped.",
+      "expected": {
+        "result": {
+          "canonical_utf8": "{\n  \"s\": \"a b\"\n}\n",
+          "sha256": "2f7580dd675f2a5ae1a73847a990ff2dc6e34ff68acb41847afe7ecc7d46ef8a"
+        }
+      },
+      "expected_source": "specification:conformance/lab/canonical.py dumps() rule, bytes written out by hand; sha256 of those bytes",
+      "id": "canon-line-separator-literal",
+      "input": {
+        "text": "{\"s\": \"a\\u2028b\"}"
+      }
+    },
+    {
+      "description": "U+FFFF sorts before U+1F600 by code point; RFC 8785 (UTF-16 order) would reverse them.",
+      "expected": {
+        "result": {
+          "canonical_utf8": "{\n  \"￿\": 1,\n  \"😀\": 2\n}\n",
+          "sha256": "abc9668ee4ad1da01543c2b30c580416f577bed90a3445d7be205adc0ffed8b0"
+        }
+      },
+      "expected_source": "specification:conformance/lab/canonical.py dumps() rule, bytes written out by hand; sha256 of those bytes",
+      "id": "canon-key-order-code-point",
+      "input": {
+        "text": "{\"\\ud83d\\ude00\": 2, \"\\uffff\": 1}"
+      }
+    },
+    {
+      "description": "Upper case sorts before lower case.",
+      "expected": {
+        "result": {
+          "canonical_utf8": "{\n  \"B\": 2,\n  \"a\": 1\n}\n",
+          "sha256": "9298ba93801a0f2b70044051869e0c2dd1b7febc7f5fa686e79590876522945d"
+        }
+      },
+      "expected_source": "specification:conformance/lab/canonical.py dumps() rule, bytes written out by hand; sha256 of those bytes",
+      "id": "canon-key-order-case",
+      "input": {
+        "text": "{\"a\": 1, \"B\": 2}"
+      }
+    },
+    {
+      "description": "An integer beyond 2^53 is written in full.",
+      "expected": {
+        "result": {
+          "canonical_utf8": "{\n  \"n\": 12345678901234567890\n}\n",
+          "sha256": "d85b7e9a3c2d6cc5d9380f8a9b837b45062d7e49c7ce8647914ab78402141778"
+        }
+      },
+      "expected_source": "specification:conformance/lab/canonical.py dumps() rule, bytes written out by hand; sha256 of those bytes",
+      "id": "canon-large-integer",
+      "input": {
+        "text": "{\"n\": 12345678901234567890}"
+      }
+    },
+    {
+      "description": "Floats use Python's repr: 1.0 keeps its .0, 1e100 is 1e+100, 0.1 is 0.1, -0.0 keeps its sign.",
+      "expected": {
+        "result": {
+          "canonical_utf8": "{\n  \"a\": 1.0,\n  \"b\": 1e+100,\n  \"c\": 0.1,\n  \"d\": -0.0\n}\n",
+          "sha256": "10a58c9e3e7b49f6ee3126fca9f5f6600ed4cf15b0833a6e8b85818079376605"
+        }
+      },
+      "expected_source": "specification:conformance/lab/canonical.py dumps() rule, bytes written out by hand; sha256 of those bytes",
+      "id": "canon-float-forms",
+      "input": {
+        "text": "{\"a\": 1.0, \"b\": 1e+100, \"c\": 0.1, \"d\": -0.0}"
+      }
+    }
+  ]
+}

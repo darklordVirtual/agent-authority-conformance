@@ -48,6 +48,8 @@ python -m pip install -r requirements-dev.txt
 python -m conformance.check
 python -m conformance.mutations
 python -m conformance.invariants
+python -m conformance.vectors verify
+python -m conformance.vectors check
 python -m unittest discover -s tests -v
 ```
 
@@ -61,8 +63,13 @@ All checks run offline, are read-only and never regenerate committed expectation
 | Local C/F/G adversarial probes (`aacp adversarial`) | [Adversarial self-service](docs/ADVERSARIAL-SELF-SERVICE.md) |
 | Runs against another project's pinned artifacts | [Federation tracks](docs/FEDERATION-TRACKS.md), [RUN-PROTOCOL-v0.3.md](RUN-PROTOCOL-v0.3.md) |
 | Cross-implementation comparison | `python -m conformance.coverage <assessment.json> ...` |
+| Checking another implementation, in any language, against frozen reference vectors | [Reference vectors](docs/REFERENCE-VECTORS.md), `python -m conformance.vectors run --impl "<command>"` |
 
 `aacp adversarial` is a local `SELF_RUN`: it executes the maintainer's own adapter and carries no independence credit. `conformance.coverage` emits a component matrix with one explicit row per property; it never scores, ranks or upgrades self-reported evidence.
+
+## Published bounded reproductions
+
+- [AEGIS Core 3.4.0, Run 002](https://github.com/darklordVirtual/agent-authority-conformance/blob/026097b21c2c5544448e05ca275dc0104d4f873a/publications/aegis-issue-21-run-002/PUBLICATION.md): operator-controlled manual reproduction of a producer-authored fixture, **REPRODUCTION / BCR-1 at most**. The producer [confirmed the published archive and representation](https://github.com/darklordVirtual/agent-authority-conformance/issues/21#issuecomment-6366973494). The publication note links the approved archive and report and states the claim limits.
 
 ## Runs against other projects
 
@@ -102,6 +109,7 @@ The reference rules consume **already accepted evidence**. They do not authentic
 | [`conformance/lab/`](conformance/lab/) | Run protocol: scope, pin, consent, freeze, run, package, rerun |
 | [`aacp/`](aacp/) | Installable CLI |
 | [`examples/`](examples/) · [`tests/fixtures/`](tests/fixtures/) | Examples and synthetic evidence cases |
+| [`vectors/`](vectors/) | Frozen, digest-pinned input and answer pairs for checking a separately written implementation |
 | [`MUTATIONS-AND-INVARIANTS.md`](MUTATIONS-AND-INVARIANTS.md) | What the adequacy checks establish, and what they do not |
 
 ## Minimal assessment

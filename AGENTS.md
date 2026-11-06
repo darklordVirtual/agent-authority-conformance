@@ -64,8 +64,15 @@ python -m unittest discover -s tests -p test_adapter.py -v
 python -m conformance.check
 python -m conformance.mutations
 python -m conformance.invariants
+python -m conformance.vectors verify
+python scripts/build_reference_vectors.py --check
+python -m conformance.vectors check
 python -m unittest discover -s tests -v
 ```
+
+The reference vectors under `vectors/` are frozen. Never edit a vector, its
+expectation or its digests to match an implementation's output; a change is a
+new suite version (docs/REFERENCE-VECTORS.md).
 
 Do not modify v0.1 history or unrelated user changes. A result report must be
 self-contained: what ran, which exact bytes, what it establishes, what it does
