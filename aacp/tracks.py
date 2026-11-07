@@ -84,6 +84,14 @@ def next_actions(run_dir):
 def _publication_items(scope, current, events):
     run_id = scope["run_id"]
     since = current.get("consent_index_at_share", 0)
+    if scope.get("track") == "self_service" and "public_boundary" in scope:
+        maintainers = consent.handles([m for s in scope["subjects"] for m in s["maintainers"]])
+        if any(e["action"] in ("publication_declined", "withdrawn") and consent.handle(e["who"]) in maintainers
+               for e in events[since:]):
+            return [_human(r, "withhold or answer", "a subject maintainer declined publication of this "
+                                                    "runner-attributed result") for r in scope["runner"]["maintainers"]]
+        return [_mechanical("publish", f"aacp run publish {run_id}",
+                            "publish the runner-attributed result over the pinned public boundary")]
     if scope.get("track") == "self_service":
         terms = scope["offer_terms"]["publication"]
         maintainers = consent.handles(scope["offer_terms"]["maintainers"])
@@ -146,8 +154,17 @@ def evidence_record(run_dir, include_unpublished=False):
         record_state = "published after review"
     per = independence.per_claim(scope)
     repository = current.get("repository")
-    notes = [f"Track: {track}." + (f" Offer {scope['offer']['offer_id']} at {scope['offer']['repo']}@"
-                                   f"{scope['offer']['commit'][:12]}." if track == "self_service" else "")]
+    if track == "self_service" and "public_boundary" in scope:
+        ref = scope["public_boundary"]
+        basis = f" Public boundary {ref['path']} at {ref['repo']}@{ref['commit'][:12]} (runner-attributed)."
+    elif track == "self_service":
+        basis = f" Offer {scope['offer']['offer_id']} at {scope['offer']['repo']}@{scope['offer']['commit'][:12]}."
+    else:
+        basis = ""
+    notes = [f"Track: {track}." + basis]
+    if scope.get("challenge"):
+        notes.append(f"Answers a public challenge by {scope['challenge']['by']} ({scope['challenge']['ref']}); "
+                     "not consent and not endorsement.")
     notes.append(f"Run label {scope['independence']} ({independence.FEDERATION[scope['independence']]}, "
                  f"{independence.BCR[scope['independence']]}).")
     if scope.get("verifier_authors"):
@@ -168,6 +185,13 @@ def evidence_record(run_dir, include_unpublished=False):
             if c["discriminated"] is not True:
                 state_word = "not exercised" if c["discriminated"] is None else "did not discriminate"
                 notes.append(f"Negative control {c['claim']} on {c['input']} {state_word} ({c['observed']}).")
+    probes_path = run_dir / "results" / "probes.json"
+    if published and probes_path.is_file():
+        for r in read_json(probes_path)["records"]:
+            observed = r["observation"] or r["execution"]
+            affects = {True: "yes", False: "no"}.get(r.get("affects_pinned_artifact"), "n/a")
+            notes.append(f"Runner probe {r['probe']} ({r['class']}): {observed}; affects pinned artifact: {affects}. "
+                         "Not a claim result.")
     if not published:
         notes.append("Results are withheld until publication.")
     record = {

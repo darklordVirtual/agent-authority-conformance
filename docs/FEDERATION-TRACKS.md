@@ -86,6 +86,13 @@ This path is intentionally narrower than a producer offer:
 - it does not record producer consent, review, endorsement, project approval or a statement in the producer's name;
 - it never infers stronger claims from the fact that an artifact is public.
 
+A public-boundary run may pin more than one subject only when every subject is a revision of
+the boundary's own repository, for example to compare a key or a text between two public
+commits. It never covers a second project. A subject maintainer's `publication_declined` or
+`withdrawn` allows `withhold`; there are no producer terms to decide otherwise, so the runner
+answers or withholds. A public request to verify (a "challenge") can be recorded alongside as
+`challenge` context, never as consent; see [CHALLENGE-RESPONSE.md](CHALLENGE-RESPONSE.md).
+
 Private/unreleased artifacts and statements made in another project's name remain on the manual path. `aacp-offers.json` remains available when a producer wants to publish explicit AACP-native terms, but it is no longer a prerequisite for operating an already-public bounded reproduction target.
 
 ## Runner: self-service sequence

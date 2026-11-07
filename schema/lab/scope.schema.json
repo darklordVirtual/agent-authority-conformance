@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/darklordVirtual/agent-authority-conformance/schema/lab/scope.schema.json",
   "title": "AAC lab SCOPE.json (v0.3)",
-  "description": "Structure only. The lab's stdlib validator also checks cross-references (claim inputs, subject indexes, temporal claims). No aggregate keys are allowed.",
+  "description": "Structure only. The lab's stdlib validator also checks cross-references (claim inputs, subject indexes, temporal claims). No aggregate keys are allowed. A self-service run over a public_boundary may pin several subjects only when each is a revision of the boundary's own repository; the stdlib validator checks that cross-field rule.",
   "type": "object",
   "propertyNames": {
     "not": {
@@ -384,6 +384,13 @@
           "subject": {
             "type": "integer",
             "minimum": 0
+          },
+          "format": {
+            "enum": [
+              "json",
+              "bytes"
+            ],
+            "description": "json (default): parsed JSON, a directory is a bundle of its .json files. bytes: exact file bytes, a directory is a bundle of every file; needed for signature and digest checks."
           }
         }
       }
@@ -621,7 +628,10 @@
         },
         "path": {
           "type": "string",
-          "pattern": "^(?!/)(?!.*(^|/)\\\\.\\\\.(/|$)).+$"
+          "minLength": 1,
+          "not": {
+            "pattern": "(^/|(^|/)\\.\\.(/|$))"
+          }
         },
         "sha256": {
           "type": "string",
@@ -629,18 +639,183 @@
         },
         "procedure_ref": {
           "type": "string",
-          "pattern": "\\\\S"
+          "pattern": "\\S"
         },
         "claims_ref": {
           "type": "string",
-          "pattern": "\\\\S"
+          "pattern": "\\S"
         },
         "classification_ref": {
           "type": "string",
-          "pattern": "\\\\S"
+          "pattern": "\\S"
         }
       },
       "description": "Pinned public boundary used as a runner-attributed self-service basis. It is not producer consent, endorsement or admission."
+    },
+    "challenge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ref",
+        "by",
+        "asked",
+        "requests_endorsement"
+      ],
+      "properties": {
+        "ref": {
+          "type": "string",
+          "pattern": "^https://"
+        },
+        "by": {
+          "type": "string",
+          "pattern": "\\S"
+        },
+        "asked": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "pattern": "\\S"
+          }
+        },
+        "requests_endorsement": {
+          "type": "boolean"
+        }
+      },
+      "description": "A public request to verify something, recorded as context. Never consent, an offer, admission or a publication approval; answering it is not endorsement."
+    },
+    "probes": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Runner-authored probes: one record per probe over all of its inputs, reported separately from claim results. The stdlib validator also checks that ids are unique across claims and probes, inputs are declared, and locator paths are pinned files.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "propertyNames": {
+          "not": {
+            "enum": [
+              "overall",
+              "score",
+              "total",
+              "aggregate",
+              "grade"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "text",
+          "class",
+          "check",
+          "inputs",
+          "reads_fields",
+          "runner_assessment"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._-]+$"
+          },
+          "text": {
+            "type": "string",
+            "pattern": "\\S"
+          },
+          "class": {
+            "enum": [
+              "SPEC_IMPLEMENTATION_DIVERGENCE",
+              "CONSTRUCTION_AMBIGUITY",
+              "BINDING_GAP",
+              "FRAMING_GAP",
+              "KEY_REUSE",
+              "TRUST_ANCHOR",
+              "ATTESTATION_SCOPE",
+              "PROVENANCE_ATTRIBUTION",
+              "OTHER"
+            ]
+          },
+          "check": {
+            "type": "string",
+            "pattern": "^[A-Za-z_][A-Za-z0-9_]*:[A-Za-z_][A-Za-z0-9_]*$"
+          },
+          "inputs": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "reads_fields": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "runner_assessment": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "level",
+              "rationale"
+            ],
+            "properties": {
+              "level": {
+                "enum": [
+                  "informational",
+                  "low",
+                  "medium",
+                  "high"
+                ]
+              },
+              "rationale": {
+                "type": "string",
+                "pattern": "\\S"
+              }
+            }
+          },
+          "remediation": {
+            "type": "string",
+            "pattern": "\\S"
+          },
+          "source_locators": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "subject",
+                "path",
+                "lines",
+                "note"
+              ],
+              "properties": {
+                "subject": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "path": {
+                  "type": "string",
+                  "minLength": 1,
+                  "not": {
+                    "pattern": "(^/|(^|/)\\.\\.(/|$))"
+                  }
+                },
+                "lines": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]*(-[1-9][0-9]*)?$"
+                },
+                "note": {
+                  "type": "string",
+                  "pattern": "\\S"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "allOf": [
@@ -682,6 +857,11 @@
           "subjects": {
             "maxItems": 1
           }
+        },
+        "not": {
+          "required": [
+            "probes"
+          ]
         }
       }
     },
@@ -721,9 +901,6 @@
         "properties": {
           "kind": {
             "const": "verification"
-          },
-          "subjects": {
-            "maxItems": 1
           }
         },
         "not": {
@@ -740,6 +917,11 @@
               "required": [
                 "public_boundary"
               ]
+            },
+            "properties": {
+              "subjects": {
+                "maxItems": 1
+              }
             }
           },
           {

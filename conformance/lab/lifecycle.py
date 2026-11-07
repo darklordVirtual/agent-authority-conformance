@@ -55,9 +55,17 @@ def init(runs_dir, run_id, kind, now, template=None, follow_up=None, commit=None
                  "previous_run": {"run_id": follow_up, "plan_sha256": prev_state["plan_sha256"]},
                  "subjects": [{**prev_scope["subjects"][0], "commit": commit, "files_sha256": {}}]}
     elif template:
+        template = Path(template)
         scope = read_json(template)
         scope["run_id"] = run_id
         run_dir.mkdir(parents=True)
+        if template.name == "SCOPE.json":
+            # A run skeleton (for example templates/runs/<name>/SCOPE.json) carries its
+            # run-owned material next to the scope; scope-only templates have none.
+            for sub in plan.RUN_OWNED:
+                if (template.parent / sub).is_dir():
+                    shutil.copytree(template.parent / sub, run_dir / sub,
+                                    ignore=shutil.ignore_patterns("__pycache__"))
     else:
         if kind not in ("adequacy", "verification"):
             raise GateError("init needs --kind adequacy or --kind verification")
@@ -190,8 +198,16 @@ def _days_since(start, now):
     return (datetime.strptime(now, fmt) - datetime.strptime(start, fmt)).total_seconds() / 86400
 
 
+def producer_maintainers(scope):
+    """Offer basis: the maintainers named in the offer. Public-boundary basis: the
+    subject maintainers named in the scope (there are no producer terms)."""
+    if "offer_terms" in scope:
+        return consent.handles(scope["offer_terms"]["maintainers"])
+    return consent.handles([m for s in scope["subjects"] for m in s["maintainers"]])
+
+
 def _producer_declines(run_dir, scope, since):
-    maintainers = consent.handles(scope["offer_terms"]["maintainers"])
+    maintainers = producer_maintainers(scope)
     return [e for e in consent.load(run_dir)[since:]
             if e["action"] in ("publication_declined", "withdrawn") and consent.handle(e["who"]) in maintainers]
 

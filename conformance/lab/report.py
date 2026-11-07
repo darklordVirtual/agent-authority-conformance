@@ -39,6 +39,82 @@ def _bullets(items):
     return "\n".join(f"- {item}" for item in items) if items else "- none"
 
 
+def track_text(scope):
+    """One line saying on what basis the run was operated."""
+    if scope.get("track") == "self_service" and "public_boundary" in scope:
+        ref = scope["public_boundary"]
+        return (f"**Track:** self-service over a pinned public boundary ({ref['repo']} at `{ref['commit']}`, "
+                f"`{ref['path']}` SHA-256 `{ref['sha256']}`). Inputs were admitted by the runner; this is not "
+                "producer consent, producer admission, review or endorsement.")
+    if scope.get("track") == "self_service":
+        ref = scope["offer"]
+        return (f"**Track:** self-service under the producer's offer `{ref['offer_id']}` "
+                f"({ref['repo']} at `{ref['commit']}`, `{ref['path']}` SHA-256 `{ref['sha256']}`). "
+                "No per-run human gate; inputs are admitted by the offer.")
+    return "**Track:** manual. Scope agreement, run authorisation and admission are in CONSENT.json."
+
+
+def challenge_section(scope):
+    challenge = scope.get("challenge")
+    if not challenge:
+        return []
+    out = ["## Challenge", "",
+           f"This run answers a public verification challenge by {challenge['by']} ({challenge['ref']}). "
+           "The challenge is context only: it is not consent, not an offer, not admission and not a "
+           "publication approval. Answering it is not endorsement.", "", "The challenge asked:", "",
+           _bullets(challenge["asked"]), ""]
+    if challenge["requests_endorsement"]:
+        out += ["The challenge also asked for endorsement. This run gives none: an endorsement is a separate "
+                "statement by a person and lies outside every claim ceiling in this report.", ""]
+    return out
+
+
+def locator_url(subject, locator):
+    lines = locator["lines"].split("-")
+    anchor = f"#L{lines[0]}" + (f"-L{lines[1]}" if len(lines) == 2 else "")
+    return f"{subject['repo'].rstrip('/')}/blob/{subject['commit']}/{locator['path']}{anchor}"
+
+
+def probe_sections(scope, results):
+    probes = results.get("results/probes.json")
+    if not probes:
+        return []
+    declared = {p["id"]: p for p in scope.get("probes", [])}
+    out = ["## Probes (runner findings, not claim results)", "", probes["note"], "",
+           "| Probe | Class | Runner assessment | Execution | Observation | Affects pinned artifact |",
+           "|---|---|---|---|---|---|"]
+    for r in probes["records"]:
+        p = declared[r["probe"]]
+        observation = r["observation"] or f"— ({r['verifier_error']['code']})"
+        affects = {True: "yes", False: "no", None: "—"}[r.get("affects_pinned_artifact")]
+        out.append(f"| `{r['probe']}` | {r['class']} | {p['runner_assessment']['level']} | {r['execution']} | "
+                   f"{observation} | {affects} |")
+    out.append("")
+    for r in probes["records"]:
+        p = declared[r["probe"]]
+        out += [f"### `{r['probe']}`", "", f"**Probed:** {p['text']}", "",
+                f"**Runner assessment ({p['runner_assessment']['level']}):** {p['runner_assessment']['rationale']}", ""]
+        if r["execution"] != "COMPLETED":
+            out += [f"Non-verdict `{r['execution']}`: {r['verifier_error']['message']}", ""]
+            continue
+        out += [f"**Observed:** {r['message']}", "", "Inputs: " + ", ".join(f"`{e}`" for e in r["evidence"]), "",
+                "Witness:", "", "```json", display_json(r["witness"]), "```", ""]
+        locators = p.get("source_locators", [])
+        if locators:
+            out += ["Source locators (read as data, never executed):", "",
+                    _bullets(f"[{loc['path']} L{loc['lines']}]({locator_url(scope['subjects'][loc['subject']], loc)})"
+                             f": {loc['note']}" for loc in locators), ""]
+        if p.get("remediation"):
+            out += [f"**Suggested remediation:** {p['remediation']}", ""]
+    return out
+
+
+def display_json(obj):
+    """Indented JSON for display inside a report; the canonical bytes live in results/."""
+    import json
+    return json.dumps(obj, sort_keys=True, indent=2, ensure_ascii=False)
+
+
 def render_report(scope, plan, results, conditions=None, preregistered=True):
     lines = [f"# {scope['run_id']}", "",
              f"**Independence:** {INDEPENDENCE_TEXT[scope['independence']]}", "",
@@ -57,13 +133,8 @@ def render_report(scope, plan, results, conditions=None, preregistered=True):
         lines += [f"Follow-up of `{prev['run_id']}` (plan `{prev['plan_sha256']}`); earlier results are unchanged.", ""]
     if scope.get("procedure"):
         lines += [f"**Procedure:** `{scope['procedure']}`.", ""]
-    if scope.get("track") == "self_service":
-        ref = scope["offer"]
-        lines += [f"**Track:** self-service under the producer's offer `{ref['offer_id']}` "
-                  f"({ref['repo']} at `{ref['commit']}`, `{ref['path']}` SHA-256 `{ref['sha256']}`). "
-                  "No per-run human gate; inputs are admitted by the offer.", ""]
-    else:
-        lines += ["**Track:** manual. Scope agreement, run authorisation and admission are in CONSENT.json.", ""]
+    lines += [track_text(scope), ""]
+    lines += challenge_section(scope)
     lines += ["Publication status: see STATUS.md. Agreement: " + str(scope.get("agreement_ref")), "",
               "## Pinned inputs", "", "| Project | Repository | Commit | Licence |", "|---|---|---|---|"]
     lines += [f"| {s['project']} | {s['repo']} | `{s['commit']}` | {s['license']} |" for s in scope["subjects"]]
@@ -75,6 +146,7 @@ def render_report(scope, plan, results, conditions=None, preregistered=True):
         lines += _adequacy_sections(scope, results)
     else:
         lines += _verification_sections(results)
+        lines += probe_sections(scope, results)
     lines += _claim_ceiling_sections(scope)
     lines += _independence_section(scope)
     lines += _condition_sections(scope, conditions or [])

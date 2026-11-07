@@ -78,6 +78,13 @@ def build_parser():
     p.add_argument("b", type=Path)
     p = sub.add_parser("selftest", help="negative runner self-test: nonzero exit, no results, no success line")
     p.add_argument("--json", action="store_true")
+    p = sub.add_parser("respond", help="draft a public reply to a verification challenge from the run's records")
+    p.add_argument("run_id")
+    p.add_argument("--out", type=Path, help="where to write the draft (default: <run>/.local/CHALLENGE-RESPONSE.md)")
+    p.add_argument("--drafted-by", default="human", metavar="human|agent:<id>",
+                   help="who drafted the reply; printed in its footer")
+    p.add_argument("--ai-assisted", action="store_true")
+    p.add_argument("--scope-ref", help="where readers find this run's SCOPE.json (path or URL) for the reproduce steps")
     return parser
 
 
@@ -211,6 +218,9 @@ def _dispatch(args, cfg, runs, run_dir, capture_error=False):
         elif args.command == "selftest":
             from .selftest import main as selftest_main
             return selftest_main(["--json"] if args.json else [])
+        elif args.command == "respond":
+            from .respond import write
+            print(write(run_dir, args.out, args.drafted_by, args.ai_assisted, args.scope_ref))
         elif args.command == "rerun":
             return subprocess.run([sys.executable, "-B", str(args.package / "rerun.py")]).returncode
     except LabError as exc:
