@@ -72,6 +72,8 @@ All checks run offline, are read-only and never regenerate committed expectation
 
 - [AEGIS Core 3.4.0, Run 002](https://github.com/darklordVirtual/agent-authority-conformance/blob/026097b21c2c5544448e05ca275dc0104d4f873a/publications/aegis-issue-21-run-002/PUBLICATION.md): operator-controlled manual reproduction of a producer-authored fixture, **REPRODUCTION / BCR-1 at most**. The producer [confirmed the published archive and representation](https://github.com/darklordVirtual/agent-authority-conformance/issues/21#issuecomment-6366973494). The publication note links the approved archive and report and states the claim limits.
 
+- [NTI witness package, 2026-11-07](publications/nti-witness-2026-11-07/PUBLICATION.md): runner-attributed verification over a pinned public boundary, answering the challenge in aeoess/agent-governance-vocabulary#177, **SECOND_IMPLEMENTATION / BCR-2 at most**. Not reviewed or endorsed by the NTI maintainer; gives no endorsement. Package reruns to `REPRODUCED`.
+
 ## Runs against other projects
 
 The v0.3 run protocol turns an agreed, bounded question about another project's artifacts into a package that the other maintainers review privately before publication, and that anyone can rerun.
