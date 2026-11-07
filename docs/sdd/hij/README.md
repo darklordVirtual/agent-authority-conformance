@@ -11,7 +11,9 @@ other implementation.
 | Baseline | `main@30a5982ba48ac899953abc14d2be7d9bbd9fa200` |
 | Depends on PR #24 | No. This branch starts from the baseline; PR #24 is unmerged. |
 | Stage | 0 of 5: design freeze and review |
-| Gate to Stage 1 | Every item marked BLOCKING in the adversarial review has a recorded maintainer disposition, and ADR-0001 to ADR-0004 are accepted or amended |
+| Gate to Stage 1 | B-05 / ADR-0004 accepted 2026-11-07; still requires maintainer disposition of B-01–B-04/B-06, decisions on ADR-0001–0003, and explicit Gate 0 closure |
+
+**Stage 0 process exception:** The maintainer explicitly waived the separate independent reviewer prerequisite on 2026-11-07. AI drafting is still disclosed; independent verification has not been performed. The requirement to document remaining blocking decisions, claim ceilings, tests and stage gates is unchanged.
 
 The proposal is kept byte-for-byte as submitted. Amendments are made in the ADRs and the
 review below, never by editing the proposal, so the record shows what was proposed and what
