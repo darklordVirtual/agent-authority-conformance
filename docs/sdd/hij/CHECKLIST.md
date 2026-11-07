@@ -17,10 +17,11 @@ gate is ticked by the maintainer. No pull request is merged automatically.
 - [x] Research questions (RESEARCH-QUESTIONS.md)
 - [x] Adversarial review of the proposal (reviews/STAGE-0-ADVERSARIAL-REVIEW.md)
 - [x] No code, schema, vector, test or CI change in this PR (checked in the PR description)
-- [ ] Review by someone other than the drafting agent
-- [ ] Maintainer disposition for every BLOCKING review item
-- [ ] Maintainer decision on ADR-0001 to ADR-0004 (accept, amend or reject)
-- [ ] **Gate 0:** profile semantics and schema acceptance criteria reviewed
+- [x] Stage 0 separate-reviewer prerequisite **explicitly waived by maintainer** (2026-11-07); not represented as independently reviewed; see ADR-0004 and Stage 0 adversarial review
+- [x] Maintainer accepted ADR-0004 option 2: five cyber boundary profiles and one observation-prerequisite profile (2026-11-07); B-05 disposition recorded
+- [ ] Maintainer disposition for **remaining** BLOCKING findings B-01–B-04 and B-06 (B-05 addressed)
+- [ ] Maintainer decisions on ADR-0001 to ADR-0003 (ADR-0004 accepted)
+- [ ] **Gate 0:** profile semantics and schema acceptance criteria reviewed; maintainer records remaining decisions and explicitly closes gate
 
 ## Stage 1: contracts (schema and registry PR)
 
