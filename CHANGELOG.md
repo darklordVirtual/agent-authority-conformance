@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Add SDD-AACP-HIJ-001 as a proposal under review, with its Stage 0 package in
+  [docs/sdd/hij/](docs/sdd/hij/README.md): four proposed ADRs, draft claims and ceilings, schema
+  acceptance criteria, a traceability matrix, an implementation checklist, research questions and an
+  adversarial review. Documentation only; no profile, schema, vector or result is adopted.
+
 - Add `AACP-OBSERVED-EFFECT-VANTAGE-2`, a revision of the observation-vantage profile. Positive observer-independence credit now also needs runner-owned evidence that the observer identity is established outside the producer, which cannot issue or revoke it, and that the producer cannot reach the observer's signing key. `evaluate_observation_vantage_r2` and `--profile-revision 2` apply it. Revision 1 and its function stay as published, as GOVERNANCE.md requires of a merged profile revision, so the reference vectors v1 and every record under revision 1 are unchanged.
 
 - Add frozen reference vectors, `vectors/aacp-reference-vectors-v1/`: 86 input and expected-answer pairs for nine deterministic operations (the E rule, the OE-08 observation vantage, AgentAvow tool keys, digests and bindings, the lab's canonical JSON, strict JSON reading, the no-aggregate key rule, and the A-G coverage matrix). Every expected answer names its source, a committed fixture, a producer's own published or signed expectation, or specification text written out by hand, and the build script imports none of the rules it checks. The bytes are pinned by `SHA256SUMS`, `MANIFEST.json` and a test, `scripts/build_reference_vectors.py --check` rebuilds them from their sources, and `--write` refuses to replace a frozen suite. `python -m conformance.vectors run --impl "<command>"` checks any implementation over a one-request stdio protocol and reports per vector, with no score. `tests/test_vectors_adequacy.py` seeds 34 plausible implementer faults, and every one is noticed; the first version let an implementation that never sorts keys pass, which the canonical-JSON vectors now catch by taking JSON text as input. The suite documents that the lab's canonical form is not RFC 8785 and that a repeated assessment component is a schema error. See [docs/REFERENCE-VECTORS.md](docs/REFERENCE-VECTORS.md).
