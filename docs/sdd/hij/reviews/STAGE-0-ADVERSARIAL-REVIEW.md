@@ -4,8 +4,9 @@
 **Against:** CHARTER.md, METHOD.md, GOVERNANCE.md, TERMINOLOGY.md, SPECIFICATION-v0.2.md and
 `profiles/AACP-OBSERVED-EFFECT-VANTAGE-1.md` at `main@30a5982`
 **Reviewer:** agent `claude-opus-5.5`, AI-drafted. **This review is not independent.** The same agent
-drafted the ADRs and wrote the PR #24 lab changes the proposal refers to. Gate 0 needs a review by
-someone else.
+drafted the ADRs and wrote the PR #24 lab changes the proposal refers to. The maintainer waived the separate-reviewer requirement for Stage 0 on 2026-11-07;
+this remains a disclosed non-independent AI-drafted review, and Gate 0 still requires
+recorded dispositions and decisions for every remaining open blocking item.
 
 **Process decision (2026-11-07):** The maintainer explicitly waived the additional independent-reviewer prerequisite for this Stage 0 only. The existing AI-authorship and lack of independence remain disclosed; this is not an assertion of independent verification. Review findings B-01 through B-04 and B-06 remain OPEN. See ADR-0004 and CHECKLIST.md.
 
