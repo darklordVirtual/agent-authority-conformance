@@ -158,6 +158,20 @@ class BytesInputTest(LabTest):
             verification.load_input(base / "missing.bin", "bytes")
 
 
+class LabRevisionTest(LabTest):
+    def test_last_successful_attempt_is_reported(self):
+        from conformance.lab.respond import _lab_revision
+        self.assertIsNone(_lab_revision(self.tmp))
+        write_json(self.tmp / "RUN-CAPTURE.json", {"attempts": [
+            {"exit_status": 0, "procedure_revision": {"source": "git", "commit": "a" * 40, "lab_modified": False}},
+            {"exit_status": 2, "procedure_revision": {"source": "git", "commit": "b" * 40, "lab_modified": False}},
+        ]})
+        self.assertEqual(_lab_revision(self.tmp), f"AACP commit `{'a' * 40}`")
+        write_json(self.tmp / "RUN-CAPTURE.json", {"attempts": [
+            {"exit_status": 0, "procedure_revision": {"source": "git", "commit": "c" * 40, "lab_modified": True}}]})
+        self.assertIn("local changes", _lab_revision(self.tmp))
+
+
 class RerunCompareTest(unittest.TestCase):
     def test_probe_witness_divergence_is_reported(self):
         record = {"probe": "p1", "execution": "COMPLETED", "observation": "DEMONSTRATED", "reads": ["x"],

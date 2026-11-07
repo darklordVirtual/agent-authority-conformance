@@ -97,7 +97,20 @@ def _pins(scope):
     return out
 
 
-def _method(scope, plan, current):
+def _lab_revision(run_dir):
+    """The lab revision of the last successful run attempt, from RUN-CAPTURE.json."""
+    path = Path(run_dir) / "RUN-CAPTURE.json"
+    if not path.is_file():
+        return None
+    ok = [a for a in read_json(path).get("attempts", []) if a.get("exit_status") == 0]
+    rev = ok[-1].get("procedure_revision", {}) if ok else {}
+    if rev.get("source") == "git":
+        return (f"AACP commit `{rev['commit']}`"
+                + (" with local changes to conformance/lab" if rev.get("lab_modified") else ""))
+    return "vendored lab code" if rev.get("source") == "vendored" else None
+
+
+def _method(scope, plan, current, lab=None):
     label = scope["independence"]
     out = ["### Method", "",
            f"- **Independence:** {INDEPENDENCE_TEXT[label]} Reads as `{FEDERATION[label]}`, {BCR[label]} at most."]
@@ -115,6 +128,9 @@ def _method(scope, plan, current):
                "and hands them the pinned subject files as data, as bytes or parsed JSON per input.")
     for path, digest in plan["core"]["run_files"].items():
         out.append(f"  - `{path}` `{digest}`")
+    if lab:
+        out.append(f"- **Lab:** run executed with {lab} (from RUN-CAPTURE.json); Python "
+                   f"{plan['environment']['python']}.")
     for item in scope.get("trust_material", []):
         out.append(f"- **Trust material:** {item}")
     authors = scope.get("verifier_authors") or scope["runner"]["maintainers"]
@@ -166,7 +182,7 @@ def render(run_dir, drafted_by="human", ai_assisted=False, scope_ref=None):
         lines += [f"- {a}" for a in challenge["asked"]]
         lines.append("")
     lines += [f"**Status:** {_status_line(current)}", ""]
-    lines += _method(scope, plan, current)
+    lines += _method(scope, plan, current, _lab_revision(run_dir))
     lines += _claims(scope, results)
     lines += _probes(scope, results)
     lines += _ceiling(scope)
