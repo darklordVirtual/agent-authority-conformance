@@ -1,6 +1,8 @@
 # Changelog
 
-## Unreleased
+## 0.3.0a1 — alpha
+
+- Distribute AACP as versioned GitHub Release assets: wheel, source archive, CycloneDX SBOM and `SHA256SUMS.txt`, with Sigstore-signed build-provenance and SBOM attestations. `.github/workflows/release.yml` runs on a `v*` tag: it checks that the tag matches `pyproject.toml`, has a changelog section and sits on `main`, reruns the conformance checks, builds the wheel twice to prove it is byte-reproducible, installs the wheel on Linux, macOS and Windows (Python 3.12 and 3.13) and the sdist on Linux and exercises the installed `aacp` outside a checkout, and publishes only after approval in the `release` environment. Pull requests that touch release inputs rehearse every step except publication. `scripts/release.py` holds the gates and `scripts/smoke_installed_cli.py` the installed-CLI check, which the CLI package job now shares. See [docs/INSTALL.md](docs/INSTALL.md) and [docs/RELEASING.md](docs/RELEASING.md). No PyPI publication; runtime dependencies are still resolved from the configured package index.
 
 - Add `AACP-OBSERVED-EFFECT-VANTAGE-2`, a revision of the observation-vantage profile. Positive observer-independence credit now also needs runner-owned evidence that the observer identity is established outside the producer, which cannot issue or revoke it, and that the producer cannot reach the observer's signing key. `evaluate_observation_vantage_r2` and `--profile-revision 2` apply it. Revision 1 and its function stay as published, as GOVERNANCE.md requires of a merged profile revision, so the reference vectors v1 and every record under revision 1 are unchanged.
 
