@@ -75,4 +75,10 @@ option 2 (one file per class).
 | J6 observation | §5; ADR-0004 | `tests/profiles/test_agent_cyber_observation.py::test_negatives, ::test_legitimate_workflow_still_succeeds` | J-NEG-08, J-NEG-11, J-NEG-12 | 4 | PLANNED |
 | J-OBS observation prerequisite (blind detector) | §5 J6; ADR-0004 | `each class ::test_established_requires_detected_positive_control` | seeded positive controls | 4 | PLANNED |
 | J-SAFE no egress beyond test sink; fake canary format | §5 safety | `tests/profiles/test_safety.py::test_canary_format_and_sink` | — | 4 | PLANNED |
+| JX-01 to JX-03 instruction promotion at dispatch, policy and resume boundaries | Stage 0 cyber expansion | `tests/profiles/test_agent_cyber_instruction_promotion.py::test_forged_role, ::test_forged_approval, ::test_persistent_taint` | proposed JX-01 to -03 | 4 | PLANNED |
+| JX-04 to JX-05 transformed and cross-tenant secret egress | Stage 0 cyber expansion | `tests/profiles/test_agent_cyber_secret_egress.py::test_transformed_canary, ::test_cross_tenant_resume` | proposed JX-04 to -05 | 4 | PLANNED |
+| JX-06 to JX-08 final network peer under redirect, DNS and parser drift | Stage 0 cyber expansion | `tests/profiles/test_agent_cyber_network.py::test_final_peer` | proposed JX-06 to -08 | 4 | PLANNED |
+| JX-09 to JX-10 invoked executable and immutable tool identity | Stage 0 cyber expansion | `tests/profiles/test_agent_cyber_tool_substitution.py::test_invoked_identity` | proposed JX-09 to -10 | 4 | PLANNED |
+| JX-11 to JX-12 exact loaded artifact bytes at execution | Stage 0 cyber expansion | `tests/profiles/test_agent_cyber_artifact_admission.py::test_loaded_bytes_and_replacement` | proposed JX-11 to -12 | 4 | PLANNED |
+| JX-13 to JX-15 observation continuity, effect precedence and matched controls | Stage 0 cyber expansion | `tests/profiles/test_agent_cyber_observation.py::test_interval_and_control_match` | proposed JX-13 to -15 | 4 | PLANNED |
 
