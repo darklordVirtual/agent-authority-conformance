@@ -15,9 +15,21 @@ KINDS = ("adequacy", "verification")
 TRACKS = ("manual", "self_service")
 INDEPENDENCE = ("SELF_RUN", "REPRODUCTION", "SECOND_IMPLEMENTATION", "INDEPENDENT_IMPLEMENTATION")
 ENGINES = ("native", "corpus_adequacy")
+# How a verification input reaches a check: parsed JSON, or the exact bytes (needed
+# whenever a check verifies a signature or a digest over the bytes as published).
+INPUT_FORMATS = ("json", "bytes")
+# Probes are runner-authored observations about a pinned artifact, separate from
+# claim results. The class says what kind of property was probed; it is not a verdict.
+PROBE_CLASSES = ("SPEC_IMPLEMENTATION_DIVERGENCE", "CONSTRUCTION_AMBIGUITY", "BINDING_GAP", "FRAMING_GAP",
+                 "KEY_REUSE", "TRUST_ANCHOR", "ATTESTATION_SCOPE", "TERMINOLOGY_CHANGE",
+                 "PROVENANCE_ATTRIBUTION", "OTHER")
+# The runner's own judgment of a probe's practical weight. Never summed or ranked.
+ASSESSMENT_LEVELS = ("informational", "low", "medium", "high")
 COMMIT = re.compile(r"^[0-9a-f]{40}$")
 SHA256 = re.compile(r"^[0-9a-f]{64}$")
 CHECK = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*:[A-Za-z_][A-Za-z0-9_]*$")
+LINES = re.compile(r"^[1-9][0-9]*(-[1-9][0-9]*)?$")
+ID = re.compile(r"^[A-Za-z0-9._-]+$")
 FILE = "SCOPE.json"
 
 
@@ -115,11 +127,101 @@ def validate_scope(scope, *, require_pins=False):
             p.append("publication.approvers must be a nonempty list of handles")
     if kind == "adequacy":
         p.extend(_adequacy_problems(scope))
+        if "probes" in scope:
+            p.append("probes are only for verification runs")
     elif kind == "verification":
         p.extend(_verification_problems(scope))
+        p.extend(_probe_problems(scope, require_pins))
+    if "challenge" in scope:
+        p.extend(_challenge_problems(scope["challenge"]))
     if p:
         raise ScopeError("; ".join(p))
     return scope
+
+
+def _challenge_problems(challenge):
+    """A public request to verify something. Context only: it is never consent, an offer,
+    admission or a publication approval, and answering it is not endorsement."""
+    if not isinstance(challenge, dict):
+        return ["challenge must be an object"]
+    p = []
+    if not (isinstance(challenge.get("ref"), str) and challenge["ref"].startswith("https://")):
+        p.append("challenge.ref must be an https URL to the public statement")
+    if not _text(challenge.get("by")):
+        p.append("challenge.by must name who made the challenge")
+    if not _texts(challenge.get("asked")):
+        p.append("challenge.asked must list what the challenge asked, in the runner's words")
+    if not isinstance(challenge.get("requests_endorsement"), bool):
+        p.append("challenge.requests_endorsement must be true or false")
+    extra = sorted(set(challenge) - {"ref", "by", "asked", "requests_endorsement"})
+    if extra:
+        p.append(f"challenge has unknown key(s): {', '.join(extra)}")
+    return p
+
+
+def _probe_problems(scope, require_pins):
+    probes = scope.get("probes")
+    if probes is None:
+        return []
+    if not (isinstance(probes, list) and probes):
+        return ["probes must be a nonempty list when present"]
+    p = []
+    inputs = {i.get("id") for i in scope.get("inputs") or [] if isinstance(i, dict)}
+    claim_ids = {c.get("id") for c in scope.get("claims") or [] if isinstance(c, dict)}
+    subjects = scope.get("subjects") if isinstance(scope.get("subjects"), list) else []
+    seen = set()
+    for i, probe in enumerate(probes):
+        w = f"probes[{i}]"
+        if not isinstance(probe, dict):
+            p.append(f"{w} must be an object")
+            continue
+        pid = probe.get("id")
+        if not (_text(pid) and ID.fullmatch(pid)):
+            p.append(f"{w}.id must be letters, digits, '.', '_' or '-'")
+        elif pid in seen or pid in claim_ids:
+            p.append(f"{w}.id {pid!r} is not unique among claims and probes")
+        seen.add(pid)
+        if not _text(probe.get("text")):
+            p.append(f"{w}.text is required: the property probed, stated neutrally")
+        if probe.get("class") not in PROBE_CLASSES:
+            p.append(f"{w}.class must be one of {', '.join(PROBE_CLASSES)}")
+        if not (isinstance(probe.get("check"), str) and CHECK.match(probe["check"])):
+            p.append(f"{w}.check must be <module>:<function> in verifier/")
+        if not _texts(probe.get("reads_fields")):
+            p.append(f"{w}.reads_fields must be a nonempty list")
+        if not (_texts(probe.get("inputs")) and set(probe["inputs"]) <= inputs):
+            p.append(f"{w}.inputs must name declared inputs")
+        elif len(set(probe["inputs"])) != len(probe["inputs"]):
+            p.append(f"{w}.inputs must be unique")
+        assessment = probe.get("runner_assessment")
+        if not (isinstance(assessment, dict) and assessment.get("level") in ASSESSMENT_LEVELS
+                and _text(assessment.get("rationale")) and set(assessment) == {"level", "rationale"}):
+            p.append(f"{w}.runner_assessment needs level ({', '.join(ASSESSMENT_LEVELS)}) and rationale")
+        if "remediation" in probe and not _text(probe["remediation"]):
+            p.append(f"{w}.remediation must be a nonempty string when present")
+        locators = probe.get("source_locators", [])
+        if not isinstance(locators, list):
+            p.append(f"{w}.source_locators must be a list")
+            continue
+        for j, loc in enumerate(locators):
+            lw = f"{w}.source_locators[{j}]"
+            if not (isinstance(loc, dict) and isinstance(loc.get("subject"), int)
+                    and not isinstance(loc.get("subject"), bool) and 0 <= loc["subject"] < len(subjects)):
+                p.append(f"{lw} needs a valid subject index")
+                continue
+            if not (_text(loc.get("path")) and _relative(loc["path"])):
+                p.append(f"{lw}.path must be relative")
+                continue
+            if not (isinstance(loc.get("lines"), str) and LINES.fullmatch(loc["lines"])):
+                p.append(f"{lw}.lines must be N or N-M")
+            elif "-" in loc["lines"] and int(loc["lines"].split("-")[0]) > int(loc["lines"].split("-")[1]):
+                p.append(f"{lw}.lines range is reversed")
+            if not _text(loc.get("note")):
+                p.append(f"{lw}.note is required")
+            pinned = subjects[loc["subject"]].get("files_sha256") if isinstance(subjects[loc["subject"]], dict) else None
+            if require_pins and isinstance(pinned, dict) and loc["path"] not in pinned:
+                p.append(f"{lw}.path {loc['path']} is not a pinned file of subject {loc['subject']}")
+    return p
 
 
 def _self_service_problems(scope):
@@ -142,13 +244,42 @@ def _self_service_problems(scope):
             p.append(f"invalid public_boundary: {exc}")
     if scope.get("kind") != "verification":
         p.append("self_service allows only kind verification; adequacy and mutation need the manual track")
-    if len(scope.get("subjects") or []) != 1:
+    subjects = scope.get("subjects") or []
+    if has_offer and len(subjects) != 1:
         p.append("self_service runs measure exactly one subject, the offer's")
+    elif has_public and not has_offer:
+        p.extend(boundary_binding_problems(scope.get("public_boundary"), subjects))
     if "publication" in scope:
         p.append("self_service publication is runner-attributed or taken from the producer offer; remove publication")
     if not _text(scope.get("procedure")):
         p.append("self_service needs procedure: the offered procedure id")
     return p
+
+
+def _repo_key(url):
+    return str(url or "").rstrip("/").removesuffix(".git").lower()
+
+
+def boundary_binding_problems(boundary, subjects):
+    """A public boundary vouches only for bytes of its own repository: every subject is a
+    revision of that repository, and subject 0 (the primary subject) is pinned at exactly
+    the boundary commit, so the boundary text describes the bytes that are verified. Other
+    subjects are earlier or later revisions kept for comparison."""
+    if not isinstance(boundary, dict):
+        return []  # validate_ref reports the malformed boundary
+    if not subjects:
+        return ["a public_boundary run needs a primary subject"]
+    p = []
+    repo = _repo_key(boundary.get("repo"))
+    foreign = [i for i, s in enumerate(subjects) if not isinstance(s, dict) or _repo_key(s.get("repo")) != repo]
+    if foreign:
+        p.append("public_boundary covers only its own repository; subject(s) "
+                 f"{', '.join(map(str, foreign))} point elsewhere")
+    primary = subjects[0] if isinstance(subjects[0], dict) else {}
+    if primary.get("commit") != boundary.get("commit"):
+        p.append("subjects[0] is the primary subject and must be pinned at the public_boundary commit")
+    return p
+
 
 
 def _subject_problems(i, s, require_pins):
@@ -237,6 +368,8 @@ def _verification_problems(scope):
                 and not isinstance(item.get("subject"), bool) and 0 <= item["subject"] < count):
             p.append(f"inputs[{i}] needs id, a relative path and a valid subject index")
             continue
+        if item.get("format", "json") not in INPUT_FORMATS:
+            p.append(f"inputs[{i}].format must be one of {', '.join(INPUT_FORMATS)}")
         if item["id"] in ids:
             p.append(f"inputs[{i}].id {item['id']!r} is duplicated")
         ids.add(item["id"])

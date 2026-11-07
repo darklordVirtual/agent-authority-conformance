@@ -1,0 +1,512 @@
+{
+  "claims": [
+    {
+      "claim": "package_signature",
+      "evidence": [
+        "sha256:1ed076b37f8ff6f3676c5eea62394339898f2abe05f1d1ba35425e0fe3804915"
+      ],
+      "execution": "COMPLETED",
+      "input": "witness",
+      "reads": [
+        "RESULTS.json",
+        "MANIFEST.json",
+        "SIGNATURE.sig",
+        "PUBLIC_KEY.pem"
+      ],
+      "result": "ESTABLISHED",
+      "unresolved_obligations": []
+    },
+    {
+      "claim": "package_signature",
+      "evidence": [
+        "sha256:439dbfe4773f853fa8e745c5f4e16d2facfcdb2a31d9f04cacd00b069fc42466"
+      ],
+      "execution": "COMPLETED",
+      "input": "pages",
+      "reads": [
+        "RESULTS.json",
+        "MANIFEST.json",
+        "SIGNATURE.sig",
+        "PUBLIC_KEY.pem"
+      ],
+      "result": "ESTABLISHED",
+      "unresolved_obligations": []
+    },
+    {
+      "claim": "s6_seal",
+      "evidence": [
+        "sha256:1ed076b37f8ff6f3676c5eea62394339898f2abe05f1d1ba35425e0fe3804915"
+      ],
+      "execution": "COMPLETED",
+      "input": "witness",
+      "reads": [
+        "RESULTS.json",
+        "PUBLIC_KEY.pem"
+      ],
+      "result": "ESTABLISHED",
+      "unresolved_obligations": []
+    },
+    {
+      "claim": "s6_seal",
+      "evidence": [
+        "sha256:439dbfe4773f853fa8e745c5f4e16d2facfcdb2a31d9f04cacd00b069fc42466"
+      ],
+      "execution": "COMPLETED",
+      "input": "pages",
+      "reads": [
+        "RESULTS.json",
+        "PUBLIC_KEY.pem"
+      ],
+      "result": "ESTABLISHED",
+      "unresolved_obligations": []
+    },
+    {
+      "claim": "s4_digests",
+      "evidence": [
+        "sha256:08ca720d720200445bb778b19a3261cd94ab65cbd8fece9387ec27916dcb0f68"
+      ],
+      "execution": "COMPLETED",
+      "input": "tree",
+      "reads": [
+        "conformance/witness/RESULTS.json",
+        "conformance/witness_generator/sample_evidence.json"
+      ],
+      "result": "ESTABLISHED",
+      "unresolved_obligations": []
+    },
+    {
+      "claim": "s5_root",
+      "evidence": [
+        "sha256:08ca720d720200445bb778b19a3261cd94ab65cbd8fece9387ec27916dcb0f68"
+      ],
+      "execution": "COMPLETED",
+      "input": "tree",
+      "reads": [
+        "conformance/witness/RESULTS.json"
+      ],
+      "result": "ESTABLISHED",
+      "unresolved_obligations": []
+    },
+    {
+      "claim": "manifest_hashes",
+      "evidence": [
+        "sha256:08ca720d720200445bb778b19a3261cd94ab65cbd8fece9387ec27916dcb0f68"
+      ],
+      "execution": "COMPLETED",
+      "input": "tree",
+      "reads": [
+        "conformance/witness/MANIFEST.json",
+        "manifest-listed files"
+      ],
+      "result": "ESTABLISHED",
+      "unresolved_obligations": []
+    },
+    {
+      "claim": "pages_mirror",
+      "evidence": [
+        "sha256:08ca720d720200445bb778b19a3261cd94ab65cbd8fece9387ec27916dcb0f68"
+      ],
+      "execution": "COMPLETED",
+      "input": "tree",
+      "reads": [
+        "conformance/witness/*",
+        "docs/witness/*"
+      ],
+      "result": "ESTABLISHED",
+      "unresolved_obligations": []
+    },
+    {
+      "claim": "suite_outcomes_evidenced",
+      "evidence": [
+        "sha256:08ca720d720200445bb778b19a3261cd94ab65cbd8fece9387ec27916dcb0f68"
+      ],
+      "execution": "COMPLETED",
+      "input": "tree",
+      "reads": [
+        "conformance/witness/RESULTS.json"
+      ],
+      "result": "NOT_ESTABLISHED",
+      "unresolved_obligations": [
+        "a test transcript or CI attestation bound to the pinned commit",
+        "an independent rerun of the pinned Rust and Python suites"
+      ]
+    },
+    {
+      "claim": "key_anchor",
+      "evidence": [
+        "sha256:08ca720d720200445bb778b19a3261cd94ab65cbd8fece9387ec27916dcb0f68"
+      ],
+      "execution": "COMPLETED",
+      "input": "tree",
+      "reads": [
+        "conformance/witness/PUBLIC_KEY.pem"
+      ],
+      "result": "NOT_ESTABLISHED",
+      "unresolved_obligations": [
+        "publication of the key outside the repository it signs",
+        "a key custody and rotation statement"
+      ]
+    }
+  ],
+  "note": "What this runner observed at these pins with this verifier and skeleton scope. Not producer expectations and not a vector suite. A run that differs is a new record, never an edit to this one.",
+  "probes": [
+    {
+      "affects_pinned_artifact": false,
+      "class": "SPEC_IMPLEMENTATION_DIVERGENCE",
+      "evidence": [
+        "tree:sha256:08ca720d720200445bb778b19a3261cd94ab65cbd8fece9387ec27916dcb0f68"
+      ],
+      "execution": "COMPLETED",
+      "inputs": [
+        "tree"
+      ],
+      "message": "The README states that an odd node is promoted unchanged; the published generator and verify.sh pair an odd last node with itself. The two rules give different roots for leaf counts 3, 5, 6, 7 and the same root for the published 4-leaf tree.",
+      "observation": "DEMONSTRATED",
+      "probe": "s5_documented_vs_implemented",
+      "reads": [
+        "conformance/witness/README.md",
+        "conformance/witness_generator/generate_seals.py",
+        "conformance/witness/verify.sh",
+        "conformance/witness/RESULTS.json"
+      ],
+      "witness": {
+        "documented_rule_equals_rfc6962_split_1_to_8": true,
+        "generator_rule_line": 106,
+        "generator_sha256": "85b0bef27b0dc3a9c4e80fa3f5030f59be4751bbcc28face8a570a2f2f84f02d",
+        "leaf_counts_where_roots_differ_1_to_8": [
+          3,
+          5,
+          6,
+          7
+        ],
+        "published_leaf_count": 4,
+        "published_root_same_under_both_rules": true,
+        "readme_rule_line": 29,
+        "readme_sha256": "95d6566512be6387dd72a169cc4ad768356ee2ba7c44c31c97d03ef8e8cab220",
+        "vector_leaves": "sha256(b'nti-probe-leaf-<i>') for i = 1..n",
+        "vectors": [
+          {
+            "documented_root": "ac82615f795a97024f7e37260d2631e826cb272fd1ba39d0f39bb4b991fbb387",
+            "implemented_root": "f8a508e4553b830073109bea58480629ea2d9ae012d56463d21d5b93a118aa25",
+            "n": 3
+          },
+          {
+            "documented_root": "aacea387e9cc630c8af19ffb713113724090480929d0d3c6634a12d16f453c3d",
+            "implemented_root": "403cc54b55aa48802489a7509418a796789d7e7c846419cb18ab3841961df97d",
+            "n": 5
+          },
+          {
+            "documented_root": "8f8f6b9331f82734991434c896bd684ff7626ca05ca3b9bcf4e8e61ff69d6148",
+            "implemented_root": "7007109afd314e560ef7fe63bc46f136749c924e5d15bcd96522a748d0211ee7",
+            "n": 6
+          },
+          {
+            "documented_root": "3f68d23c0f63e7b0475be001a4cfdaa950a15d18b4f6199736ead5e3edb40cd0",
+            "implemented_root": "e58eedb213c31c19a212d94286795dee70c1cccf1de55e90f07a321c6f34a4a4",
+            "n": 7
+          }
+        ],
+        "verifier_rule_line": 46,
+        "verifier_sha256": "355e809e679cfa8ba3e25ce64691b6eb5b0e0a547b171e272d1d35750453f324"
+      }
+    },
+    {
+      "affects_pinned_artifact": false,
+      "class": "CONSTRUCTION_AMBIGUITY",
+      "evidence": [
+        "tree:sha256:08ca720d720200445bb778b19a3261cd94ab65cbd8fece9387ec27916dcb0f68"
+      ],
+      "execution": "COMPLETED",
+      "inputs": [
+        "tree"
+      ],
+      "message": "Under the implemented rule a list of n leaves and the same list with its last leaf repeated have the same root (n = 3, 5, 7), and S6 signs only the 32-byte root, so the seal does not bind the leaf count. The published tree has even sizes at every level, so it is not affected.",
+      "observation": "DEMONSTRATED",
+      "probe": "s5_leaf_count_binding",
+      "reads": [
+        "conformance/witness/RESULTS.json"
+      ],
+      "witness": {
+        "leaf_count_inside_s6_message": false,
+        "pairs": [
+          {
+            "collide": true,
+            "leaf_count": 3,
+            "root": "f8a508e4553b830073109bea58480629ea2d9ae012d56463d21d5b93a118aa25",
+            "root_with_repeat": "f8a508e4553b830073109bea58480629ea2d9ae012d56463d21d5b93a118aa25",
+            "with_last_leaf_repeated": 4
+          },
+          {
+            "collide": true,
+            "leaf_count": 5,
+            "root": "403cc54b55aa48802489a7509418a796789d7e7c846419cb18ab3841961df97d",
+            "root_with_repeat": "403cc54b55aa48802489a7509418a796789d7e7c846419cb18ab3841961df97d",
+            "with_last_leaf_repeated": 6
+          },
+          {
+            "collide": true,
+            "leaf_count": 7,
+            "root": "e58eedb213c31c19a212d94286795dee70c1cccf1de55e90f07a321c6f34a4a4",
+            "root_with_repeat": "e58eedb213c31c19a212d94286795dee70c1cccf1de55e90f07a321c6f34a4a4",
+            "with_last_leaf_repeated": 8
+          }
+        ],
+        "published_level_sizes": [
+          4,
+          2,
+          1
+        ],
+        "published_tree_used_duplication": false,
+        "rfc6962_split_collides_on_same_pairs": false,
+        "s6_message_bytes": 32,
+        "s6_signs": "S5_evidence_root.merkle_root_sha256",
+        "vector_leaves": "sha256(b'nti-probe-leaf-<i>') for i = 1..n"
+      }
+    },
+    {
+      "affects_pinned_artifact": true,
+      "class": "BINDING_GAP",
+      "evidence": [
+        "witness:sha256:1ed076b37f8ff6f3676c5eea62394339898f2abe05f1d1ba35425e0fe3804915"
+      ],
+      "execution": "COMPLETED",
+      "inputs": [
+        "witness"
+      ],
+      "message": "After relabelling the fixture PRODUCTION and renaming an artifact, the S5 root is unchanged and the S6 seal still verifies; only the outer package signature fails. The seal alone can be carried into a context that misdescribes what it covers.",
+      "observation": "DEMONSTRATED",
+      "probe": "s6_message_binding",
+      "reads": [
+        "RESULTS.json",
+        "MANIFEST.json",
+        "SIGNATURE.sig",
+        "PUBLIC_KEY.pem"
+      ],
+      "witness": {
+        "changed": {
+          "S4_file_integrity[1].name": [
+            "request.json",
+            "payment_authorization.json"
+          ],
+          "seal_scope.classification": [
+            "SYNTHETIC - test fixture, not production evidence",
+            "PRODUCTION"
+          ]
+        },
+        "fields_bound_by_s6": [
+          "S5_evidence_root.merkle_root_sha256"
+        ],
+        "fields_not_bound_by_s6": [
+          "S4 artifact names",
+          "S4 byte counts",
+          "S5 leaf_count",
+          "seal_scope.classification",
+          "scope",
+          "suites"
+        ],
+        "package_signature_verifies_after_relabel": false,
+        "relabelled_results_sha256": "0cc7743cce0d1886a6e0e0cce487b3f58a4e412139d8b1a3e40a1cd61648029b",
+        "s5_root_after_relabel": "20271a5928932d6362ff566207e20f60cb2a5e387a7178dbf6da028d7c01fe1e",
+        "s6_seal_verifies_after_relabel": true
+      }
+    },
+    {
+      "affects_pinned_artifact": true,
+      "class": "FRAMING_GAP",
+      "evidence": [
+        "witness:sha256:1ed076b37f8ff6f3676c5eea62394339898f2abe05f1d1ba35425e0fe3804915"
+      ],
+      "execution": "COMPLETED",
+      "inputs": [
+        "witness"
+      ],
+      "message": "Moving the final newline of RESULTS.json to the start of MANIFEST.json gives two different files, both strict JSON, that verify under the same signature. The boundary between the signed files is not authenticated; with strict parsers only whitespace can move.",
+      "observation": "DEMONSTRATED",
+      "probe": "package_signature_framing",
+      "reads": [
+        "RESULTS.json",
+        "MANIFEST.json",
+        "SIGNATURE.sig",
+        "PUBLIC_KEY.pem"
+      ],
+      "witness": {
+        "both_shifted_files_are_strict_json": true,
+        "manifest_sha256": "b29af6001024d919d33ea18d414cbcb303d70eada68d21cd17947267ee373cd4",
+        "results_sha256": "2c9ff6a8850d9a4069855a664a7671a5c02f4e4441726025c13b3189359fd7a5",
+        "shifted_manifest_sha256": "b3ddff6a4ae9ca7bf01d545b17483aa9ab7a32c7ee0364a15e8477457f0f3731",
+        "shifted_results_sha256": "702697138872edbb40205d5ae55c26c442027a62370d994a103c85483cfbc9ae",
+        "signature_verifies_on_shifted_pair": true,
+        "signed_message": "RESULTS.json || MANIFEST.json, no length prefix or separator"
+      }
+    },
+    {
+      "affects_pinned_artifact": true,
+      "class": "KEY_REUSE",
+      "evidence": [
+        "witness:sha256:1ed076b37f8ff6f3676c5eea62394339898f2abe05f1d1ba35425e0fe3804915"
+      ],
+      "execution": "COMPLETED",
+      "inputs": [
+        "witness"
+      ],
+      "message": "One Ed25519 key signs both the package and the S6 seal, and the S6 message is the bare 32-byte root with no context string, so any 32-byte value this key ever signs reads as a valid S6 seal.",
+      "observation": "DEMONSTRATED",
+      "probe": "key_reuse_without_context",
+      "reads": [
+        "RESULTS.json",
+        "MANIFEST.json",
+        "SIGNATURE.sig",
+        "PUBLIC_KEY.pem"
+      ],
+      "witness": {
+        "package_signature_message_bytes": 8293,
+        "public_key_raw_hex": "ababaf03f4bee7900ae3a91050a3de723c7b302f4020b465f0c0466222f50906",
+        "s6_message_bytes": 32,
+        "s6_message_has_context_prefix": false,
+        "s6_message_hex": "20271a5928932d6362ff566207e20f60cb2a5e387a7178dbf6da028d7c01fe1e",
+        "same_key_verifies_both": true
+      }
+    },
+    {
+      "affects_pinned_artifact": true,
+      "class": "TRUST_ANCHOR",
+      "evidence": [
+        "witness:sha256:1ed076b37f8ff6f3676c5eea62394339898f2abe05f1d1ba35425e0fe3804915",
+        "history_witness:sha256:428ee644a679a8cd480a43b79472fa3471ff8bfb14bc501a17c78bb91fb4452c"
+      ],
+      "execution": "COMPLETED",
+      "inputs": [
+        "witness",
+        "history_witness"
+      ],
+      "message": "The witness key differs between the two pinned revisions and each package verifies under its own key. Nothing in the pinned package records the change, so a verifier holding only the repository cannot tell which key is authoritative.",
+      "observation": "DEMONSTRATED",
+      "probe": "key_changed_between_revisions",
+      "reads": [
+        "PUBLIC_KEY.pem",
+        "RESULTS.json",
+        "MANIFEST.json",
+        "SIGNATURE.sig",
+        "README.md"
+      ],
+      "witness": {
+        "earlier_key_pem_sha256": "66003123efc80e3eb1d849fc0680732567560570c785edfbbe3960574bb1c64f",
+        "earlier_key_raw_hex": "02815770232bae5e72b61ad17b675a21b3846d1bd1a0fc58e64ae8ea98d3808f",
+        "earlier_package_verifies_under_earlier_key": true,
+        "pinned_key_pem_sha256": "4153ddbbf43f5576a53515b18934a0b5fdc088c62250d709f6c4594e41016075",
+        "pinned_key_raw_hex": "ababaf03f4bee7900ae3a91050a3de723c7b302f4020b465f0c0466222f50906",
+        "pinned_package_verifies_under_pinned_key": true,
+        "pinned_readme_mentions_rotation": false
+      }
+    },
+    {
+      "affects_pinned_artifact": true,
+      "class": "TERMINOLOGY_CHANGE",
+      "evidence": [
+        "witness:sha256:1ed076b37f8ff6f3676c5eea62394339898f2abe05f1d1ba35425e0fe3804915",
+        "history_witness:sha256:428ee644a679a8cd480a43b79472fa3471ff8bfb14bc501a17c78bb91fb4452c"
+      ],
+      "execution": "COMPLETED",
+      "inputs": [
+        "witness",
+        "history_witness"
+      ],
+      "message": "In the earlier revision, S4, S5 and S6 denote invariants of the separate ASL project (S4 a threshold and tripwire property, S5 a kill-path cascade, S6 undefined), recorded there as not run. In the pinned revision the same identifiers denote a seal construction (artifact digests, a Merkle root, an Ed25519 signature). The pinned package does not record this change of meaning, and it refers to a witness specification for the field names without identifying it. This concerns terminology only; it says nothing about where the construction or any code came from.",
+      "observation": "DEMONSTRATED",
+      "probe": "s4_s5_s6_meaning_changed",
+      "reads": [
+        "README.md",
+        "vendor/S4_S5_S6_RECORD.json",
+        "RESULTS.json"
+      ],
+      "witness": {
+        "earlier_meaning": {
+          "S4": "Thresholds are quiet on ordinary traffic, but the tripwire still fires.",
+          "S5": "Every kill path still fires the complete cascade.",
+          "S6": "Not defined in the public ASL conformance kit revision."
+        },
+        "earlier_record_sha256": "480a0a512839d14fae77b320d9caa06f057e4b63425796b53baabaecb2ee4bf9",
+        "earlier_status_in_results": {
+          "S4": "NOT_RUN",
+          "S5": "NOT_RUN",
+          "S6": "NOT_RUN"
+        },
+        "pinned_meaning": {
+          "S4": "S4 file integrity: SHA-256 of each evidence artifact, in declared order.",
+          "S5": "S5 evidence root: Merkle root over the S4 digests. SHA-256, RFC-6962-style, with leaf/node domain separation (`nti-s5-leaf-v1:`, `nti-s5-node-v1:`). Odd nodes are promoted unchanged.",
+          "S6": "S6 seal: Ed25519 signature over the S5 root."
+        },
+        "pinned_package_mentions_earlier_meaning": false,
+        "pinned_readme_links_that_specification": false,
+        "pinned_readme_refers_to_a_witness_specification": true,
+        "pinned_readme_sha256": "95d6566512be6387dd72a169cc4ad768356ee2ba7c44c31c97d03ef8e8cab220"
+      }
+    }
+  ],
+  "public_boundary": {
+    "commit": "8ca84887317d6d7e3cb52d1cad4e639b07f1d8d3",
+    "path": "conformance/witness/README.md",
+    "repo": "https://github.com/abisheakp197/Neutral-Trust-Infrastructure",
+    "sha256": "95d6566512be6387dd72a169cc4ad768356ee2ba7c44c31c97d03ef8e8cab220"
+  },
+  "run_files": {
+    "verifier/nti_witness.py": "04a48bd332a28d86bd735de611ac50dd6e0143293de536260cb3e94724a8cca6"
+  },
+  "run_id": "nti-witness",
+  "subjects": [
+    {
+      "commit": "8ca84887317d6d7e3cb52d1cad4e639b07f1d8d3",
+      "files_sha256": {
+        ".github/workflows/issuer-quorum-regressions.yml": "87975c4ad9a0fa4b753b419a25c3a3d49c4e723d328ff4e014fb0f147b827730",
+        "conformance/witness/.gitignore": "b4ef5aaab1e8843af76582bf0811569f39c23595731d237229e56e1f66592493",
+        "conformance/witness/MANIFEST.json": "b29af6001024d919d33ea18d414cbcb303d70eada68d21cd17947267ee373cd4",
+        "conformance/witness/PUBLIC_KEY.pem": "4153ddbbf43f5576a53515b18934a0b5fdc088c62250d709f6c4594e41016075",
+        "conformance/witness/README.md": "95d6566512be6387dd72a169cc4ad768356ee2ba7c44c31c97d03ef8e8cab220",
+        "conformance/witness/RESULTS.json": "2c9ff6a8850d9a4069855a664a7671a5c02f4e4441726025c13b3189359fd7a5",
+        "conformance/witness/SIGNATURE.sig": "c18566b6bb37fbdd6733da9777fe66789c22034ab9f959a8e670a1866940e162",
+        "conformance/witness/sign.sh": "7bdde5dbb4ab0b36880cca42d9eb99b4e743d995c9dfb9933ab6808bf319985e",
+        "conformance/witness/verify.sh": "355e809e679cfa8ba3e25ce64691b6eb5b0e0a547b171e272d1d35750453f324",
+        "conformance/witness_generator/generate_seals.py": "85b0bef27b0dc3a9c4e80fa3f5030f59be4751bbcc28face8a570a2f2f84f02d",
+        "conformance/witness_generator/sample_evidence.json": "d988746568821931152a6567d9929b7052abf692a319f340d47688ae5350cc84",
+        "docs/witness/MANIFEST.json": "b29af6001024d919d33ea18d414cbcb303d70eada68d21cd17947267ee373cd4",
+        "docs/witness/PUBLIC_KEY.pem": "4153ddbbf43f5576a53515b18934a0b5fdc088c62250d709f6c4594e41016075",
+        "docs/witness/README.md": "95d6566512be6387dd72a169cc4ad768356ee2ba7c44c31c97d03ef8e8cab220",
+        "docs/witness/RESULTS.json": "2c9ff6a8850d9a4069855a664a7671a5c02f4e4441726025c13b3189359fd7a5",
+        "docs/witness/SIGNATURE.sig": "c18566b6bb37fbdd6733da9777fe66789c22034ab9f959a8e670a1866940e162",
+        "docs/witness/index.html": "11e065664808dcb2cb3b0bedf7027733774418475cb21f74b1f610ebd25a825b",
+        "docs/witness/sign.sh": "7bdde5dbb4ab0b36880cca42d9eb99b4e743d995c9dfb9933ab6808bf319985e",
+        "docs/witness/verify.sh": "355e809e679cfa8ba3e25ce64691b6eb5b0e0a547b171e272d1d35750453f324",
+        "ube-foundation/Cargo.lock": "3fe85cec7e96773c65a3d37c7640e8a69a5202dc2e0f95fe532661f12613833e",
+        "ube-foundation/Cargo.toml": "11a42eba316fa3e9a8a85e66dff3cdc492c4a6bb2cc3d947b7d36ec34f87fc28",
+        "ube-foundation/python_tests/test_python_sdk.py": "0c88b846b62cd69de2ab3c6c382ca2c7cdb6f5cdab3a2cbe2d622330b0495093",
+        "ube-foundation/tests/adversarial_fuzz.rs": "325f4aca981b2c93f3c3d974add6953736be2313d95495da9e20c2758ccd14e8",
+        "ube-foundation/tests/adversarial_suite.rs": "d4536b2c7c00313b67c219e2ce92c80a87c035c51da91cf557e360012231ebdd",
+        "ube-foundation/tests/core_tests.rs": "e13a23e324262fcb65429767dbb519e833714d62a4509d5523d9e2f72e66ab61",
+        "ube-foundation/tests/enterprise_adversarial_stress_suite.rs": "c107e7fa629f630663ff20b8d0aeb60c41cc56c8ad05648cc7db3eaefd6cb584",
+        "ube-foundation/tests/nti_conformance_regressions.rs": "ff6b3e8bdf88d750f186f4e6a57afd7ec0da891cb002c5dccab197fc51becb7e",
+        "ube-foundation/tests/robustness_fuzz.rs": "184c6847fbd418bd9f172231d7124ccc67cdcf2cb52e037b6314db95b1e5438d",
+        "ube-foundation/tests/security_patch_tests.rs": "52df5a6bc84aa34c0df7036c6a418987f7a61a23d17656c9d302d1fb4967284e",
+        "ube-foundation/tests/trust_marketplace_adversarial.rs": "846b51a6ff8645f30e6ff6df3075304e95dd9afd34f831a4711d19351907e03d"
+      },
+      "repo": "https://github.com/abisheakp197/Neutral-Trust-Infrastructure"
+    },
+    {
+      "commit": "896d352a23d1e8bada5c543fc797e45f8638899d",
+      "files_sha256": {
+        "conformance/witness/.gitignore": "b4ef5aaab1e8843af76582bf0811569f39c23595731d237229e56e1f66592493",
+        "conformance/witness/MANIFEST.json": "5dbf032e4177992d03525da191951074fd563a3a9bf95865b3512e8da602ff3f",
+        "conformance/witness/PUBLIC_KEY.pem": "66003123efc80e3eb1d849fc0680732567560570c785edfbbe3960574bb1c64f",
+        "conformance/witness/README.md": "99cf0d19cc981701f0f0bde65b3f791d35875dfe3110d5d6088f1ee7d6e18cea",
+        "conformance/witness/RESULTS.json": "db83ba3464c0507b4eec6fd96c35d77ac8d540a519f0effe4e51ae43743a1931",
+        "conformance/witness/SIGNATURE.sig": "0d3a5580ceff27a918b69b728acab63b65a61124ce97e6f196966bf03742b13f",
+        "conformance/witness/build_witness.py": "f56e3867c475dd57179b79473ea11ba05715ba76df4650486d694b246d2adab6",
+        "conformance/witness/sign.sh": "05768411eab5ad792bd6e7aea79aae4069e756a826513c3d824950b696a42f3a",
+        "conformance/witness/vendor/S4_S5_S6_PROVENANCE.md": "087e5992679ab905f0d032fcb87676fd69afd26ec67aa8872aa9f3309031eecb",
+        "conformance/witness/vendor/S4_S5_S6_RECORD.json": "480a0a512839d14fae77b320d9caa06f057e4b63425796b53baabaecb2ee4bf9",
+        "conformance/witness/verify.sh": "9d428f2639de6efe036d845399abd0af6a226c6d6839f8b24cbca8452eab4ea7"
+      },
+      "repo": "https://github.com/abisheakp197/Neutral-Trust-Infrastructure"
+    }
+  ],
+  "template_scope_sha256": "78780d73d5f1c3d56fe9b9d93c61acaa2c37eb6be2f779e5cbd9475b57bf499e"
+}

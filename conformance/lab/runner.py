@@ -71,6 +71,9 @@ def execute(run_dir, scope, trees, admission=None):
     if scope["kind"] == "verification":
         records = verification.execute(run_dir, scope, trees, admission)
         out["results/claims.json"] = {"records": records}
+        probes = verification.execute_probes(run_dir, scope, trees, admission)
+        if probes is not None:
+            out[verification.PROBES_FILE] = probes
         if admission is not None:
             out[ADMISSION_FILE] = admission
         controls = negative_controls(scope, records)
