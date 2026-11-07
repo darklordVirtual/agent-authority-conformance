@@ -12,15 +12,23 @@
   records a public request to verify as context, never as consent, and the report states
   that no endorsement is given. `respond` drafts a reply from the run's own records, with
   AI-drafting disclosure, outside the package manifest. `init --template <dir>/SCOPE.json`
-  copies the skeleton's `verifier/`. Worked example:
+  copies the skeleton's `verifier/`. `respond` writes only under the run's `.local/` or
+  outside the run directory and replaces a draft only with `--force`; it groups findings by
+  whether they hold for the bytes as published. Rerun compares every field of every probe
+  record. Probe class `TERMINOLOGY_CHANGE` records an identifier whose meaning changed between
+  revisions without any inference about provenance. Worked example:
   [templates/runs/nti-witness/](templates/runs/nti-witness/), the NTI witness package from
-  aeoess/agent-governance-vocabulary#177, with a standard-library RFC 8032 Ed25519.
+  aeoess/agent-governance-vocabulary#177, with a standard-library RFC 8032 Ed25519, and its
+  real run kept in `recorded/RECORD.json` (`scripts/record_lab_run.py`), checked offline and
+  rerun over the real pinned bytes by the `nti-real-bytes` CI job.
 - Lab fixes for the public-boundary basis: `package` crashed rendering the track line,
   `withhold`, `aacp next` and `aacp export map` assumed an offer, and the scope schema's
   `public_boundary` patterns were double-escaped, so the schema rejected every valid
-  boundary. A public-boundary run may now pin several revisions of the boundary's own
-  repository; a single subject behaves as before. The schema agreement test now covers the
-  public boundary.
+  boundary. A public-boundary run is now bound to its boundary: every subject must be a
+  revision of the boundary's own repository (also with a single subject, which was not checked
+  before) and subject 0 must be pinned at the boundary commit. Several revisions of that
+  repository may be pinned for comparison. The schema agreement test now covers the public
+  boundary.
 
 - Add `AACP-OBSERVED-EFFECT-VANTAGE-2`, a revision of the observation-vantage profile. Positive observer-independence credit now also needs runner-owned evidence that the observer identity is established outside the producer, which cannot issue or revoke it, and that the producer cannot reach the observer's signing key. `evaluate_observation_vantage_r2` and `--profile-revision 2` apply it. Revision 1 and its function stay as published, as GOVERNANCE.md requires of a merged profile revision, so the reference vectors v1 and every record under revision 1 are unchanged.
 

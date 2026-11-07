@@ -129,11 +129,38 @@ class NtiFlowTest(LabTest):
         root = read_json(run / "results" / "probes.json")["records"][2]["witness"]["s5_root_after_relabel"]
         self.assertIn(root, text)
         self.assertIn("This response gives none", text)
+        holding = text.index("#### Holding for the pinned bytes as published")
+        constructed = text.index("#### Shown only on constructed inputs")
+        self.assertLess(holding, constructed)
+        self.assertGreater(text.index("`s5_leaf_count_binding`"), constructed)
+        self.assertLess(text.index("`s6_message_binding`"), constructed)
         self.assertIn("Drafted by agent:test; AI-assisted: yes", text)
         self.assertIn(state.load_state(run)["plan_sha256"], text)
         for key in ("score", "overall", "aggregate", "total", "grade"):
             self.assertNotIn(f'"{key}"', text)  # no aggregate field in any rendered record
         self.assertEqual(rerun(run)[0], "REPRODUCED")  # the draft lives outside the manifest
+
+    def test_respond_never_overwrites_run_records(self):
+        from conformance.lab.errors import GateError
+        run = self.run_case()
+        lifecycle.package(run, NOW)
+        scope_bytes = (run / "SCOPE.json").read_bytes()
+        for target in (run / "SCOPE.json", run / "results" / "claims.json", run / "MANIFEST.json",
+                       run / "notes.md", run):
+            with self.subTest(target=target.name), self.assertRaisesRegex(GateError, "run directory|not a file"):
+                respond.write(run, out=target)
+        link = self.tmp / "innocent.md"
+        link.symlink_to(run / "SCOPE.json")
+        with self.assertRaisesRegex(GateError, "run directory"):
+            respond.write(run, out=link)
+        self.assertEqual((run / "SCOPE.json").read_bytes(), scope_bytes)
+        respond.write(run)
+        with self.assertRaisesRegex(GateError, "--force"):
+            respond.write(run)
+        respond.write(run, force=True)
+        outside = respond.write(run, out=self.tmp / "reply.md")
+        self.assertTrue(outside.is_file())
+        self.assertEqual(rerun(run)[0], "REPRODUCED")
 
     def test_changed_byte_contradicts_signature(self):
         run = self.run_case(tamper=True)
@@ -148,6 +175,17 @@ class NtiFlowTest(LabTest):
         self.assertEqual((record["execution"], record["result"]), ("INVALID_INPUT", None))
         self.assertEqual(claims[("pages_mirror", "tree")]["result"], "CONTRADICTED")
         self.assertEqual(probes["package_signature_framing"]["execution"], "INVALID_INPUT")
+
+    def test_terminology_probe_discriminates_a_recorded_change(self):
+        _, probes = self.results(self.run_case())
+        w = probes["s4_s5_s6_meaning_changed"]["witness"]
+        self.assertEqual(w["earlier_status_in_results"], {"S4": "NOT_RUN", "S5": "NOT_RUN", "S6": "NOT_RUN"})
+        self.assertTrue(w["pinned_meaning"]["S5"].startswith("S5 evidence root: Merkle root"))
+        self.assertNotIn("source", probes["s4_s5_s6_meaning_changed"]["message"].split("terminology only")[0].lower())
+
+    def test_terminology_probe_is_quiet_when_the_change_is_recorded(self):
+        _, probes = self.results(self.run_case(records_change=True))
+        self.assertEqual(probes["s4_s5_s6_meaning_changed"]["observation"], "NOT_DEMONSTRATED")
 
     def test_respond_refuses_before_run_and_after_edit(self):
         earlier, pinned = build_repo(self.remotes / "nti")

@@ -86,14 +86,20 @@ class ScopeRulesTest(unittest.TestCase):
     def test_public_boundary_subjects(self):
         s = json.loads((FIXTURES / "toy-offer-run" / "SCOPE.json").read_text(encoding="utf-8"))
         s.pop("offer")
-        s["public_boundary"] = {"repo": "https://example.invalid/toy-receipts", "commit": "a" * 40,
+        s["public_boundary"] = {"repo": "https://example.invalid/toy-receipts", "commit": s["subjects"][0]["commit"],
                                 "path": "README.md", "sha256": "b" * 64, "procedure_ref": "README.md#p",
                                 "claims_ref": "README.md#c", "classification_ref": "README.md#k"}
-        validate_scope(s)  # one subject, as before
+        validate_scope(s)
         s["subjects"].append({**s["subjects"][0], "commit": "c" * 40})
-        validate_scope(s)  # two revisions of the boundary's own repository
+        validate_scope(s)  # a second revision of the boundary's own repository
         s["subjects"][1]["repo"] = "https://example.invalid/other-project"
         with self.assertRaisesRegex(ScopeError, "own repository"):
+            validate_scope(s)
+        s["subjects"] = [{**s["subjects"][0], "repo": "https://example.invalid/other-project"}]
+        with self.assertRaisesRegex(ScopeError, "own repository"):
+            validate_scope(s)  # also with a single subject
+        s["subjects"] = [{**s["subjects"][0], "repo": "https://example.invalid/toy-receipts", "commit": "c" * 40}]
+        with self.assertRaisesRegex(ScopeError, "boundary commit"):
             validate_scope(s)
 
 
@@ -180,6 +186,22 @@ class RerunCompareTest(unittest.TestCase):
         diffs = compare({"results/probes.json": {"records": [record]}},
                         {"results/probes.json": {"records": [changed]}})
         self.assertEqual([d["item"] for d in diffs], ["probe p1"])
+
+    def test_every_probe_field_is_compared(self):
+        record = {"probe": "p1", "class": "BINDING_GAP", "inputs": ["i"], "execution": "COMPLETED",
+                  "observation": "DEMONSTRATED", "reads": ["x"], "witness": {"root": "aa"},
+                  "affects_pinned_artifact": True, "message": "seen", "evidence": ["i:sha256:" + "a" * 64]}
+        error = {**record, "execution": "ERROR", "observation": None,
+                 "verifier_error": {"code": "exception", "message": "A"}}
+        for label, a, b in (("message", record, {**record, "message": "seen differently"}),
+                            ("class", record, {**record, "class": "FRAMING_GAP"}),
+                            ("inputs", record, {**record, "inputs": ["i", "j"]}),
+                            ("verifier_error", error, {**error, "verifier_error": {"code": "exception", "message": "B"}})):
+            with self.subTest(label):
+                diffs = compare({"results/probes.json": {"records": [a]}}, {"results/probes.json": {"records": [b]}})
+                self.assertEqual(len(diffs), 1)
+        self.assertEqual(compare({"results/probes.json": {"records": [record]}},
+                                 {"results/probes.json": {"records": [dict(record)]}}), [])
 
 
 PROBES_PY = '''

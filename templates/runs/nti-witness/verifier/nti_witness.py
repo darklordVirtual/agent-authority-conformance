@@ -217,10 +217,6 @@ def _line_of(data, needle):
     return None
 
 
-def _normalised(data):
-    return " ".join(data.decode("utf-8", errors="replace").split())
-
-
 # --- claims (one record per input) --------------------------------------------------
 
 def package_signature(doc, context):
@@ -530,35 +526,79 @@ def key_changed_between_revisions(docs, context):
             "witness": witness, "affects_pinned_artifact": changed, "message": message}
 
 
-EXTERNAL_MARKERS = ("Raja549h/asl-conformance-kit", "ASL")
-NATIVE_CLAIM = "It shares no code with any external conformance kit."
-SPEC_REFERENCE = "to match the witness specification"
+IDS = ("S4", "S5", "S6")
+EARLIER_RECORD = "vendor/S4_S5_S6_RECORD.json"
+EARLIER_MARKERS = ("ASL", "Agent Safety Layer")
+SPEC_PHRASE = "witness specification"
 
 
-TEXT_SUFFIXES = (".md", ".json", ".py", ".sh", ".html", ".txt")
+def _pinned_meanings(readme):
+    """The pinned README's seal table: {id: "<row label>: <construction>"}."""
+    out = {}
+    for line in readme.decode("utf-8", errors="replace").splitlines():
+        cells = [c.strip() for c in line.strip().strip("|").split("|")]
+        for sid in IDS:
+            if len(cells) >= 3 and cells[0].startswith(f"**{sid}**"):
+                out[sid] = f"{cells[0].replace('**', '')}: {cells[2].replace('**', '')}"
+    return out
 
 
-def _naming(bundle, marker):
-    """Text files of a bundle that contain marker (binary files such as SIGNATURE.sig are skipped)."""
-    return sorted(p for p, data in bundle.items() if p.endswith(TEXT_SUFFIXES) and marker.encode() in data)
+def _earlier_status(results):
+    """{id: status} for S4/S5/S6 entries anywhere in an earlier RESULTS.json."""
+    found = {}
+
+    def walk(node):
+        if isinstance(node, dict):
+            if node.get("id") in IDS and "status" in node:
+                found[node["id"]] = node["status"]
+            for value in node.values():
+                walk(value)
+        elif isinstance(node, list):
+            for value in node:
+                walk(value)
+    walk(results)
+    return found
 
 
-def seal_scheme_attribution(docs, context):
+def _paragraph_with(text, phrase):
+    for para in re.split(r"\n\s*\n", text):
+        if phrase in " ".join(para.split()):
+            return " ".join(para.split())
+    return None
+
+
+def s4_s5_s6_meaning_changed(docs, context):
+    """Terminology only: compares what the identifiers S4, S5 and S6 denote in the two
+    pinned revisions. It draws no conclusion about where any construction or code came from."""
     now, then = docs["witness"], docs["history_witness"]
-    found_then = {m: _naming(then, m) for m in EXTERNAL_MARKERS}
-    found_now = {m: _naming(now, m) for m in EXTERNAL_MARKERS}
-    readme = now.get("README.md", b"")
-    witness = {"earlier_revision_files_naming": found_then,
-               "pinned_revision_files_naming": found_now,
-               "pinned_readme_states_native": NATIVE_CLAIM in _normalised(readme),
-               "pinned_readme_refers_to_witness_specification": SPEC_REFERENCE in _normalised(readme),
-               "pinned_readme_sha256": hashlib.sha256(readme).hexdigest()}
-    demonstrated = (all(found_then.values()) and not any(found_now.values())
-                    and witness["pinned_readme_refers_to_witness_specification"])
-    message = ("An earlier revision of the witness package named the external ASL project "
-               "(Raja549h/asl-conformance-kit) as the source of the S4/S5/S6 seals. The pinned revision keeps the "
-               "S4/S5/S6 names and refers to 'the witness specification' but names no source for it."
-               if demonstrated else "The attribution pattern was not observed.")
-    return {"observation": "DEMONSTRATED" if demonstrated else "NOT_DEMONSTRATED",
-            "reads": ["README.md", "MANIFEST.json", "RESULTS.json", "vendor/*"],
-            "witness": witness, "affects_pinned_artifact": demonstrated, "message": message}
+    if "README.md" not in now or EARLIER_RECORD not in then or "RESULTS.json" not in then:
+        return {"observation": "NOT_DEMONSTRATED", "reads": ["README.md", EARLIER_RECORD, "RESULTS.json"],
+                "witness": {}, "affects_pinned_artifact": False,
+                "message": "One of the two revisions does not define S4/S5/S6 in the files this probe reads."}
+    earlier = _json(then[EARLIER_RECORD]).get("invariants", {})
+    pinned = _pinned_meanings(now["README.md"])
+    readme_text = now["README.md"].decode("utf-8", errors="replace")
+    mentions = {m: sorted(p for p, data in now.items()
+                          if p.endswith((".md", ".json")) and m.encode() in data) for m in EARLIER_MARKERS}
+    spec_paragraph = _paragraph_with(readme_text, SPEC_PHRASE)
+    witness = {"earlier_meaning": {k: earlier.get(k) for k in IDS},
+               "earlier_status_in_results": _earlier_status(_json(then["RESULTS.json"])),
+               "earlier_record_sha256": hashlib.sha256(then[EARLIER_RECORD]).hexdigest(),
+               "pinned_meaning": {k: pinned.get(k) for k in IDS},
+               "pinned_readme_sha256": hashlib.sha256(now["README.md"]).hexdigest(),
+               "pinned_package_mentions_earlier_meaning": any(mentions.values()),
+               "pinned_readme_refers_to_a_witness_specification": spec_paragraph is not None,
+               "pinned_readme_links_that_specification": bool(spec_paragraph and (
+                   "http" in spec_paragraph or "](" in spec_paragraph))}
+    changed = (all(earlier.get(k) for k in ("S4", "S5")) and all(pinned.get(k) for k in IDS)
+               and not witness["pinned_package_mentions_earlier_meaning"])
+    message = ("In the earlier revision, S4, S5 and S6 denote invariants of the separate ASL project (S4 a "
+               "threshold and tripwire property, S5 a kill-path cascade, S6 undefined), recorded there as not run. "
+               "In the pinned revision the same identifiers denote a seal construction (artifact digests, a Merkle "
+               "root, an Ed25519 signature). The pinned package does not record this change of meaning, and it "
+               "refers to a witness specification for the field names without identifying it. This concerns "
+               "terminology only; it says nothing about where the construction or any code came from."
+               if changed else "The identifiers keep their meaning, or the change is recorded in the pinned package.")
+    return {"observation": "DEMONSTRATED" if changed else "NOT_DEMONSTRATED",
+            "reads": ["README.md", EARLIER_RECORD, "RESULTS.json"],
+            "witness": witness, "affects_pinned_artifact": changed, "message": message}

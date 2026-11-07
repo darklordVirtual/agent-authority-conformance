@@ -202,7 +202,8 @@ never borrow the standing of a claim result.
 A probe declares `id` (unique among claims and probes), `text` (the property
 probed, stated neutrally), `class` (`SPEC_IMPLEMENTATION_DIVERGENCE`,
 `CONSTRUCTION_AMBIGUITY`, `BINDING_GAP`, `FRAMING_GAP`, `KEY_REUSE`,
-`TRUST_ANCHOR`, `ATTESTATION_SCOPE`, `PROVENANCE_ATTRIBUTION` or `OTHER`),
+`TRUST_ANCHOR`, `ATTESTATION_SCOPE`, `TERMINOLOGY_CHANGE`, `PROVENANCE_ATTRIBUTION` or
+`OTHER`),
 `check`, `inputs`, `reads_fields`, `runner_assessment` (`level`
 `informational`, `low`, `medium` or `high`, with a `rationale`) and optionally
 `remediation` and `source_locators` (subject, pinned path, line range, note;
@@ -223,9 +224,16 @@ including the witness, and are reported in their own section. A probe never
 maps to `PASS` or `FAIL`, assessment levels are never summed, and the report
 does not count probes.
 
-A public-boundary run (§9) may pin several subjects when each is a revision of
-the boundary's own repository, so a probe can compare them. It never covers a
-second project.
+A public-boundary run (§9) is bound to its boundary: every subject must be a
+revision of the boundary's own repository, with one subject as with several,
+and subject 0, the primary subject, must be pinned at the boundary commit, so
+the boundary text describes exactly the bytes verified. Further subjects are
+other revisions kept for comparison. The basis never covers a second project.
+
+Probes describe what the pinned bytes show. A difference between two revisions
+supports a statement about the difference (for example that an identifier
+changed meaning), not about where code or a construction came from; that needs
+its own evidence and is outside every probe in this protocol.
 
 ## 6. Package
 
@@ -251,6 +259,12 @@ the endorsement statement and reproduce steps. It requires a measured run whose
 scope, run-owned files and results are unchanged, writes outside the package
 (`.local/CHALLENGE-RESPONSE.md` by default) so MANIFEST.json is untouched, and
 ends with who drafted it (`--drafted-by human|agent:<id>`, `--ai-assisted`).
+Inside the run directory it writes only under `.local/` (symlinks resolved), and
+it replaces an existing draft only with `--force`. Findings are grouped by
+`affects_pinned_artifact`: those that hold for the bytes as published come
+first, and those shown only on constructed inputs say that no attack on the
+published package is demonstrated. On rerun, every field of every probe record
+is compared, including its message, class, inputs and any verifier error.
 It states the lab status; before `PUBLISHED` the package is not citable as
 published evidence, although every value in the draft is recomputable from the
 pinned bytes. See [docs/CHALLENGE-RESPONSE.md](docs/CHALLENGE-RESPONSE.md).

@@ -86,9 +86,10 @@ This path is intentionally narrower than a producer offer:
 - it does not record producer consent, review, endorsement, project approval or a statement in the producer's name;
 - it never infers stronger claims from the fact that an artifact is public.
 
-A public-boundary run may pin more than one subject only when every subject is a revision of
-the boundary's own repository, for example to compare a key or a text between two public
-commits. It never covers a second project. A subject maintainer's `publication_declined` or
+A public-boundary run is bound to its boundary: every subject is a revision of the boundary's
+own repository, with one subject as with several, and subject 0 is pinned at the boundary
+commit. Further subjects are other public revisions kept for comparison, for example of a key
+or a text. It never covers a second project. A subject maintainer's `publication_declined` or
 `withdrawn` allows `withhold`; there are no producer terms to decide otherwise, so the runner
 answers or withholds. A public request to verify (a "challenge") can be recorded alongside as
 `challenge` context, never as consent; see [CHALLENGE-RESPONSE.md](CHALLENGE-RESPONSE.md).

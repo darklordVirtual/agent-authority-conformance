@@ -60,28 +60,46 @@ def _probes(scope, results):
            "Runner-authored probes. A finding is the runner's reproducible observation with a witness anyone "
            "can recompute; it is not a claim result and not a statement by the producer. Assessment levels are "
            "the runner's judgment and are not summed.", ""]
-    for n, r in enumerate(probes["records"], start=1):
-        p = declared[r["probe"]]
-        affects = {True: "yes", False: "no"}.get(r.get("affects_pinned_artifact"), "—")
-        out += [f"**F{n}. `{r['probe']}`** · {r['class']} · runner assessment: "
-                f"{p['runner_assessment']['level']} · {r['observation'] or r['execution']} · "
-                f"affects the pinned artifact: {affects}", "",
-                f"*Probed:* {p['text']}", ""]
-        if r["execution"] != "COMPLETED":
-            out += [f"Non-verdict: {r['verifier_error']['message']}", ""]
-            continue
-        out += [f"*Observed:* {r['message']}", "",
-                f"*Why this level:* {p['runner_assessment']['rationale']}", ""]
-        locators = p.get("source_locators", [])
-        if locators:
-            out += ["*Where (read as data, not executed):*", ""]
-            out += [f"- [{loc['path']} L{loc['lines']}]({locator_url(scope['subjects'][loc['subject']], loc)}): "
-                    f"{loc['note']}" for loc in locators]
-            out.append("")
-        out += ["<details><summary>Witness</summary>", "", "```json", display_json(r["witness"]), "```", "",
-                "</details>", ""]
-        if p.get("remediation"):
-            out += [f"*Suggested fix:* {p['remediation']}", ""]
+    groups = (
+        (True, "#### Holding for the pinned bytes as published"),
+        (False, "#### Shown only on constructed inputs: the pinned bytes are not affected, and no attack on the "
+                "published package is demonstrated"),
+        (None, "#### Not completed (non-verdicts)"),
+    )
+    ordered = []
+    for key, heading in groups:
+        members = [r for r in probes["records"] if r.get("affects_pinned_artifact") is key]
+        if members:
+            ordered.append((heading, members))
+    n = 0
+    for heading, members in ordered:
+        out += [heading, ""]
+        for r in members:
+            n += 1
+            out += _finding(scope, declared[r["probe"]], r, n)
+    return out
+
+
+def _finding(scope, p, r, n):
+    affects = {True: "yes", False: "no"}.get(r.get("affects_pinned_artifact"), "—")
+    out = [f"**F{n}. `{r['probe']}`** · {r['class']} · runner assessment: "
+           f"{p['runner_assessment']['level']} · {r['observation'] or r['execution']} · "
+           f"affects the pinned artifact: {affects}", "",
+           f"*Probed:* {p['text']}", ""]
+    if r["execution"] != "COMPLETED":
+        return out + [f"Non-verdict: {r['verifier_error']['message']}", ""]
+    out += [f"*Observed:* {r['message']}", "",
+            f"*Why this level:* {p['runner_assessment']['rationale']}", ""]
+    locators = p.get("source_locators", [])
+    if locators:
+        out += ["*Where (read as data, not executed):*", ""]
+        out += [f"- [{loc['path']} L{loc['lines']}]({locator_url(scope['subjects'][loc['subject']], loc)}): "
+                f"{loc['note']}" for loc in locators]
+        out.append("")
+    out += ["<details><summary>Witness</summary>", "", "```json", display_json(r["witness"]), "```", "",
+            "</details>", ""]
+    if p.get("remediation"):
+        out += [f"*Suggested fix:* {p['remediation']}", ""]
     return out
 
 
@@ -198,12 +216,29 @@ def render(run_dir, drafted_by="human", ai_assisted=False, scope_ref=None):
     return "\n".join(lines)
 
 
-def write(run_dir, out=None, drafted_by="human", ai_assisted=False, scope_ref=None):
+def output_path(run_dir, out=None, force=False):
+    """Where the draft may be written. Inside the run directory only .local/ is allowed,
+    because everything else there is a scope, lifecycle, result or package file; an
+    existing file is replaced only with force. Symlinks are resolved before the check."""
+    run_dir = Path(run_dir).resolve()
+    path = (Path(out) if out else run_dir / DEFAULT_OUT).resolve()
+    local = run_dir / ".local"
+    if (path == run_dir or run_dir in path.parents) and local not in path.parents:
+        raise GateError(f"refusing to write inside the run directory outside .local/: {path.name}; "
+                        "run files are locked records")
+    if path.exists() and not path.is_file():
+        raise GateError(f"{path.name} exists and is not a file")
+    if path.exists() and not force:
+        raise GateError(f"{path.name} already exists; pass --force to replace the earlier draft")
+    return path
+
+
+def write(run_dir, out=None, drafted_by="human", ai_assisted=False, scope_ref=None, force=False):
     if drafted_by != "human" and not (isinstance(drafted_by, str) and drafted_by.startswith("agent:")
                                       and len(drafted_by) > len("agent:")):
         raise GateError("--drafted-by must be 'human' or 'agent:<id>'")
+    path = output_path(run_dir, out, force)  # before rendering, so a refused path changes nothing
     text = render(run_dir, drafted_by, ai_assisted, scope_ref)
-    path = Path(out) if out else Path(run_dir) / DEFAULT_OUT
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(text, encoding="utf-8")
     return path

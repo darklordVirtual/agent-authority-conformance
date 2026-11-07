@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/darklordVirtual/agent-authority-conformance/schema/lab/scope.schema.json",
   "title": "AAC lab SCOPE.json (v0.3)",
-  "description": "Structure only. The lab's stdlib validator also checks cross-references (claim inputs, subject indexes, temporal claims). No aggregate keys are allowed. A self-service run over a public_boundary may pin several subjects only when each is a revision of the boundary's own repository; the stdlib validator checks that cross-field rule.",
+  "description": "Structure only. The lab's stdlib validator also checks cross-references (claim inputs, subject indexes, temporal claims). No aggregate keys are allowed. A self-service run over a public_boundary pins only revisions of the boundary's own repository, with subject 0 at the boundary commit; the stdlib validator checks these cross-field rules.",
   "type": "object",
   "propertyNames": {
     "not": {
@@ -729,6 +729,7 @@
               "KEY_REUSE",
               "TRUST_ANCHOR",
               "ATTESTATION_SCOPE",
+              "TERMINOLOGY_CHANGE",
               "PROVENANCE_ATTRIBUTION",
               "OTHER"
             ]

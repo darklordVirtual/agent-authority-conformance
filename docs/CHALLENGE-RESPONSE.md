@@ -34,7 +34,14 @@ python -m conformance.lab package <run_id>
 python -m conformance.lab respond <run_id> --drafted-by agent:<id> --ai-assisted \
     --scope-ref <where readers find SCOPE.json>
 (cd runs/<run_id> && python3 rerun.py)                    # REPRODUCED, DIVERGED or NOT_REPRODUCIBLE
+python scripts/record_lab_run.py runs/<run_id> templates/runs/<case>/SCOPE.json   # optional record
 ```
+
+`respond` writes only under the run's `.local/` or outside the run directory, and replaces an
+earlier draft only with `--force`. A record (`templates/runs/<case>/recorded/RECORD.json`)
+keeps what one run observed at its pins with the committed verifier and scope; tests check
+that it still belongs to them, and a network-enabled test reruns the scope over the real bytes
+and compares every record.
 
 `share` and `publish` then deliver the package as a runner-attributed public-boundary
 result (see [FEDERATION-TRACKS.md](FEDERATION-TRACKS.md#public-boundary-compatibility)).
@@ -50,6 +57,9 @@ Posting the draft reply, sharing and publishing are a person's decisions.
   inputs is `false` even when it matters for the next release.
 - Read producer code as data. A locator names the bytes that were read; nothing is
   executed.
+- Claim only what the bytes show. Two revisions that use one identifier for different
+  things show a change of terminology; they do not show where a construction or its code
+  came from. Provenance needs its own evidence.
 - Label independence by what the runner knew. Reading the producer's verifier before
   writing your own makes the run `SECOND_IMPLEMENTATION`, however different the code.
 
@@ -62,5 +72,8 @@ repository (the package and its first published version), checks the eight docum
 runner-authored claims with a standard-library RFC 8032 Ed25519 and three Merkle rules
 (documented, RFC 6962 split, as implemented), and runs seven probes. The tests build a
 synthetic package with test keys and run the same scope end to end
-([tests/lab/test_nti_example.py](../tests/lab/test_nti_example.py)); they never use the
-producer's bytes.
+([tests/lab/test_nti_example.py](../tests/lab/test_nti_example.py)). The real run is kept in
+[`recorded/RECORD.json`](../templates/runs/nti-witness/recorded/RECORD.json);
+[tests/lab/test_nti_recorded.py](../tests/lab/test_nti_recorded.py) checks it offline and, in the
+`nti-real-bytes` CI job (`AACP_NETWORK_TESTS=1`), reruns the scope over the two pinned NTI commits
+and compares every claim and probe record.

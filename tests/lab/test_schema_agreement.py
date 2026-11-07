@@ -50,7 +50,8 @@ class SchemaAgreementTest(unittest.TestCase):
         boundary = copy.deepcopy(offer_run)
         boundary.pop("offer")
         boundary["public_boundary"] = {
-            "repo": boundary["subjects"][0]["repo"], "commit": "a" * 40, "path": "docs/BOUNDARY.md",
+            "repo": boundary["subjects"][0]["repo"], "commit": boundary["subjects"][0]["commit"],
+            "path": "docs/BOUNDARY.md",
             "sha256": "b" * 64, "procedure_ref": "docs/BOUNDARY.md#procedure",
             "claims_ref": "docs/BOUNDARY.md#claims", "classification_ref": "docs/BOUNDARY.md#classification"}
         yield "public boundary", boundary

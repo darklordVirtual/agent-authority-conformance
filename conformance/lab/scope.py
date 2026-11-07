@@ -21,7 +21,8 @@ INPUT_FORMATS = ("json", "bytes")
 # Probes are runner-authored observations about a pinned artifact, separate from
 # claim results. The class says what kind of property was probed; it is not a verdict.
 PROBE_CLASSES = ("SPEC_IMPLEMENTATION_DIVERGENCE", "CONSTRUCTION_AMBIGUITY", "BINDING_GAP", "FRAMING_GAP",
-                 "KEY_REUSE", "TRUST_ANCHOR", "ATTESTATION_SCOPE", "PROVENANCE_ATTRIBUTION", "OTHER")
+                 "KEY_REUSE", "TRUST_ANCHOR", "ATTESTATION_SCOPE", "TERMINOLOGY_CHANGE",
+                 "PROVENANCE_ATTRIBUTION", "OTHER")
 # The runner's own judgment of a probe's practical weight. Never summed or ranked.
 ASSESSMENT_LEVELS = ("informational", "low", "medium", "high")
 COMMIT = re.compile(r"^[0-9a-f]{40}$")
@@ -246,20 +247,39 @@ def _self_service_problems(scope):
     subjects = scope.get("subjects") or []
     if has_offer and len(subjects) != 1:
         p.append("self_service runs measure exactly one subject, the offer's")
-    elif has_public and not has_offer and len(subjects) != 1:
-        # One subject, as before. Several subjects only when every one is a pinned revision
-        # of the boundary's own repository (for example a key or text that changed between
-        # two public revisions); this basis never covers a second project.
-        repo = str((scope.get("public_boundary") or {}).get("repo", "")).rstrip("/")
-        if not subjects or any(not isinstance(s, dict) or str(s.get("repo", "")).rstrip("/") != repo
-                               for s in subjects):
-            p.append("a public_boundary run with several subjects may only pin revisions of the "
-                     "boundary's own repository")
+    elif has_public and not has_offer:
+        p.extend(boundary_binding_problems(scope.get("public_boundary"), subjects))
     if "publication" in scope:
         p.append("self_service publication is runner-attributed or taken from the producer offer; remove publication")
     if not _text(scope.get("procedure")):
         p.append("self_service needs procedure: the offered procedure id")
     return p
+
+
+def _repo_key(url):
+    return str(url or "").rstrip("/").removesuffix(".git").lower()
+
+
+def boundary_binding_problems(boundary, subjects):
+    """A public boundary vouches only for bytes of its own repository: every subject is a
+    revision of that repository, and subject 0 (the primary subject) is pinned at exactly
+    the boundary commit, so the boundary text describes the bytes that are verified. Other
+    subjects are earlier or later revisions kept for comparison."""
+    if not isinstance(boundary, dict):
+        return []  # validate_ref reports the malformed boundary
+    if not subjects:
+        return ["a public_boundary run needs a primary subject"]
+    p = []
+    repo = _repo_key(boundary.get("repo"))
+    foreign = [i for i, s in enumerate(subjects) if not isinstance(s, dict) or _repo_key(s.get("repo")) != repo]
+    if foreign:
+        p.append("public_boundary covers only its own repository; subject(s) "
+                 f"{', '.join(map(str, foreign))} point elsewhere")
+    primary = subjects[0] if isinstance(subjects[0], dict) else {}
+    if primary.get("commit") != boundary.get("commit"):
+        p.append("subjects[0] is the primary subject and must be pinned at the public_boundary commit")
+    return p
+
 
 
 def _subject_problems(i, s, require_pins):

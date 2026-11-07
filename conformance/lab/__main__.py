@@ -85,6 +85,7 @@ def build_parser():
                    help="who drafted the reply; printed in its footer")
     p.add_argument("--ai-assisted", action="store_true")
     p.add_argument("--scope-ref", help="where readers find this run's SCOPE.json (path or URL) for the reproduce steps")
+    p.add_argument("--force", action="store_true", help="replace an existing draft (never a run record)")
     return parser
 
 
@@ -220,7 +221,7 @@ def _dispatch(args, cfg, runs, run_dir, capture_error=False):
             return selftest_main(["--json"] if args.json else [])
         elif args.command == "respond":
             from .respond import write
-            print(write(run_dir, args.out, args.drafted_by, args.ai_assisted, args.scope_ref))
+            print(write(run_dir, args.out, args.drafted_by, args.ai_assisted, args.scope_ref, args.force))
         elif args.command == "rerun":
             return subprocess.run([sys.executable, "-B", str(args.package / "rerun.py")]).returncode
     except LabError as exc:

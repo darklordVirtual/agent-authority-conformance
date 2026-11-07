@@ -333,33 +333,44 @@
       "text": "The witness key is stable across the published revisions, or its change is recorded in the package."
     },
     {
-      "check": "nti_witness:seal_scheme_attribution",
-      "class": "PROVENANCE_ATTRIBUTION",
-      "id": "seal_scheme_attribution",
+      "check": "nti_witness:s4_s5_s6_meaning_changed",
+      "class": "TERMINOLOGY_CHANGE",
+      "id": "s4_s5_s6_meaning_changed",
       "inputs": [
         "witness",
         "history_witness"
       ],
       "reads_fields": [
         "README.md",
-        "MANIFEST.json",
-        "RESULTS.json",
-        "vendor/*"
+        "vendor/S4_S5_S6_RECORD.json",
+        "RESULTS.json"
       ],
-      "remediation": "Name the source of the S4/S5/S6 specification in the README. An independent reimplementation stays independent code.",
+      "remediation": "State in the README that S4/S5/S6 now name the seal construction rather than the ASL invariants named by the earlier revision, and identify the witness specification the field names follow.",
       "runner_assessment": {
         "level": "informational",
-        "rationale": "Not a cryptographic issue. Recorded because shared attribution is one of the principles in the challenge's thread."
+        "rationale": "Not a cryptographic issue. A reader comparing the two public revisions could take S4/S5/S6 results for one meaning as covering the other; nothing here bears on where the construction or its code came from."
       },
       "source_locators": [
         {
-          "lines": "32-33",
-          "note": "keeps S6_hmac_seal to match the witness specification, without naming it",
+          "lines": "25-31",
+          "note": "pinned meaning: the S4/S5/S6 seal table",
           "path": "conformance/witness/README.md",
           "subject": 0
+        },
+        {
+          "lines": "32-33",
+          "note": "refers to a witness specification for the field name without identifying it",
+          "path": "conformance/witness/README.md",
+          "subject": 0
+        },
+        {
+          "lines": "11-21",
+          "note": "earlier meaning: ASL invariants S4 and S5, S6 undefined",
+          "path": "conformance/witness/vendor/S4_S5_S6_PROVENANCE.md",
+          "subject": 1
         }
       ],
-      "text": "The pinned README names the source of the S4/S5/S6 specification that an earlier revision attributed to another project."
+      "text": "The identifiers S4, S5 and S6 keep the meaning they had in the earlier published revision, or the pinned package records the change."
     }
   ],
   "procedure": "nti-witness-readme-how-to-verify: the README steps, run with the runner's own checks",

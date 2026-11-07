@@ -38,7 +38,10 @@ FIXTURE = _dumps({
                   {"name": "policy.txt", "content_utf8": "allow if scope is read"},
                   {"name": "audit_note.txt", "content_utf8": "synthetic audit entry"}]})
 
-README = (b"# Witness\n\n| S5 | Merkle root. Odd nodes are promoted unchanged. |\n\n"
+README = (b"# Witness\n\n| Seal | Field | Construction |\n| :--- | :--- | :--- |\n"
+          b"| **S4** file integrity | `S4_file_integrity` | SHA-256 of each artifact. |\n"
+          b"| **S5** evidence root | `S5_evidence_root` | Merkle root. Odd nodes are promoted unchanged. |\n"
+          b"| **S6** seal | `S6_hmac_seal` | Ed25519 signature over the S5 root. |\n\n"
           b"The field is called `S6_hmac_seal` to match the witness\nspecification, but it is a signature.\n\n"
           b"This is a native implementation. It shares no code with any external conformance kit. The\n"
           b"generator is in the repository.\n")
@@ -75,12 +78,17 @@ def _package(v, secret, readme, extra_results=None, manifest_entries=()):
             "PUBLIC_KEY.pem": v.pem_for(v.ed25519_public(secret)), "README.md": readme}
 
 
-def build_repo(root, tamper=False, missing_signature=False):
+def build_repo(root, tamper=False, missing_signature=False, records_change=False):
     """Create the repository; return (earlier commit, pinned commit)."""
     v = verifier()
-    old = _package(v, OLD_SECRET, b"# Witness\n\nS4/S5/S6 come from the external ASL project.\n")
+    old = _package(v, OLD_SECRET, b"# Witness\n\nS4, S5 and S6 are ASL invariants and were not run.\n",
+                   extra_results={"external": [{"id": "S4", "status": "NOT_RUN"}, {"id": "S5", "status": "NOT_RUN"},
+                                               {"id": "S6", "status": "NOT_RUN"}]})
     history = {f"conformance/witness/{k}": d for k, d in old.items()}
-    history["conformance/witness/vendor/S4_S5_S6_PROVENANCE.md"] = b"Source: Raja549h/asl-conformance-kit (ASL).\n"
+    history["conformance/witness/vendor/S4_S5_S6_RECORD.json"] = _dumps({"invariants": {
+        "S4": "Thresholds are quiet on ordinary traffic, but the tripwire still fires.",
+        "S5": "Every kill path still fires the complete cascade.",
+        "S6": "Not defined in the public conformance kit revision."}})
     earlier = make_repo(root, history)
     core = [{"path": "ube-foundation/tests/core_tests.rs", "sha256": hashlib.sha256(CORE_TESTS).hexdigest()}]
     new = _package(v, NEW_SECRET, README, manifest_entries=core)
@@ -88,7 +96,9 @@ def build_repo(root, tamper=False, missing_signature=False):
         new["RESULTS.json"] = new["RESULTS.json"].replace(b"PASSED", b"PASSEd", 1)
     files = {f"conformance/witness/{k}": d for k, d in new.items()}
     files.update({f"docs/witness/{k}": d for k, d in new.items()})
-    remove = ["conformance/witness/vendor/S4_S5_S6_PROVENANCE.md"]
+    if records_change:
+        files["conformance/witness/CHANGES.md"] = b"S4/S5/S6 previously named ASL invariants; they now name the seals.\n"
+    remove = ["conformance/witness/vendor/S4_S5_S6_RECORD.json"]
     if missing_signature:
         del files["conformance/witness/SIGNATURE.sig"]
         remove.append("conformance/witness/SIGNATURE.sig")  # the earlier commit had one
@@ -108,9 +118,10 @@ def scope_for(earlier, pinned):
     scope["subjects"][0]["paths"] = ["conformance/witness", "conformance/witness_generator", "docs/witness",
                                      "ube-foundation/tests"]
     scope["public_boundary"].update(repo=REPO, commit=pinned, sha256=hashlib.sha256(README).hexdigest())
+    scope["subjects"][1]["paths"] = ["conformance/witness"]
     for probe in scope["probes"]:
-        for loc in probe.get("source_locators", []):
-            loc["lines"] = "1"
+        probe["source_locators"] = [dict(loc, lines="1", path=loc["path"].replace(
+            "vendor/S4_S5_S6_PROVENANCE.md", "vendor/S4_S5_S6_RECORD.json")) for loc in probe.get("source_locators", [])]
     return scope
 
 
