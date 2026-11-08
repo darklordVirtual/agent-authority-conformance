@@ -89,6 +89,11 @@
     "S-EV-05": {
       "result": "OBSERVED",
       "discrimination": "NOT_RUN"
+    },
+    "P-X-04": {
+      "result": "NOT_OBSERVED",
+      "discrimination": "NOT_RUN",
+      "sensitivity": "SENSITIVE"
     }
   }
 }

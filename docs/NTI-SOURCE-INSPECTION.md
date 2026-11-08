@@ -95,12 +95,15 @@ reviewed either.
 | P-03 | Mythos | AACP-EV-03 | S-EV-03 | static | no_mapping |
 | P-04 | Mythos + Daybreak #3 | AACP-EV-04 | S-EV-04 | static | no_mapping |
 | P-05 | Mythos | AACP-EV-05 | S-EV-05 | static | no_mapping |
+| (none) | REMORA binding | AACP-X-04 | P-X-04 | executed; not observed, sensitive | no_mapping |
 
 NTI-13 is new from Daybreak: `AutonomousAgent::execute_task` (`L:1591-1611`)
 dispatches through the orchestrator and only then evaluates intent policies.
 In `FailSafe` mode the violation is returned as an error, but the forbidden
 `write_file` has already happened. P-D-03 shows this with a real write in a
 temporary directory; the repair (evaluate policies before dispatch) stops it.
+
+AACP-X-04 was added to the catalog while binding REMORA, where it reproduces. NTI was probed for it too: its persisted state reloads and verifies, and the probe is sensitive.
 
 Daybreak #4 ("witness matches HEAD: false") is not a weakness by itself, since a
 package is generated before it is committed. It is part of AACP-EV-02
