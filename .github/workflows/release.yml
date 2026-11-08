@@ -1,0 +1,297 @@
+name: Release
+
+# Builds, tests, documents and publishes an installable AACP distribution as a
+# GitHub Release. See docs/RELEASING.md for the maintainer procedure.
+#
+#   push of tag v*      full release: verify -> build -> smoke -> publish (gated by the
+#                       `release` environment; publish waits for a required reviewer)
+#   pull_request        rehearsal of verify/build/smoke when release inputs change; never publishes
+#   workflow_dispatch   the same rehearsal on demand; never publishes
+
+on:
+  push:
+    tags: ["v*"]
+  pull_request:
+    paths:
+      - .github/workflows/release.yml
+      - scripts/release.py
+      - scripts/smoke_installed_cli.py
+      - requirements-release.txt
+      - pyproject.toml
+      - aacp/**
+      - schema/*.json
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  PYTHON_VERSION: "3.12"
+  PIP_DISABLE_PIP_VERSION_CHECK: "1"
+
+jobs:
+  verify:
+    name: Verify tag, version and conformance checks
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      tag: ${{ steps.meta.outputs.tag }}
+      version: ${{ steps.meta.outputs.version }}
+      title: ${{ steps.meta.outputs.title }}
+      prerelease: ${{ steps.meta.outputs.prerelease }}
+      wheel: ${{ steps.meta.outputs.wheel }}
+      sdist: ${{ steps.meta.outputs.sdist }}
+      sbom: ${{ steps.meta.outputs.sbom }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Resolve release tag and validate version metadata
+        id: meta
+        run: |
+          if [ "$GITHUB_REF_TYPE" = "tag" ]; then
+            TAG="$GITHUB_REF_NAME"
+            DRY=""
+          else
+            TAG="v$(python -c 'import tomllib; print(tomllib.load(open("pyproject.toml","rb"))["project"]["version"])')"
+            DRY="--dry-run"
+            echo "::notice::Rehearsal for $TAG ($GITHUB_EVENT_NAME); nothing will be published."
+          fi
+          python scripts/release.py metadata --tag "$TAG" $DRY --github-output "$GITHUB_OUTPUT"
+          python scripts/release.py notes --tag "$TAG" $DRY --out "$RUNNER_TEMP/RELEASE_NOTES.md"
+
+      - name: Require the tagged commit to be on main
+        if: github.ref_type == 'tag'
+        run: |
+          git merge-base --is-ancestor "$GITHUB_SHA" origin/main \
+            || { echo "::error::$GITHUB_REF_NAME ($GITHUB_SHA) is not reachable from origin/main"; exit 1; }
+
+      - name: Install validation dependencies
+        if: github.event_name != 'pull_request'
+        run: python -m pip install -r requirements-dev.txt
+
+      - name: Run conformance checks and tests
+        if: github.event_name != 'pull_request'
+        run: |
+          python -m conformance.check
+          python -m conformance.mutations
+          python -m conformance.invariants
+          (cd vectors/aacp-reference-vectors-v1 && sha256sum --check SHA256SUMS)
+          python -m conformance.vectors verify
+          python scripts/build_reference_vectors.py --check
+          python -m conformance.vectors check
+          python -m conformance.vectors run --impl "python -m conformance.vectors serve"
+          python -m conformance.vectors run --impl "python templates/vector-impl/stdlib_impl.py"
+          python -m unittest discover -s tests -v
+
+      - name: Run lab tests including the pinned corpus-adequacy engine
+        if: github.event_name != 'pull_request'
+        run: |
+          git clone --quiet https://github.com/corpus-adequacy/corpus-adequacy.git "$RUNNER_TEMP/corpus-adequacy"
+          git -C "$RUNNER_TEMP/corpus-adequacy" checkout --quiet 5fa2ff587497b00ac684a767335b9068f7e520a6
+          AAC_CORPUS_ADEQUACY="$RUNNER_TEMP/corpus-adequacy" python -m unittest discover -s tests/lab -t . -v
+
+      - name: Ensure checks did not rewrite tracked evidence
+        run: git diff --exit-code
+
+      - name: Upload release notes
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release-notes
+          path: ${{ runner.temp }}/RELEASE_NOTES.md
+          if-no-files-found: error
+          retention-days: 30
+
+  build:
+    name: Build wheel, sdist, SBOM and checksums
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      TAG: ${{ needs.verify.outputs.tag }}
+      SBOM: ${{ needs.verify.outputs.sbom }}
+      WHEEL: ${{ needs.verify.outputs.wheel }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install pinned build tooling
+        run: python -m pip install -r requirements-release.txt
+
+      - name: Build twice from a pinned timestamp
+        run: |
+          # The commit time makes archive timestamps deterministic; the second build proves it.
+          export SOURCE_DATE_EPOCH="$(git log -1 --format=%ct)"
+          python -m build --outdir dist .
+          rm -rf build ./*.egg-info
+          python -m build --outdir "$RUNNER_TEMP/rebuild" .
+          rm -rf build ./*.egg-info
+
+      - name: Check distributions
+        run: |
+          python scripts/release.py check-dist --dist dist --tag "$TAG" --rebuild-dist "$RUNNER_TEMP/rebuild"
+          python -m twine check --strict dist/*
+
+      - name: Generate CycloneDX SBOM of the installed runtime environment
+        run: |
+          # A pip-less environment, so the SBOM lists only aacp-conformance and what it pulls in.
+          python -m venv --without-pip "$RUNNER_TEMP/sbom-env"
+          python -m pip --python "$RUNNER_TEMP/sbom-env/bin/python" install "dist/$WHEEL"
+          cyclonedx-py environment -E \
+            --pyproject pyproject.toml --mc-type application \
+            --output-reproducible --validate --of JSON \
+            -o "dist/$SBOM" "$RUNNER_TEMP/sbom-env/bin/python"
+
+      - name: Write and verify SHA256SUMS.txt
+        run: |
+          python scripts/release.py checksums --dist dist
+          python scripts/release.py verify-checksums --dist dist --tag "$TAG"
+          (cd dist && sha256sum --check --strict SHA256SUMS.txt)
+          {
+            echo "### Release assets for $TAG"
+            echo '```'
+            cat dist/SHA256SUMS.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload distributions
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release-dist
+          path: dist/
+          if-no-files-found: error
+          retention-days: 30
+
+  smoke:
+    name: Installed CLI (${{ matrix.os }}, Python ${{ matrix.python }}, ${{ matrix.artifact }})
+    needs: [verify, build]
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python: ["3.12", "3.13"]
+        artifact: [wheel]
+        include:
+          - os: ubuntu-latest
+            python: "3.12"
+            artifact: sdist
+    steps:
+      - name: Check out test scripts
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: scripts
+          sparse-checkout-cone-mode: false
+
+      - name: Set up Python
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Download distributions
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: release-dist
+          path: ${{ runner.temp }}/dist
+
+      - name: Verify checksums, install into a clean environment and exercise the CLI
+        shell: bash
+        env:
+          TAG: ${{ needs.verify.outputs.tag }}
+          VERSION: ${{ needs.verify.outputs.version }}
+          FILE: ${{ matrix.artifact == 'wheel' && needs.verify.outputs.wheel || needs.verify.outputs.sdist }}
+        run: |
+          python scripts/release.py verify-checksums --dist "$RUNNER_TEMP/dist" --tag "$TAG"
+          python scripts/smoke_installed_cli.py "$RUNNER_TEMP/dist/$FILE" --version "$VERSION"
+
+  publish:
+    name: Publish GitHub Release
+    needs: [verify, build, smoke]
+    if: github.event_name == 'push' && github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    environment:
+      name: release
+      url: ${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ needs.verify.outputs.tag }}
+    permissions:
+      contents: write      # create the release and upload assets
+      id-token: write      # Sigstore signing certificate for attestations
+      attestations: write  # persist attestations
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      TAG: ${{ needs.verify.outputs.tag }}
+      TITLE: ${{ needs.verify.outputs.title }}
+      PRERELEASE: ${{ needs.verify.outputs.prerelease }}
+    steps:
+      - name: Check out release script
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: scripts
+          sparse-checkout-cone-mode: false
+
+      - name: Download distributions
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: release-dist
+          path: dist
+
+      - name: Download release notes
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: release-notes
+          path: notes
+
+      - name: Re-verify assets before signing
+        run: |
+          python3 scripts/release.py verify-checksums --dist dist --tag "$TAG"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "::error::A release for $TAG already exists. Published releases are not replaced; cut a new version."
+            exit 1
+          fi
+
+      - name: Attest build provenance
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-checksums: dist/SHA256SUMS.txt
+
+      - name: Attest SBOM for the wheel
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-path: dist/${{ needs.verify.outputs.wheel }}
+          sbom-path: dist/${{ needs.verify.outputs.sbom }}
+
+      - name: Create draft release, upload assets, then publish
+        run: |
+          # Draft first: with immutable releases enabled, assets cannot be added after publication.
+          args=(--draft --verify-tag --title "$TITLE" --notes-file notes/RELEASE_NOTES.md)
+          if [ "$PRERELEASE" = "true" ]; then args+=(--prerelease); else args+=(--latest); fi
+          gh release create "$TAG" "${args[@]}" dist/*
+          gh release view "$TAG" --json assets --jq '.assets[].name' | sort > "$RUNNER_TEMP/uploaded.txt"
+          (cd dist && ls -1) | sort > "$RUNNER_TEMP/expected.txt"
+          diff -u "$RUNNER_TEMP/expected.txt" "$RUNNER_TEMP/uploaded.txt"
+          gh release edit "$TAG" --draft=false
+          echo "Published $TITLE: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/tag/$TAG" >> "$GITHUB_STEP_SUMMARY"

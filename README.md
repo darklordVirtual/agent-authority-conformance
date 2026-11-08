@@ -38,9 +38,13 @@ Properties are separable. Evidence for one grants no credit in another, and **Aâ
 
 Evidence tiers are `RESOLVED` (inspected at a stated revision), `REPORTED` (described, not resolved) and `NONE`. In v0.2, `PASS` and `FAIL` require pinned `RESOLVED` evidence. A runtime success, valid receipt or passing test is not a property verdict, and missing evidence is never a demonstrated violation.
 
+## Install
+
+The `aacp` command is distributed as a wheel on [GitHub Releases](https://github.com/darklordVirtual/agent-authority-conformance/releases), not PyPI. Install, checksum and attestation verification: [docs/INSTALL.md](docs/INSTALL.md). Maintainers: [docs/RELEASING.md](docs/RELEASING.md).
+
 ## Quick start
 
-Python 3.12 or newer:
+From a checkout, Python 3.12 or newer:
 
 ```sh
 python -m venv .venv && . .venv/bin/activate   # Windows: .venv\Scripts\Activate.ps1

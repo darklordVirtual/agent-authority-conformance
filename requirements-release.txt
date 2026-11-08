@@ -1,0 +1,4 @@
+# Build and release tooling for .github/workflows/release.yml. Not needed at runtime.
+build==1.6.1
+twine==7.0.0
+cyclonedx-bom==8.0.1
