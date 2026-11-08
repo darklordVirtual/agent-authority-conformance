@@ -67,7 +67,7 @@ All checks run offline, are read-only and never regenerate committed expectation
 | Local C/F/G adversarial probes (`aacp adversarial`) | [Adversarial self-service](docs/ADVERSARIAL-SELF-SERVICE.md) |
 | Runs against another project's pinned artifacts | [Federation tracks](docs/FEDERATION-TRACKS.md), [RUN-PROTOCOL-v0.3.md](RUN-PROTOCOL-v0.3.md) |
 | Answering a public "verify our hashes" challenge, with runner findings kept apart from claims | [Challenge response](docs/CHALLENGE-RESPONSE.md), `python -m conformance.lab respond <run>` |
-| Repeatable security controls against a pinned project, with an A-G report | [AACP controls](docs/CONTROLS.md), example [REMORA report](reports/remora-b5e4c42/REPORT.md) |
+| Repeatable security controls against a pinned project, with an A-G report | [AACP controls](docs/CONTROLS.md), catalog [v1.3.0](controls/aacp-controls-v1.3.0/catalog.json), [control runs](#control-runs) below |
 | Cross-implementation comparison | `python -m conformance.coverage <assessment.json> ...` |
 | Checking another implementation, in any language, against frozen reference vectors | [Reference vectors](docs/REFERENCE-VECTORS.md), `python -m conformance.vectors run --impl "<command>"` |
 
@@ -78,6 +78,21 @@ All checks run offline, are read-only and never regenerate committed expectation
 - [AEGIS Core 3.4.0, Run 002](https://github.com/darklordVirtual/agent-authority-conformance/blob/026097b21c2c5544448e05ca275dc0104d4f873a/publications/aegis-issue-21-run-002/PUBLICATION.md): operator-controlled manual reproduction of a producer-authored fixture, **REPRODUCTION / BCR-1 at most**. The producer [confirmed the published archive and representation](https://github.com/darklordVirtual/agent-authority-conformance/issues/21#issuecomment-6366973494). The publication note links the approved archive and report and states the claim limits.
 
 - [NTI witness package, 2026-11-07](publications/nti-witness-2026-11-07/PUBLICATION.md): runner-attributed verification over a pinned public boundary, answering the challenge in aeoess/agent-governance-vocabulary#177, **SECOND_IMPLEMENTATION / BCR-2 at most**. Not reviewed or endorsed by the NTI maintainer; gives no endorsement. Package reruns to `REPRODUCED`.
+
+## Control runs
+
+A control names one weakness and the A-G property it bears on; a binding probes it against one pinned project. Catalog [v1.3.0](controls/aacp-controls-v1.3.0/catalog.json) adds execution-boundary (E), TOCTOU (F), effect-verification (G) and C-02 controls and the `AACP-CY` cyber-boundary family (instruction promotion, approval injection, canary egress, redirects and parser differentials, tool substitution, verified-versus-executed bytes, observer precedence). Each control ships with a reference subject in `tests/controls_reference/` that shows it can be probed.
+
+**Why a control report shows `UNTESTED`.** Controls look for weaknesses. A probe that observes one, and stops observing it when that weakness alone is repaired, is evidence of `FAIL`. A probe that does not observe it shows only that this attack did not work, so it never yields `PASS`, and the property stays `UNTESTED` unless something counted as a `FAIL`. Each such probe must also be shown **sensitive**: with the protection removed, it observes. A `PASS` needs an assessment with resolved, direct evidence for the property as a whole, its scope and its caveat ([SPECIFICATION.md §3, §5](SPECIFICATION.md)), which no set of passed attacks provides on its own. The probe table in each report shows how much was tried.
+
+| Binding | Subject | Catalog | Result |
+|---|---|---|---|
+| [`remora-06c2f8f`](reports/remora-06c2f8f/REPORT.md) | REMORA `06c2f8f` | 1.2.0 | AACP-X-01, X-02 and X-04 observed; A-D probes not observed, all sensitive |
+| [`remora-b5e4c42`](reports/remora-b5e4c42/REPORT.md) | REMORA `b5e4c42` (fix) | 1.2.0 | all 20 not observed, all sensitive |
+| [`remora-428b823`](reports/remora-428b823/REPORT.md) | REMORA `428b823` | 1.3.0 | AACP-CY-11 and AACP-F-01 (ACCEPT path) observed; E-01 observed (partial) |
+| [`remora-eed92c8`](reports/remora-eed92c8/REPORT.md) | REMORA `eed92c8` (fix) | 1.3.0 | 36 of 37 not observed, all sensitive; E-01 observed (partial) |
+
+These are self-assessments (`AUTHOR_RUN`); the `controls` workflow reruns every binding as a `REPRODUCTION` on a clean runner. Reproductions by others, and bindings that implement the same probe contracts independently, are welcome: `python -m conformance.controls run --binding controls/bindings/<id> --subject <checkout> --out <result.json> --run-id <id> --independence REPRODUCTION`. Use a disposable environment; a run executes the subject's code.
 
 ## Runs against other projects
 
