@@ -37,6 +37,12 @@ INSPECTION = ROOT / "docs" / "nti-source-inspection"
 CANDIDATES = INSPECTION / "reproduction_candidates.rs"
 MUTATIONS = INSPECTION / "mutations.json"
 EXPECTED = INSPECTION / "expected.json"
+PROCEDURE_FILES = (
+    "scripts/run_nti_inspection.py",
+    "docs/nti-source-inspection/reproduction_candidates.rs",
+    "docs/nti-source-inspection/mutations.json",
+    "docs/nti-source-inspection/expected.json",
+)
 TEST_TARGET = "reproduction_candidates"
 LINE = re.compile(r"^test (\S+) \.\.\. (ok|FAILED|ignored)$")
 
@@ -110,11 +116,10 @@ def main(argv=None):
             "mutations_sha256": sha256_file(MUTATIONS),
             "expected_sha256": sha256_file(EXPECTED),
             "aacp_revision": run(["git", "rev-parse", "HEAD"], ROOT)[1].strip() or "UNKNOWN",
-            "procedure_committed": run(["git", "status", "--porcelain", "--",
-                                        "scripts/run_nti_inspection.py",
-                                        str(CANDIDATES.relative_to(ROOT)),
-                                        str(MUTATIONS.relative_to(ROOT)),
-                                        str(EXPECTED.relative_to(ROOT))], ROOT)[1].strip() == "",
+            # Fixed repository paths, so a self-test that swaps MUTATIONS for a
+            # temporary file is reported as uncommitted rather than crashing.
+            "procedure_committed": all(p.resolve().is_relative_to(ROOT) for p in (CANDIDATES, MUTATIONS, EXPECTED))
+                                   and run(["git", "status", "--porcelain", "--", *PROCEDURE_FILES], ROOT)[1].strip() == "",
         },
         "environment": {
             "rustc": tool_version(["rustc", "--version"]),
