@@ -1,0 +1,110 @@
+name: NTI inspection reproduction
+
+# Compiles and tests a pinned, third-party checkout (Neutral Trust Infrastructure)
+# with AACP-authored candidates. Read-only token, no secrets, disposable runner.
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - docs/nti-source-inspection/**
+      - scripts/run_nti_inspection.py
+      - .github/workflows/nti-inspection.yml
+
+permissions:
+  contents: read
+
+env:
+  NTI_REPOSITORY: abisheakp197/Neutral-Trust-Infrastructure
+  NTI_REVISION: de08dbdcd27e01c27585d936091c69b59d173a97
+  RUST_TOOLCHAIN: "1.97.0"
+
+jobs:
+  reproduce:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Check out AACP
+        uses: actions/checkout@v4
+
+      - name: Check out NTI at the pinned revision
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.NTI_REPOSITORY }}
+          ref: ${{ env.NTI_REVISION }}
+          path: nti
+          persist-credentials: false
+
+      - name: Install pinned Rust toolchain
+        run: |
+          rustup toolchain install "$RUST_TOOLCHAIN" --profile minimal
+          rustup default "$RUST_TOOLCHAIN"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Reproduce baseline and discrimination
+        run: |
+          python scripts/run_nti_inspection.py \
+            --nti nti \
+            --out out/nti-inspection-result.json \
+            --run-id "nti-de08dbd-gha-${{ github.run_id }}-${{ github.run_attempt }}" \
+            --operator "github-actions run ${{ github.run_id }} (${{ github.repository }})" \
+            --independence REPRODUCTION
+
+      - name: Harness self-test (no-op mutation must not discriminate)
+        run: |
+          python - <<'EOF'
+          import importlib.util, json, pathlib, tempfile
+          spec = importlib.util.spec_from_file_location("h", "scripts/run_nti_inspection.py")
+          h = importlib.util.module_from_spec(spec); spec.loader.exec_module(h)
+          m = json.loads(h.MUTATIONS.read_text())
+          m["mutations"] = [dict(m["mutations"][0], id="SELFTEST-NOOP", new=m["mutations"][0]["old"])]
+          tmp = pathlib.Path(tempfile.mkdtemp()) / "mutations.json"; tmp.write_text(json.dumps(m))
+          h.MUTATIONS = tmp
+          rc = h.main(["--nti", "nti", "--out", "out/selftest-noop.json", "--run-id", "selftest-noop"])
+          r = json.load(open("out/selftest-noop.json"))
+          assert rc == 1 and r["discrimination"][0]["status"] == "DOES_NOT_DISCRIMINATE", r
+          print("no-op mutation correctly reported DOES_NOT_DISCRIMINATE")
+          EOF
+
+      - name: Harness self-test (wrong revision is a non-verdict)
+        run: |
+          git -C nti fetch --quiet --depth 2 origin "$NTI_REVISION"
+          git -C nti checkout --quiet "$NTI_REVISION~1"
+          if python scripts/run_nti_inspection.py --nti nti --out out/selftest-pin.json --run-id selftest-pin; then
+            echo "wrong revision was accepted"; exit 1
+          fi
+          python -c "import json; r=json.load(open('out/selftest-pin.json')); assert r['verdict']=='NON_VERDICT', r; print('wrong revision correctly reported NON_VERDICT')"
+          git -C nti checkout --quiet "$NTI_REVISION"
+
+      - name: Summarise
+        if: always()
+        run: |
+          python - <<'EOF' >> "$GITHUB_STEP_SUMMARY"
+          import json, pathlib
+          p = pathlib.Path("out/nti-inspection-result.json")
+          if not p.exists():
+              print("No result record was written."); raise SystemExit
+          r = json.loads(p.read_text())
+          print(f"## NTI inspection reproduction: `{r['verdict']}`\n")
+          print(f"Subject `{r['subject']['repository']}` @ `{r['subject']['revision']}`; "
+                f"{r['environment']['rustc']}; independence `{r['independence']}`.\n")
+          if r["non_verdict_errors"]:
+              print("Non-verdict errors: " + "; ".join(r["non_verdict_errors"]) + "\n")
+          if r["baseline"]:
+              print("### Baseline (pristine subject; `ok` = weakness present)\n\n| Test | Status |\n|---|---|")
+              for k, v in sorted(r["baseline"]["tests"].items()):
+                  print(f"| `{k}` | {v} |")
+          print("\n### Discrimination (one repair applied; tests must FAIL)\n\n| Mutation | Finding | Status |\n|---|---|---|")
+          for d in r["discrimination"]:
+              print(f"| {d['id']} | {d['finding']} | {d['status']} |")
+          EOF
+
+      - name: Upload result record
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nti-inspection-result
+          path: out/

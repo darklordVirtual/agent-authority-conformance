@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- Add [docs/NTI-SOURCE-INSPECTION.md](docs/NTI-SOURCE-INSPECTION.md), a bounded source inspection of Neutral Trust Infrastructure pinned at `de08dbd`, including its PR #63 witness-provenance claims, with unexecuted reproduction candidates. No NTI code was executed, no AACP run was performed and no NTI claim is mapped to an AACP property.
+- Add an assessment of Neutral Trust Infrastructure at `de08dbd`, [examples/nti-de08dbd.json](examples/nti-de08dbd.json), with its inspection record [docs/NTI-SOURCE-INSPECTION.md](docs/NTI-SOURCE-INSPECTION.md). A, B, C and D are `FAIL` on executed evidence; E, F and G are `UNTESTED`. Each `FAIL` rests on a test that passes on the pinned revision and fails when that one weakness is repaired; `scripts/run_nti_inspection.py` runs both halves from `mutations.json` and `expected.json` and writes a result record, and `.github/workflows/nti-inspection.yml` reproduces it in CI with two negative harness self-tests. The tests and mutations are the assessor's, so the runs are an author run and a reproduction, not independent. The PR #63 witness-provenance observations are recorded without an A-G mapping.
 
 - Add `AACP-OBSERVED-EFFECT-VANTAGE-2`, a revision of the observation-vantage profile. Positive observer-independence credit now also needs runner-owned evidence that the observer identity is established outside the producer, which cannot issue or revoke it, and that the producer cannot reach the observer's signing key. `evaluate_observation_vantage_r2` and `--profile-revision 2` apply it. Revision 1 and its function stay as published, as GOVERNANCE.md requires of a merged profile revision, so the reference vectors v1 and every record under revision 1 are unchanged.
 

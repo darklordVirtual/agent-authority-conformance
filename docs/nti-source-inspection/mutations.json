@@ -1,0 +1,100 @@
+{
+  "schema": "aacp-nti-discrimination-mutations-v1",
+  "subject": {
+    "repository": "https://github.com/abisheakp197/Neutral-Trust-Infrastructure",
+    "revision": "de08dbdcd27e01c27585d936091c69b59d173a97",
+    "file": "ube-foundation/src/lib.rs",
+    "file_sha256": "970a7bbda6568a3837e75562f59e5465aa6a6a0444bf9ddafea7608c76313466"
+  },
+  "purpose": "Each mutation is a minimal repair of one weakness. It is applied alone to a pristine copy of the subject file. The named tests must then FAIL, which shows they discriminate the weakness rather than passing regardless. A mutation is not a proposed patch for NTI.",
+  "mutations": [
+    {
+      "id": "M-01",
+      "finding": "NTI-01",
+      "repair": "require a request signature by the key registered for the actor",
+      "tests": ["nti_01_actor_spoofing_no_signature_required", "nti_01b_signature_is_self_attested"],
+      "old": "        if let (Some(sig_bytes), Some(pk_bytes)) = (&request.signature, &request.public_key) {",
+      "new": "        if request.signature.is_none() || request.public_key.as_ref() != self.issuer_keys.get(&request.actor) {\n            return PolicyDecision { decision: Decision::Deny, reason: \"mutation: unauthenticated actor\".into() };\n        }\n        if let (Some(sig_bytes), Some(pk_bytes)) = (&request.signature, &request.public_key) {"
+    },
+    {
+      "id": "M-03",
+      "finding": "NTI-03",
+      "repair": "accept an air-gap bundle only from a signer known to the registry",
+      "tests": ["nti_03_airgap_bundle_self_signed_trust"],
+      "old": "        if !bundle.verify() {",
+      "new": "        if !self.peers.values().any(|p| p.public_key == bundle.signer_public_key) {\n            return Err(\"mutation: untrusted signer\".into());\n        }\n        if !bundle.verify() {"
+    },
+    {
+      "id": "M-04",
+      "finding": "NTI-04",
+      "repair": "count token uses across committed batches as well as the pending buffer",
+      "tests": ["nti_04_max_executions_resets_on_batch_commit"],
+      "old": "                    let count = engine\n                        .events\n                        .iter()",
+      "new": "                    let count = engine\n                        .batches\n                        .iter()\n                        .flat_map(|b| b.events.iter())\n                        .chain(engine.events.iter())"
+    },
+    {
+      "id": "M-05",
+      "finding": "NTI-05",
+      "repair": "reject an amount that is not a non-negative integer",
+      "tests": ["nti_05_value_limit_type_confusion"],
+      "old": "                    let val = request.input[\"amount\"].as_u64().unwrap_or(0);",
+      "new": "                    let Some(val) = request.input[\"amount\"].as_u64() else {\n                        return OutcomeVerdict::Invalid(\"mutation: non-integer amount\".into());\n                    };"
+    },
+    {
+      "id": "M-06",
+      "finding": "NTI-06",
+      "repair": "component-wise prefix match and reject parent-directory components",
+      "tests": ["nti_06_path_prefix_escape"],
+      "old": "                    if !path.starts_with(prefix) {",
+      "new": "                    if !std::path::Path::new(path).starts_with(prefix) || path.split('/').any(|c| c == \"..\") {"
+    },
+    {
+      "id": "M-07",
+      "finding": "NTI-07",
+      "repair": "compare the persisted last_batch_hash with the recomputed batch-chain head",
+      "tests": ["nti_07_audit_batch_truncation_undetected"],
+      "old": "        let mut event_prev = if self.batches.is_empty() {",
+      "new": "        if !self.batches.is_empty() && self.last_batch_hash != prev_hash {\n            return false;\n        }\n        let mut event_prev = if self.batches.is_empty() {"
+    },
+    {
+      "id": "M-08",
+      "finding": "NTI-08",
+      "repair": "bind the token to the requesting actor",
+      "tests": ["nti_08_token_is_unbound_bearer"],
+      "old": "            if token.capability != request.capability {",
+      "new": "            if request.actor != token.root_actor {\n                return PolicyDecision { decision: Decision::Deny, reason: \"mutation: token not bound to actor\".into() };\n            }\n            if token.capability != request.capability {"
+    },
+    {
+      "id": "M-08b",
+      "finding": "NTI-08b",
+      "repair": "bind the token to one call identity",
+      "tests": ["nti_08b_token_not_bound_to_call"],
+      "old": "            if token.capability != request.capability {",
+      "new": "            if token.id != request.id {\n                return PolicyDecision { decision: Decision::Deny, reason: \"mutation: token not bound to call\".into() };\n            }\n            if token.capability != request.capability {"
+    },
+    {
+      "id": "M-09",
+      "finding": "NTI-09",
+      "repair": "respond only to registered peers",
+      "tests": ["nti_09_handshake_accepts_unknown_peer"],
+      "old": "        let secret = EphemeralSecret::random_from_rng(rand::rngs::OsRng);\n        let public = XPublicKey::from(&secret);\n        let peer_ephemeral_bytes",
+      "new": "        if !self.peers.contains_key(&request.sender_id) {\n            return Err(\"mutation: unknown peer\".into());\n        }\n        let secret = EphemeralSecret::random_from_rng(rand::rngs::OsRng);\n        let public = XPublicKey::from(&secret);\n        let peer_ephemeral_bytes"
+    },
+    {
+      "id": "M-10",
+      "finding": "NTI-10",
+      "repair": "fail closed when a revocation notice exists, whatever its signature",
+      "tests": ["nti_10_revocation_fail_open"],
+      "old": "                if pk.verify(&msg_bytes, &sig).is_ok() {\n                    return false;\n                }",
+      "new": "                let _ = (pk, sig, msg_bytes);\n                return false;"
+    },
+    {
+      "id": "M-11",
+      "finding": "NTI-11",
+      "repair": "promote the odd node unchanged instead of duplicating it",
+      "tests": ["nti_11_merkle_odd_node_duplication_collision"],
+      "old": "                let mut hasher = Sha256::new();\n                hasher.update(&hashes[i]);\n                if i + 1 < hashes.len() {\n                    hasher.update(&hashes[i + 1]);\n                } else {\n                    hasher.update(&hashes[i]);\n                }",
+      "new": "                if i + 1 >= hashes.len() {\n                    next_level.push(hashes[i].clone());\n                    continue;\n                }\n                let mut hasher = Sha256::new();\n                hasher.update(&hashes[i]);\n                hasher.update(&hashes[i + 1]);"
+    }
+  ]
+}

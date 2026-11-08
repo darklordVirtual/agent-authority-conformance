@@ -1,67 +1,125 @@
 # NTI source inspection
 
-Inspected on 2026-11-08. This is a bounded source inspection of
+Inspected and executed on 2026-11-08. This is a bounded inspection of
 [Neutral Trust Infrastructure](https://github.com/abisheakp197/Neutral-Trust-Infrastructure)
-(NTI), not a complete audit, production assessment, AACP run or independent
-execution of NTI. No NTI code was executed. The reproduction candidates in
-[`nti-source-inspection/reproduction_candidates.rs`](nti-source-inspection/reproduction_candidates.rs)
-were written from the source and have **not** been compiled or run.
+(NTI): a source reading, plus an AACP assessment of the library API backed by
+executed, discriminating tests. It is not a complete audit or a production
+assessment.
 
-Drafted by an AI agent (Claude) at the maintainer's request and reviewed by the
-maintainer before publication. Producer review: not yet requested. Unresolved
+- **AACP assessment (A-G):** [`examples/nti-de08dbd.json`](../examples/nti-de08dbd.json)
+- **Procedure:** [`scripts/run_nti_inspection.py`](../scripts/run_nti_inspection.py) with
+  [`reproduction_candidates.rs`](nti-source-inspection/reproduction_candidates.rs),
+  [`mutations.json`](nti-source-inspection/mutations.json) and
+  [`expected.json`](nti-source-inspection/expected.json)
+- **Result records:** [`nti-source-inspection/results/`](nti-source-inspection/results/)
+- **CI reproduction:** [`.github/workflows/nti-inspection.yml`](../.github/workflows/nti-inspection.yml)
+
+Drafted and executed by an AI agent (Claude) at the maintainer's request; the
+maintainer authorized executing NTI code in a disposable environment and
+publishing the result. Producer review: not yet requested. Unresolved
 disagreement will be published alongside this record, not edited away.
+
+## Result
+
+| Property | Status | Basis |
+| :--- | :--- | :--- |
+| A Receipt Integrity | **FAIL** | Single-use semantics: a `MaxExecutions(1)` token is accepted again after a batch commit (NTI-04). |
+| B Authority Provenance | **FAIL** | Actor is unauthenticated (NTI-01), signing key is self-attested (NTI-01b), tokens have no subject (NTI-08). |
+| C Exact-Call Integrity | **FAIL** | One token authorizes calls with different identities, targets and amounts (NTI-08b). |
+| D Semantic Authority | **FAIL** | `ValueLimit` and `PathRestricted` caveats are bypassed (NTI-05, NTI-06). |
+| E Execution-Boundary Integrity | UNTESTED | §12 topology and bypass attempts not performed. |
+| F TOCTOU Resistance | UNTESTED | Not exercised. |
+| G Effect Verification | UNTESTED | Not exercised. |
+
+The rows are not commensurable and are not to be combined (SPECIFICATION §7).
+Each `FAIL` row names its supported condition and what it does not establish
+in the assessment file; for example A's row does not show that token
+signatures can be forged.
+
+### How a FAIL row is established
+
+For each weakness the procedure checks two things:
+
+1. **Baseline:** on the pristine pinned revision the candidate test passes,
+   so the weakness is present.
+2. **Discrimination:** with a minimal repair of that one weakness applied to a
+   fresh copy of `lib.rs`, the same test fails. A test that would pass whether
+   or not the weakness exists is therefore not counted (SPECIFICATION §5).
+   A build error under a mutation is recorded as `BUILD_ERROR`, never as
+   discrimination.
+
+The mutations are minimal repairs for measurement, not proposed patches.
+
+The harness was checked negatively: a no-op mutation is reported
+`DOES_NOT_DISCRIMINATE`, and a checkout at the wrong revision is a
+`NON_VERDICT` with no verdict written. CI repeats both self-tests on every run.
+
+### Runs
+
+| Run | Independence | Result |
+| :--- | :--- | :--- |
+| [`2026-11-08-local-author-run.json`](nti-source-inspection/results/2026-11-08-local-author-run.json) | `AUTHOR_RUN` (assessor wrote the tests and ran them) | `EXPECTATIONS_MET`: 12/12 baseline tests as expected, 11/11 mutations discriminate |
+| CI, [`nti-inspection.yml`](../.github/workflows/nti-inspection.yml) | `REPRODUCTION` (same procedure, separate host and toolchain install) | see the workflow run and its `nti-inspection-result` artifact |
+
+Neither run is an independent implementation; both execute assessor-authored
+tests.
 
 ## Pins
 
 | Subject | Pin |
 | :--- | :--- |
 | Repository HEAD | [`de08dbdcd27e01c27585d936091c69b59d173a97`](https://github.com/abisheakp197/Neutral-Trust-Infrastructure/tree/de08dbdcd27e01c27585d936091c69b59d173a97) |
+| Subject file | `ube-foundation/src/lib.rs`, sha256 `970a7bbda6568a3837e75562f59e5465aa6a6a0444bf9ddafea7608c76313466` |
 | PR #63 merge | [`44d55490e90d5734e44b114ef1680d4ca4c0a71a`](https://github.com/abisheakp197/Neutral-Trust-Infrastructure/commit/44d55490e90d5734e44b114ef1680d4ca4c0a71a) (`ea763c0` + `0b30c52`) |
 | Witness manifest | `conformance/witness/MANIFEST.json` v5, `commit: ea763c0c…`, signing key fingerprint `bab37667…c009` |
 | Generator | `conformance/witness_generator/generate_seals.py`, sha256 `a7ee4a2f7b86c117…` (matches manifest) |
+| Toolchain (local run) | rustc 1.97.0, cargo 1.97.0, `--locked` |
 
 Line numbers below refer to the HEAD pin. `L` = `ube-foundation/src/lib.rs`,
 `N` = `ube-foundation/src/network.rs`, `G` = the generator.
 
-## Scope and method
+## Reproduce
 
-Read in full: `lib.rs` (2104 lines), `network.rs`, `generate_seals.py`,
-`conformance/witness/{MANIFEST,RESULTS}.json`, `verify.sh` (targeted), the
-integration-test names. Manifest hashes for the generator, sample evidence,
-tests and `Cargo.{toml,lock}` were recomputed and match HEAD. One digest claim
-(P-01) was reproduced by hashing a fixed string; nothing else was executed.
+```sh
+git clone https://github.com/abisheakp197/Neutral-Trust-Infrastructure nti
+git -C nti checkout de08dbdcd27e01c27585d936091c69b59d173a97
+python scripts/run_nti_inspection.py --nti nti \
+    --out out/result.json --run-id my-run --operator "<you>" --independence REPRODUCTION
+```
 
-Severity is judged against NTI's own stated properties ("zero-trust",
-"fail-closed", independently verifiable witness evidence). The HTTP API binds
-to `127.0.0.1` (`N:136`), so network findings are reachable by local processes
-or via SSRF, not directly from the internet.
+This compiles and runs NTI code: use a disposable environment. Exit status 0
+means every expectation in `expected.json` held. Or run the workflow from the
+Actions tab (`workflow_dispatch`).
 
-## Engine findings
+## Findings and mapping
 
-Each candidate ID maps to a test function of the same name in the reproduction
-file. "Static" means the conclusion rests on reading, not execution.
+`Executed` = reproduced by a candidate test that also discriminates under its
+mutation. `Static` = from reading only. The relationship column uses the
+vocabulary of FEDERATION-REVIEW-PROTOCOL §5; only `Executed` rows with an
+`exact` relationship produce an A-G status.
 
-| ID | Sev. | Location | Observation |
-| :--- | :--- | :--- | :--- |
-| NTI-01 | Critical | `L:685-776`, `N:46-59` | `actor` is an unauthenticated string. `signature`, `public_key`, `pqc_*`, `identity_claim` are optional and skipped when absent; the decision is `capabilities[actor] ∋ capability`. When present, the public key is request-supplied and never bound to the actor (no actor→key registry exists). `IdentityClaim` is likewise self-signed. |
-| NTI-02 | Critical¹ | `N:83-133` | `POST /vote` signs an `Allow` `ConsensusVote` for any unauthenticated proposal. The local check is `IntentVerifier` with empty constraints, which returns `Valid` for every action except constrained `write_file`. `engine.evaluate` is never called. Vote messages (`L:102-110`) carry no nonce or epoch, so votes replay. Result: `verify_consensus` (`L:136-169`) is satisfiable at any threshold by collecting votes. Static. |
-| NTI-03 | Critical¹ | `L:2012-2036`, `L:2082-2088` | `AirGapBundle::verify` checks the signature against the key carried in the bundle. `DistributedRegistry::sync_state` then overwrites `state_root`. Any key can install any state root. |
-| NTI-04 | High | `L:396-411`, `L:594-612`, `L:801-803` | `MaxExecutions` counts only the uncommitted `events` buffer, which `commit_batch` drains at 10 records. The limit resets after each commit. |
-| NTI-05 | High | `L:412-420` | `ValueLimit` reads `input["amount"].as_u64().unwrap_or(0)`. String, float, negative or object amounts evaluate to 0 and pass. The caveat's currency is ignored. |
-| NTI-06 | High | `L:421-429`, `L:1433-1440`, sink `L:1463-1469` | `PathRestricted` is a raw `starts_with` with no normalisation (`prefix/../..`, `prefix_sibling`). `not_allowed_paths` is exact string equality. |
-| NTI-07 | High | `L:846-850` | `verify_history` anchors pending events to the persisted `last_batch_hash` and never compares it with the recomputed batch-chain head. Trailing committed batches can be removed from the state file while pending events remain, and `load_from_file` accepts it. (Removing *all* batches is detected: the anchor then becomes `""`.) |
-| NTI-08 | High | `L:61-98`, `L:712-759` | Capability tokens have no subject or audience. The token branch never examines `request.actor` and returns `Allow` before the actor capability check. A token is a bearer credential for any actor string. |
-| NTI-09 | Medium | `L:1769-1793`, `N:140-188` | Handshake is unauthenticated: the responder ignores `self.peers`; the initiator verifies the response against the self-reported responder key (TOFU). The signature covers only the two ephemeral keys, not identities or a transcript. |
-| NTI-10 | Medium | `L:1142-1168` | Revocation is fail-open: a revocation notice whose signature does not verify is ignored and the credential is accepted. A malformed verifier key becomes `[0; 32]` via `unwrap_or`. |
-| NTI-11 | Medium | `L:571-591` | The engine's audit Merkle root duplicates the odd node and has no leaf/node domain separation, so `[h1,h2,h3]` and `[h1,h2,h3,h3]` share a root. PR #62/#63 describe and fix exactly this in the Python generator only. `AirGapBundle::verify` checks the root alone. |
-| NTI-12 | Low | various | `verify` vs `verify_strict` used inconsistently (only `CapabilityToken` is strict); `register_voter_key` accepts unvalidated bytes; every `message_to_sign` maps serialization errors to empty bytes (`unwrap_or_default`); `verify_consensus(threshold = 0)` is always true; `Orchestrator` defaults to `consensus_threshold = 1`; `SafetyMode::FailOpen` continues after policy violations; `PqcKeyPair` derives `Serialize` with secret key bytes; `NetworkModule` sends unsigned requests and depends on NTI-01 to work. Static. |
+| ID | Sev. | Location | Basis | AACP | Observation |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| NTI-01 | Critical | `L:685-776`, `N:46-59` | Executed (M-01) | B exact | `actor` is an unauthenticated string. Signature, key, PQC and identity-claim fields are optional and skipped when absent; the decision is `capabilities[actor] ∋ capability`. When present, the public key comes from the request and is never bound to the actor. |
+| NTI-01b | Critical | `L:685-710` | Executed (M-01) | B exact | A request signed by any fresh key while naming a granted actor is allowed. |
+| NTI-02 | Critical¹ | `N:83-133` | Static | A, B structural | `POST /vote` signs an `Allow` vote for any unauthenticated proposal; local check is `IntentVerifier` with empty constraints; vote messages (`L:102-110`) have no nonce, so votes replay. `verify_consensus` (`L:136-169`) is satisfiable by collecting votes. |
+| NTI-03 | Critical¹ | `L:2012-2036`, `L:2082-2088` | Executed (M-03) | A structural | `AirGapBundle::verify` trusts the key carried in the bundle; `sync_state` installs any self-signed state root. A state-sync artifact, not an authorization artifact, so no A status. |
+| NTI-04 | High | `L:396-411`, `L:594-612` | Executed (M-04) | A exact | `MaxExecutions` counts only the uncommitted buffer, drained at 10 records. |
+| NTI-05 | High | `L:412-420` | Executed (M-05) | D exact | `ValueLimit` reads `amount` with `as_u64().unwrap_or(0)`; non-integer encodings pass; currency ignored. |
+| NTI-06 | High | `L:421-429`, `L:1433-1440` | Executed (M-06) | D exact | `PathRestricted` is a raw `starts_with` (`../`, sibling prefixes); `not_allowed_paths` is exact equality. |
+| NTI-07 | High | `L:846-850` | Executed (M-07) | no_mapping | `verify_history` never compares the persisted `last_batch_hash` with the recomputed chain head; trailing committed batches can be removed. Removing all batches is detected. |
+| NTI-08 | High | `L:61-98`, `L:712-759` | Executed (M-08) | B exact | Tokens have no subject; the token path never checks `request.actor`. |
+| NTI-08b | High | `L:76-81` | Executed (M-08b) | C exact | The token signature covers id, issuer, capability and caveats only; one token authorizes any call identity and arguments. |
+| NTI-09 | Medium | `L:1769-1793`, `N:140-188` | Executed (M-09) | no_mapping | Handshake responder ignores the peer registry; initiator verifies against the self-reported key (TOFU); signature covers only ephemeral keys. |
+| NTI-10 | Medium | `L:1142-1168` | Executed (M-10) | A partial | Revocation of marketplace credentials fails open when the notice signature does not verify; malformed verifier keys become `[0; 32]`. |
+| NTI-11 | Medium | `L:571-591` | Executed (M-11) | no_mapping | The engine's audit Merkle root duplicates the odd node with no domain separation, so `[h1,h2,h3]` and `[h1,h2,h3,h3]` share a root. PR #62/#63 fix this only in the Python generator. |
+| NTI-12 | Low | various | Static | no_mapping | `verify` vs `verify_strict` inconsistent; unvalidated voter keys; `message_to_sign` maps errors to empty bytes; `verify_consensus(threshold = 0)` is true; default `consensus_threshold = 1`; `SafetyMode::FailOpen`; `PqcKeyPair` serializes secret keys; `NetworkModule` sends unsigned requests. |
 
-¹ Critical relative to the mesh/consensus claims; exposure is limited by the
-loopback bind noted above.
+¹ Critical relative to the mesh and consensus claims; the HTTP API binds to
+`127.0.0.1` (`N:136`), so it is reachable by local processes or via SSRF.
 
-What the inspection did not find fault with: the primitive calls to Ed25519,
-Dilithium5, Kyber1024 and ChaCha20-Poly1305 (random 96-bit nonce per KEM
-encapsulation, so nonce reuse under one key is not a concern).
+Not faulted: the primitive calls to Ed25519, Dilithium5, Kyber1024 and
+ChaCha20-Poly1305.
 
 ## PR #63 provenance claims
 
@@ -71,44 +129,25 @@ domain-separated and length-prefixed; the generator's S5 Merkle follows RFC 6962
 with domain separation; S6 binds root, leaf count and ordered names; manifest
 file hashes match the tree.
 
-| ID | Sev. | Location | Observation |
-| :--- | :--- | :--- | :--- |
-| P-01 | High | `G:154-156`, `G:184-186`; manifest `suite_evidence_logs.cargo_build`, `.cargo_check_python` | Build and check transcripts are canonicalised to `finished=<bool>\nerror_lines=<n>\n`. For any successful build of any crate the digest is `sha256("finished=True\nerror_lines=0\n")` = `08344a03a3788eec6baf26a976eb3e99799736cd4d0f4f6a439e4c5d416efe20`, which is the value recorded for both suites. **Reproduced** by hashing the string. These digests bind no NTI-specific fact. |
-| P-02 | High | `G:110-123`, `G:174-183` | The test digest binds sorted test names and statuses, not code. `src/lib.rs`, `src/network.rs` and `src/python_bindings.rs` are absent from `nti_test_scripts`. `manifest.commit` is an unsigned-by-construction string the verifier never compares with the checked-out tree. The package shows that tests with these names passed on some tree, not that the published engine passed them. |
-| P-03 | Medium | `G:434-469`, `G:483` | `--skip-suite-runs` reuses earlier suite evidence while stamping the current `HEAD` and a new timestamp. Nothing records the commit on which the evidence was produced. |
-| P-04 | Medium | `G:77-108`, `G:352-385`; `verify.sh:33,91,128` | `key_history` is written into the manifest and signed by the current key; four keys in about 34 hours, none cross-signed by its predecessor, all "private key not retained". Whoever controls the generator can append a key with an equally valid history. `key_url` is served from the same repository's Pages, and `verify.sh` reads the local `PUBLIC_KEY.pem`, never the URL. |
-| P-05 | Low | `G:493`; `verify.sh:205-214` | Python test totals are hard-coded (`2 if py_ok else 0`). When cargo is missing, `verify.sh` skips the suite step and still prints a success-worded `RESULT` line. |
+For AACP, NTI's witness package is producer evidence. Its `PASSED` claims are
+`REPORTED`, not `RESOLVED`, and the assessment does not rely on them. These
+observations are `no_mapping` to A-G.
 
-## Reproduction candidates
-
-[`nti-source-inspection/reproduction_candidates.rs`](nti-source-inspection/reproduction_candidates.rs)
-contains one Rust integration test per engine finding NTI-01 to NTI-11 (except
-NTI-02 and NTI-12, which are HTTP-level or hygiene and remain static). Each test
-is written to **pass when the weakness is present**. To run against the pin:
-
-```sh
-git clone https://github.com/abisheakp197/Neutral-Trust-Infrastructure nti
-git -C nti checkout de08dbdcd27e01c27585d936091c69b59d173a97
-cp docs/nti-source-inspection/reproduction_candidates.rs nti/ube-foundation/tests/
-cd nti/ube-foundation && cargo test --locked --test reproduction_candidates
-```
-
-Until that run is recorded, every engine finding is a candidate: a compile
-error or a failing test means the candidate is wrong or the pin differs, not
-that NTI is broken in a different way.
-
-## AACP relationship
-
-No AACP run was performed and no NTI claim is mapped to an AACP property. NTI's
-witness vocabulary (S4/S5/S6, `PASSED`) is preserved as NTI's own. Mapping
-status for every AACP property: `not_evaluated`.
+| ID | Sev. | Location | Basis | Observation |
+| :--- | :--- | :--- | :--- | :--- |
+| P-01 | High | `G:154-156`, `G:184-186`; manifest `suite_evidence_logs.cargo_build`, `.cargo_check_python` | Reproduced (hash of fixed string) | Build and check transcripts are canonicalised to `finished=<bool>\nerror_lines=<n>\n`. For any successful build of any crate the digest is `sha256("finished=True\nerror_lines=0\n")` = `08344a03a3788eec6baf26a976eb3e99799736cd4d0f4f6a439e4c5d416efe20`, the value recorded for both suites. |
+| P-02 | High | `G:110-123`, `G:174-183` | Static | The test digest binds sorted test names and statuses, not code. `src/*.rs` are absent from `nti_test_scripts`. `verify.sh` never compares `manifest.commit` with the checked-out tree. |
+| P-03 | Medium | `G:434-469`, `G:483` | Static | `--skip-suite-runs` reuses earlier suite evidence while stamping the current `HEAD`; the producing commit is not recorded. |
+| P-04 | Medium | `G:77-108`, `G:352-385`; `verify.sh:33,91,128` | Static | `key_history` is self-certifying: written into the manifest and signed by the current key; four keys in about 34 hours, none cross-signed. `key_url` is in the same repository's Pages, and `verify.sh` reads the local key, never the URL. |
+| P-05 | Low | `G:493`; `verify.sh:205-214` | Static | Python test totals are hard-coded; without cargo, `verify.sh` skips the suites and still prints a success-worded `RESULT`. |
 
 ## Remaining boundaries
 
-The inspection did not execute NTI's suites, `verify.sh` or the reproduction
-candidates; did not inspect `python_bindings.rs`, the conformance fixtures under
-`conformance/agent-did-interop/` and `conformance/vate-recovery/` beyond file
-listing, or the CI workflows; did not test the HTTP API live; and did not
-assess dependencies. A hash match establishes byte identity, not authenticity
-or execution. NTI's own description of its threat model may narrow some
-severities; that requires producer input.
+Not done: the HTTP API, Python bindings and multi-node operation were not
+exercised; NTI-02, NTI-12 and P-02 to P-05 rest on reading only; E, F and G have
+no evidence; `conformance/agent-did-interop/`, `conformance/vate-recovery/` and
+the CI workflows were listed, not inspected; dependencies were not assessed.
+The tests and mutations are the assessor's, so neither run is independent. A
+hash match establishes byte identity, not authenticity. The implementer has
+supplied no scope declaration or non-claims; if NTI declares a narrower scope,
+some rows may become `OUT_OF_SCOPE` rather than `FAIL`.

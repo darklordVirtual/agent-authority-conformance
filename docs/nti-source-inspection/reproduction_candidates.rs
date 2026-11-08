@@ -1,7 +1,8 @@
 //! Reproduction candidates for docs/NTI-SOURCE-INSPECTION.md.
 //! Subject: abisheakp197/Neutral-Trust-Infrastructure @ de08dbdcd27e01c27585d936091c69b59d173a97
-//! Written from source; NOT yet compiled or run. Each test PASSES when the weakness is present.
-//! Copy to ube-foundation/tests/ and run: cargo test --locked --test reproduction_candidates
+//! Each test PASSES when the weakness is present; mutations.json checks that each FAILS when
+//! the weakness is repaired. Harness: scripts/run_nti_inspection.py.
+//! Manual use: copy to ube-foundation/tests/ and run cargo test --locked --test reproduction_candidates
 use ed25519_dalek::{Signer, SigningKey};
 use ube_foundation::*;
 
@@ -140,6 +141,25 @@ fn nti_08_token_is_unbound_bearer() {
         let mut r = req("b", actor, "pay", serde_json::json!({}));
         r.token = Some(t.clone());
         assert_eq!(e.evaluate(&r).decision, Decision::Allow);
+    }
+}
+
+/// (High) lib.rs:61-98, 712-759 — the token signature covers only id, issuer, capability and
+/// caveats. One token authorizes any call identity and any arguments under that capability.
+#[test]
+fn nti_08b_token_not_bound_to_call() {
+    let (sk, pk) = issuer();
+    let mut e = TrustEngine::new();
+    e.register_issuer_key("issuer", pk).unwrap();
+    e.grant("issuer", "pay");
+    let t = token(&sk, "tok-c", "pay", vec![]);
+    for (id, input) in [
+        ("c1", serde_json::json!({ "to": "acct-A", "amount": 1 })),
+        ("c2", serde_json::json!({ "to": "acct-Z", "amount": 999 })),
+    ] {
+        let mut r = req(id, "issuer", "pay", input);
+        r.token = Some(t.clone());
+        assert_eq!(e.evaluate(&r).decision, Decision::Allow, "call {id} authorized by unbound token");
     }
 }
 

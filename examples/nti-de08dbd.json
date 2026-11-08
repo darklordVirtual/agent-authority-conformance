@@ -1,0 +1,181 @@
+{
+  "spec_version": "0.1",
+  "system": "Neutral Trust Infrastructure (ube-foundation)",
+  "system_version": "0.1.7",
+  "revision": "de08dbdcd27e01c27585d936091c69b59d173a97",
+  "assessed_at": "2026-11-08",
+  "assessor": "Agent Authority Conformance project (maintainer Stian Skogbrott; drafted and executed by an AI agent, reviewed by the maintainer)",
+  "scope": {
+    "process_model": "single-process; in-process library calls to TrustEngine, DistributedRegistry, RecommendationLayer and AgentMeshNode from Rust integration tests",
+    "deployment_model": "library API only; the HTTP API in src/network.rs, the Python bindings and multi-node operation were not exercised",
+    "external_effects": "none",
+    "trust_assumptions": [
+      "Assessment is limited to the immutable public revision named above and the AACP-authored tests and mutations in docs/nti-source-inspection/",
+      "The implementer has not supplied a scope declaration or explicit non-claims; properties are assessed against the public library API as published",
+      "Every FAIL row rests on a test that passes on the pristine revision and fails when the weakness alone is repaired (scripts/run_nti_inspection.py)",
+      "The tests and mutations were written by the assessor; this is an author run and its CI rerun a reproduction, not an independent implementation",
+      "NTI's own witness package (conformance/witness) is treated as REPORTED evidence and was not relied on"
+    ],
+    "explicit_non_claims": []
+  },
+  "properties": [
+    {
+      "id": "A",
+      "property": "Receipt Integrity",
+      "status": "FAIL",
+      "evidence_tier": "RESOLVED",
+      "claimed_status": "not supplied by implementer",
+      "reasoning": "A capability token carrying MaxExecutions(1) is accepted a second time once ten unrelated records have been committed to an audit batch, because the counter reads only the uncommitted event buffer (lib.rs:396-411, 594-612). The single-use semantics named by property A do not hold under that tested condition. The test passes on the pristine revision and fails when the counter also reads committed batches (M-04).",
+      "caveat": "Token signature authenticity and tamper detection were not shown to fail: CapabilityToken::verify uses verify_strict over a canonical message and no attempt to forge or modify a token was made. Expiry, not-before and multi-process replay were not exercised. Related observations outside this row: revocation of marketplace credentials fails open (NTI-10, partial mapping to A) and consensus votes carry no nonce (NTI-02, static only).",
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "docs/nti-source-inspection/reproduction_candidates.rs#nti_04_max_executions_resets_on_batch_commit",
+          "command": "python scripts/run_nti_inspection.py --nti <checkout> --out <file> --run-id <id>",
+          "description": "Uses a MaxExecutions(1) token, is denied on the second use, records eight unrelated requests to trigger commit_batch, then is allowed again."
+        },
+        {
+          "kind": "code",
+          "reference": "https://github.com/abisheakp197/Neutral-Trust-Infrastructure/blob/de08dbdcd27e01c27585d936091c69b59d173a97/ube-foundation/src/lib.rs#L396-L411",
+          "revision": "de08dbdcd27e01c27585d936091c69b59d173a97",
+          "description": "MaxExecutions counts engine.events only."
+        },
+        {
+          "kind": "artifact",
+          "reference": "docs/nti-source-inspection/results/2026-11-08-local-author-run.json",
+          "description": "Result record: baseline ok, mutation M-04 DISCRIMINATES."
+        }
+      ]
+    },
+    {
+      "id": "B",
+      "property": "Authority Provenance",
+      "status": "FAIL",
+      "evidence_tier": "RESOLVED",
+      "claimed_status": "not supplied by implementer",
+      "reasoning": "TrustEngine::evaluate grants an action to whatever actor string the request names. With no signature at all, a request naming a granted actor is allowed (NTI-01). With a signature, the verifying key is taken from the request and never bound to the actor, so any key works (NTI-01b). A capability token has no subject: the token path never examines request.actor, so one token authorizes any actor string (NTI-08). Each test passes on the pristine revision and fails under its single repair (M-01, M-08).",
+      "caveat": "Issuer provenance is partly enforced: a token is accepted only if its root_actor has a configured issuer key and a local grant for the capability; this was not shown to fail. Delegation chains do not exist in the assessed API, so attenuation was not assessed.",
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "docs/nti-source-inspection/reproduction_candidates.rs#nti_01_actor_spoofing_no_signature_required",
+          "description": "Unsigned request naming the granted actor 'admin' is allowed."
+        },
+        {
+          "kind": "test",
+          "reference": "docs/nti-source-inspection/reproduction_candidates.rs#nti_01b_signature_is_self_attested",
+          "description": "Request signed by an unregistered key while naming 'admin' is allowed."
+        },
+        {
+          "kind": "test",
+          "reference": "docs/nti-source-inspection/reproduction_candidates.rs#nti_08_token_is_unbound_bearer",
+          "description": "One token is accepted for actors 'alice', 'mallory', '' and 'issuer'."
+        },
+        {
+          "kind": "code",
+          "reference": "https://github.com/abisheakp197/Neutral-Trust-Infrastructure/blob/de08dbdcd27e01c27585d936091c69b59d173a97/ube-foundation/src/lib.rs#L685-L776",
+          "revision": "de08dbdcd27e01c27585d936091c69b59d173a97",
+          "description": "Optional signature checks and the final capabilities[actor] decision."
+        },
+        {
+          "kind": "artifact",
+          "reference": "docs/nti-source-inspection/results/2026-11-08-local-author-run.json",
+          "description": "Result record: baseline ok, mutations M-01 and M-08 DISCRIMINATE."
+        }
+      ]
+    },
+    {
+      "id": "C",
+      "property": "Exact-Call Integrity",
+      "status": "FAIL",
+      "evidence_tier": "RESOLVED",
+      "claimed_status": "not supplied by implementer",
+      "reasoning": "The token signature covers id, issuer, capability and caveats only (lib.rs:76-81). The same token authorizes two calls with different call identities, targets and amounts (NTI-08b). The test passes on the pristine revision and fails when the token is bound to one call identity (M-08b).",
+      "caveat": "The optional request signature does cover id, actor, capability, action and input (lib.rs:244-255); argument substitution under a present, verified request signature was not attempted. Because that signature is optional and self-attested (row B), it does not establish exact-call binding by itself.",
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "docs/nti-source-inspection/reproduction_candidates.rs#nti_08b_token_not_bound_to_call",
+          "description": "One token is accepted for call c1 (acct-A, amount 1) and call c2 (acct-Z, amount 999)."
+        },
+        {
+          "kind": "code",
+          "reference": "https://github.com/abisheakp197/Neutral-Trust-Infrastructure/blob/de08dbdcd27e01c27585d936091c69b59d173a97/ube-foundation/src/lib.rs#L76-L81",
+          "revision": "de08dbdcd27e01c27585d936091c69b59d173a97",
+          "description": "CapabilityToken::message_to_sign."
+        },
+        {
+          "kind": "artifact",
+          "reference": "docs/nti-source-inspection/results/2026-11-08-local-author-run.json",
+          "description": "Result record: baseline ok, mutation M-08b DISCRIMINATES."
+        }
+      ]
+    },
+    {
+      "id": "D",
+      "property": "Semantic Authority",
+      "status": "FAIL",
+      "evidence_tier": "RESOLVED",
+      "claimed_status": "not supplied by implementer",
+      "reasoning": "Caveats meant to bound the resource and value of an action are not enforced in their operational meaning. ValueLimit(100, NOK) accepts amounts given as a string, float, negative number or object, all read as 0, and ignores the currency (NTI-05). PathRestricted('/srv/app/data') accepts '/srv/app/data/../../../etc/passwd' and '/srv/app/data_secret/key' (NTI-06). Each test passes on the pristine revision and fails under its single repair (M-05, M-06).",
+      "caveat": "Only the two caveat types were exercised. IntentVerifier and Orchestrator-level policy checks were inspected but not tested. No real file or payment effect was produced; the decision returned by evaluate() is the observed outcome.",
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "docs/nti-source-inspection/reproduction_candidates.rs#nti_05_value_limit_type_confusion",
+          "description": "Four non-u64 encodings of 1000000 pass a limit of 100."
+        },
+        {
+          "kind": "test",
+          "reference": "docs/nti-source-inspection/reproduction_candidates.rs#nti_06_path_prefix_escape",
+          "description": "Three paths outside the restricted prefix pass."
+        },
+        {
+          "kind": "code",
+          "reference": "https://github.com/abisheakp197/Neutral-Trust-Infrastructure/blob/de08dbdcd27e01c27585d936091c69b59d173a97/ube-foundation/src/lib.rs#L412-L429",
+          "revision": "de08dbdcd27e01c27585d936091c69b59d173a97",
+          "description": "ValueLimit and PathRestricted interpretation."
+        },
+        {
+          "kind": "artifact",
+          "reference": "docs/nti-source-inspection/results/2026-11-08-local-author-run.json",
+          "description": "Result record: baseline ok, mutations M-05 and M-06 DISCRIMINATE."
+        }
+      ]
+    },
+    {
+      "id": "E",
+      "property": "Execution-Boundary Integrity",
+      "status": "UNTESTED",
+      "evidence_tier": "NONE",
+      "reasoning": "Neither half of the SPECIFICATION §12 procedure was performed: no credential topology register exists for NTI and no bypass attempts against a running deployment were made.",
+      "caveat": "UNTESTED records absent evidence, not failure. Static reading suggests SystemModule writes files with no capability check of its own, which a §12.2 attempt could test.",
+      "evidence": []
+    },
+    {
+      "id": "F",
+      "property": "TOCTOU Resistance",
+      "status": "UNTESTED",
+      "evidence_tier": "NONE",
+      "reasoning": "No test exercised a change of state, expiry or target between evaluation and dispatch, or concurrent use.",
+      "caveat": "UNTESTED records absent evidence, not failure. Orchestrator::run_task evaluates immediately before dispatch in-process; that ordering was read, not tested.",
+      "evidence": []
+    },
+    {
+      "id": "G",
+      "property": "Effect Verification",
+      "status": "UNTESTED",
+      "evidence_tier": "NONE",
+      "reasoning": "No test exercised read-back of an external effect.",
+      "caveat": "UNTESTED records absent evidence, not failure. Static reading found module-output agreement checks across modules, not effect read-back.",
+      "evidence": []
+    }
+  ],
+  "notes": [
+    "No aggregate is implied. Per SPECIFICATION §7 the rows are not commensurable and must not be combined into a score or ranking.",
+    "Additional reproduced observations without an A-G status (relationship in parentheses): NTI-03 air-gap bundles trusted on their embedded signer key (structural to A, state-sync artifact rather than an authorization artifact); NTI-07 trailing audit batches removable undetected (no_mapping, audit integrity is outside the model); NTI-09 unauthenticated handshake (no_mapping, transport); NTI-10 revocation fail-open for marketplace credentials (partial to A); NTI-11 odd-node duplication in the engine's audit Merkle root (no_mapping). Each passes on the pristine revision and fails under its single repair.",
+    "Static-only observations, not executed: NTI-02 /vote signs Allow for any proposal; NTI-12 hygiene; P-01 to P-05 on the PR #63 witness package. See docs/NTI-SOURCE-INSPECTION.md.",
+    "Reproduce: python scripts/run_nti_inspection.py --nti <checkout at the revision> --out <file> --run-id <id>; CI: .github/workflows/nti-inspection.yml.",
+    "Implementer review: not yet requested. Disagreement will be recorded, not normalized away (SPECIFICATION §8)."
+  ]
+}
