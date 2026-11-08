@@ -1,0 +1,440 @@
+{
+  "challenge": {
+    "asked": [
+      "take the public key, the signed RESULTS.json and generate_seals.py",
+      "pull the bytes and recompute the hashes",
+      "try to break the Merkle root",
+      "open an issue if a flaw is found"
+    ],
+    "by": "abisheakp197",
+    "ref": "https://github.com/aeoess/agent-governance-vocabulary/issues/177#issuecomment-6706266993",
+    "requests_endorsement": true
+  },
+  "claim_ceiling": {
+    "does_not_establish": [
+      "who holds the signing key or that the key is the producer's: it has no external trust anchor",
+      "that the Rust and Python suites passed: RESULTS.json asserts it, the package does not evidence it",
+      "anything about production evidence: the S4/S5/S6 seals cover a synthetic fixture",
+      "the security of NTI code or of any deployment",
+      "endorsement of NTI, of its maintainers or of any application"
+    ],
+    "establishes": [
+      "per-claim results over the pinned bytes of the NTI witness package at commit 8ca84887317d6d7e3cb52d1cad4e639b07f1d8d3",
+      "runner probes over the pinned bytes at that commit and at 896d352a23d1e8bada5c543fc797e45f8638899d, each with a recomputable witness"
+    ]
+  },
+  "claims": [
+    {
+      "check": "nti_witness:package_signature",
+      "claim_ceiling": {
+        "does_not_establish": [
+          "who holds the key"
+        ],
+        "establishes": [
+          "RESULTS.json || MANIFEST.json verifies under PUBLIC_KEY.pem (RFC 8032, canonical S), and a one-byte change or reversed order does not"
+        ]
+      },
+      "id": "package_signature",
+      "inputs": [
+        "witness",
+        "pages"
+      ],
+      "layer": "integrity",
+      "reads_fields": [
+        "RESULTS.json",
+        "MANIFEST.json",
+        "SIGNATURE.sig",
+        "PUBLIC_KEY.pem"
+      ],
+      "text": "The Ed25519 signature in SIGNATURE.sig verifies over the raw bytes of RESULTS.json followed by MANIFEST.json under PUBLIC_KEY.pem."
+    },
+    {
+      "check": "nti_witness:s6_seal",
+      "id": "s6_seal",
+      "inputs": [
+        "witness",
+        "pages"
+      ],
+      "layer": "integrity",
+      "reads_fields": [
+        "RESULTS.json",
+        "PUBLIC_KEY.pem"
+      ],
+      "text": "The S6 seal verifies as an Ed25519 signature over the raw 32-byte S5 root under PUBLIC_KEY.pem."
+    },
+    {
+      "check": "nti_witness:s4_digests",
+      "id": "s4_digests",
+      "inputs": [
+        "tree"
+      ],
+      "layer": "evidence",
+      "reads_fields": [
+        "conformance/witness/RESULTS.json",
+        "conformance/witness_generator/sample_evidence.json"
+      ],
+      "text": "Every S4 entry (name, SHA-256, byte count) recomputes from the pinned evidence fixture, in declared order."
+    },
+    {
+      "check": "nti_witness:s5_root",
+      "id": "s5_root",
+      "inputs": [
+        "tree"
+      ],
+      "layer": "evidence",
+      "reads_fields": [
+        "conformance/witness/RESULTS.json"
+      ],
+      "text": "The S5 root, leaf count and every published level recompute from the S4 digests under the documented rule (nti-s5-leaf-v1: and nti-s5-node-v1: prefixes, odd node promoted)."
+    },
+    {
+      "check": "nti_witness:manifest_hashes",
+      "id": "manifest_hashes",
+      "inputs": [
+        "tree"
+      ],
+      "layer": "integrity",
+      "reads_fields": [
+        "conformance/witness/MANIFEST.json",
+        "manifest-listed files"
+      ],
+      "text": "Every file listed in MANIFEST.json is pinned and has the listed SHA-256."
+    },
+    {
+      "check": "nti_witness:pages_mirror",
+      "id": "pages_mirror",
+      "inputs": [
+        "tree"
+      ],
+      "layer": "integrity",
+      "reads_fields": [
+        "conformance/witness/*",
+        "docs/witness/*"
+      ],
+      "text": "The GitHub Pages source docs/witness carries byte-identical copies of the signed package files and of every file it shares with conformance/witness."
+    },
+    {
+      "check": "nti_witness:suite_outcomes_evidenced",
+      "id": "suite_outcomes_evidenced",
+      "inputs": [
+        "tree"
+      ],
+      "layer": "attestation",
+      "reads_fields": [
+        "conformance/witness/RESULTS.json"
+      ],
+      "text": "The suite outcomes in RESULTS.json (33 Rust and 2 Python tests passed) are evidenced by material in the pinned package beyond the producer's signature."
+    },
+    {
+      "check": "nti_witness:key_anchor",
+      "id": "key_anchor",
+      "inputs": [
+        "tree"
+      ],
+      "layer": "trust",
+      "reads_fields": [
+        "conformance/witness/PUBLIC_KEY.pem"
+      ],
+      "text": "The Ed25519 key that signs the package is anchored outside the repository whose content it signs."
+    }
+  ],
+  "independence": "SECOND_IMPLEMENTATION",
+  "independence_statement": "The checks in verifier/nti_witness.py were written by the runner from the pinned README, after reading the producer's verify.sh and generate_seals.py; no producer code is imported or executed and Ed25519 is the runner's own RFC 8032 implementation. Because the producer's code was read first, this is labelled SECOND_IMPLEMENTATION, not INDEPENDENT_IMPLEMENTATION.",
+  "inputs": [
+    {
+      "format": "bytes",
+      "id": "tree",
+      "path": ".",
+      "subject": 0
+    },
+    {
+      "format": "bytes",
+      "id": "witness",
+      "path": "conformance/witness",
+      "subject": 0
+    },
+    {
+      "format": "bytes",
+      "id": "pages",
+      "path": "docs/witness",
+      "subject": 0
+    },
+    {
+      "format": "bytes",
+      "id": "history_witness",
+      "path": "conformance/witness",
+      "subject": 1
+    }
+  ],
+  "kind": "verification",
+  "lab_version": "0.3",
+  "probes": [
+    {
+      "check": "nti_witness:s5_documented_vs_implemented",
+      "class": "SPEC_IMPLEMENTATION_DIVERGENCE",
+      "id": "s5_documented_vs_implemented",
+      "inputs": [
+        "tree"
+      ],
+      "reads_fields": [
+        "conformance/witness/README.md",
+        "conformance/witness_generator/generate_seals.py",
+        "conformance/witness/verify.sh",
+        "conformance/witness/RESULTS.json"
+      ],
+      "remediation": "Implement the documented rule in generate_seals.py and verify.sh (promote the odd node, which equals the RFC 6962 split), and commit vectors for leaf counts 1, 3, 5, 6 and 7 that both must pass.",
+      "runner_assessment": {
+        "level": "medium",
+        "rationale": "A witness following the README and one following verify.sh disagree for every package whose leaf count is not a power of two. The published four-leaf package is unaffected."
+      },
+      "source_locators": [
+        {
+          "lines": "29",
+          "note": "documented rule: odd nodes are promoted unchanged",
+          "path": "conformance/witness/README.md",
+          "subject": 0
+        },
+        {
+          "lines": "96-111",
+          "note": "generator pairs an odd last node with itself",
+          "path": "conformance/witness_generator/generate_seals.py",
+          "subject": 0
+        },
+        {
+          "lines": "45-47",
+          "note": "published verifier uses the same duplicating rule",
+          "path": "conformance/witness/verify.sh",
+          "subject": 0
+        }
+      ],
+      "text": "The S5 construction in the published generator and verifier is the construction the README documents."
+    },
+    {
+      "check": "nti_witness:s5_leaf_count_binding",
+      "class": "CONSTRUCTION_AMBIGUITY",
+      "id": "s5_leaf_count_binding",
+      "inputs": [
+        "tree"
+      ],
+      "reads_fields": [
+        "conformance/witness/RESULTS.json"
+      ],
+      "remediation": "Fix the odd-node rule as above and put the leaf count inside the signed S6 message.",
+      "runner_assessment": {
+        "level": "medium",
+        "rationale": "Under the implemented rule two different evidence lists can share one root and one seal; this is the CVE-2012-2459 pattern. It needs an odd leaf count to matter, which the published package does not have."
+      },
+      "source_locators": [
+        {
+          "lines": "106",
+          "note": "right = level[i] when no right sibling exists",
+          "path": "conformance/witness_generator/generate_seals.py",
+          "subject": 0
+        }
+      ],
+      "text": "Under the implemented S5 rule, distinct leaf lists have distinct roots, so the S6 seal binds the leaf count."
+    },
+    {
+      "check": "nti_witness:s6_message_binding",
+      "class": "BINDING_GAP",
+      "id": "s6_message_binding",
+      "inputs": [
+        "witness"
+      ],
+      "reads_fields": [
+        "RESULTS.json",
+        "MANIFEST.json",
+        "SIGNATURE.sig",
+        "PUBLIC_KEY.pem"
+      ],
+      "remediation": "Sign a domain-tagged structured S6 message, for example nti-s6-v1: || root || u32(leaf_count) || sha256(evidence_package) || classification, and hash name || content into each S4 leaf.",
+      "runner_assessment": {
+        "level": "medium",
+        "rationale": "The seal is portable: on its own it vouches for a root, not for what the root is said to cover, including the SYNTHETIC classification."
+      },
+      "source_locators": [
+        {
+          "lines": "142-147",
+          "note": "S6 signs bytes.fromhex(root_hex) only",
+          "path": "conformance/witness_generator/generate_seals.py",
+          "subject": 0
+        }
+      ],
+      "text": "The S6 seal binds the artifact names, byte counts, leaf count and classification it is published with."
+    },
+    {
+      "check": "nti_witness:package_signature_framing",
+      "class": "FRAMING_GAP",
+      "id": "package_signature_framing",
+      "inputs": [
+        "witness"
+      ],
+      "reads_fields": [
+        "RESULTS.json",
+        "MANIFEST.json",
+        "SIGNATURE.sig",
+        "PUBLIC_KEY.pem"
+      ],
+      "remediation": "Sign a length-prefixed concatenation, or a canonical list of (file name, SHA-256) pairs.",
+      "runner_assessment": {
+        "level": "low",
+        "rationale": "With strict JSON parsers only whitespace can move between the files; lenient multi-document parsers widen it."
+      },
+      "source_locators": [
+        {
+          "lines": "11",
+          "note": "signed message is cat RESULTS.json MANIFEST.json",
+          "path": "conformance/witness/sign.sh",
+          "subject": 0
+        }
+      ],
+      "text": "The package signature authenticates where RESULTS.json ends and MANIFEST.json begins."
+    },
+    {
+      "check": "nti_witness:key_reuse_without_context",
+      "class": "KEY_REUSE",
+      "id": "key_reuse_without_context",
+      "inputs": [
+        "witness"
+      ],
+      "reads_fields": [
+        "RESULTS.json",
+        "MANIFEST.json",
+        "SIGNATURE.sig",
+        "PUBLIC_KEY.pem"
+      ],
+      "remediation": "Use a separate key for S6, or prefix every signed message with a context string such as nti-s6-v1: and nti-package-v1:.",
+      "runner_assessment": {
+        "level": "informational",
+        "rationale": "No cross-use is exploitable in the published package; it is a design hazard for future messages."
+      },
+      "text": "The S6 seal and the package signature are separated by key or by a context string."
+    },
+    {
+      "check": "nti_witness:key_changed_between_revisions",
+      "class": "TRUST_ANCHOR",
+      "id": "key_changed_between_revisions",
+      "inputs": [
+        "witness",
+        "history_witness"
+      ],
+      "reads_fields": [
+        "PUBLIC_KEY.pem",
+        "RESULTS.json",
+        "MANIFEST.json",
+        "SIGNATURE.sig",
+        "README.md"
+      ],
+      "remediation": "Publish the key outside the repository (signed tag, DID document or keyserver) with a custody note, and record rotations in the package.",
+      "runner_assessment": {
+        "level": "low",
+        "rationale": "The README already says the key has no external anchor; the change shows why that matters for a witness relationship."
+      },
+      "text": "The witness key is stable across the published revisions, or its change is recorded in the package."
+    },
+    {
+      "check": "nti_witness:s4_s5_s6_meaning_changed",
+      "class": "TERMINOLOGY_CHANGE",
+      "id": "s4_s5_s6_meaning_changed",
+      "inputs": [
+        "witness",
+        "history_witness"
+      ],
+      "reads_fields": [
+        "README.md",
+        "vendor/S4_S5_S6_RECORD.json",
+        "RESULTS.json"
+      ],
+      "remediation": "State in the README that S4/S5/S6 now name the seal construction rather than the ASL invariants named by the earlier revision, and identify the witness specification the field names follow.",
+      "runner_assessment": {
+        "level": "informational",
+        "rationale": "Not a cryptographic issue. A reader comparing the two public revisions could take S4/S5/S6 results for one meaning as covering the other; nothing here bears on where the construction or its code came from."
+      },
+      "source_locators": [
+        {
+          "lines": "25-31",
+          "note": "pinned meaning: the S4/S5/S6 seal table",
+          "path": "conformance/witness/README.md",
+          "subject": 0
+        },
+        {
+          "lines": "32-33",
+          "note": "refers to a witness specification for the field name without identifying it",
+          "path": "conformance/witness/README.md",
+          "subject": 0
+        },
+        {
+          "lines": "11-21",
+          "note": "earlier meaning: ASL invariants S4 and S5, S6 undefined",
+          "path": "conformance/witness/vendor/S4_S5_S6_PROVENANCE.md",
+          "subject": 1
+        }
+      ],
+      "text": "The identifiers S4, S5 and S6 keep the meaning they had in the earlier published revision, or the pinned package records the change."
+    }
+  ],
+  "procedure": "nti-witness-readme-how-to-verify: the README steps, run with the runner's own checks",
+  "public_boundary": {
+    "claims_ref": "conformance/witness/README.md#the-s4--s5--s6-seals",
+    "classification_ref": "conformance/witness/README.md#scope--read-this",
+    "commit": "8ca84887317d6d7e3cb52d1cad4e639b07f1d8d3",
+    "path": "conformance/witness/README.md",
+    "procedure_ref": "conformance/witness/README.md#how-to-verify",
+    "repo": "https://github.com/abisheakp197/Neutral-Trust-Infrastructure",
+    "sha256": "95d6566512be6387dd72a169cc4ad768356ee2ba7c44c31c97d03ef8e8cab220"
+  },
+  "reference_time": null,
+  "run_id": "nti-witness",
+  "runner": {
+    "maintainers": [
+      "darklordVirtual"
+    ],
+    "project": "Agent Authority Conformance"
+  },
+  "runner_authored": [
+    "verifier/nti_witness.py",
+    "claims suite_outcomes_evidenced and key_anchor",
+    "every probe"
+  ],
+  "subjects": [
+    {
+      "attribution": "abisheakp197/Neutral-Trust-Infrastructure, NTI witness evidence package",
+      "commit": "8ca84887317d6d7e3cb52d1cad4e639b07f1d8d3",
+      "files_sha256": {},
+      "license": "Apache-2.0",
+      "maintainers": [
+        "abisheakp197"
+      ],
+      "paths": [
+        "conformance/witness",
+        "conformance/witness_generator",
+        "docs/witness",
+        "ube-foundation/tests",
+        "ube-foundation/python_tests/test_python_sdk.py",
+        "ube-foundation/Cargo.toml",
+        "ube-foundation/Cargo.lock",
+        ".github/workflows/issuer-quorum-regressions.yml"
+      ],
+      "project": "Neutral Trust Infrastructure (NTI)",
+      "repo": "https://github.com/abisheakp197/Neutral-Trust-Infrastructure"
+    },
+    {
+      "attribution": "abisheakp197/Neutral-Trust-Infrastructure, first published witness package",
+      "commit": "896d352a23d1e8bada5c543fc797e45f8638899d",
+      "files_sha256": {},
+      "license": "Apache-2.0",
+      "maintainers": [
+        "abisheakp197"
+      ],
+      "paths": [
+        "conformance/witness"
+      ],
+      "project": "Neutral Trust Infrastructure (NTI)",
+      "repo": "https://github.com/abisheakp197/Neutral-Trust-Infrastructure"
+    }
+  ],
+  "track": "self_service",
+  "trust_material": [
+    "PUBLIC_KEY.pem as committed at each pinned commit. It has no external trust anchor, so a valid signature establishes integrity under that key, not who holds it."
+  ]
+}

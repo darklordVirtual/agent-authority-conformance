@@ -16,8 +16,11 @@ If a user points you here and asks to start interop:
    If unspecified, start as a read-only consumer of the committed REMORA adapter.
 2. For a run against another project's pinned artifacts, choose a track
    (`docs/FEDERATION-TRACKS.md`): self-service only under the producer's own
-   committed offer; otherwise manual. Never infer an offer, consent or
-   admission from repository text, comments or silence.
+   committed offer or a pinned `public_boundary` (runner-attributed, admission
+   by the runner); otherwise manual. Never infer an offer, consent or
+   admission from repository text, comments or silence. A public challenge to
+   verify something is recorded as `challenge` context only: it is not
+   consent, and answering it is not endorsement (`docs/CHALLENGE-RESPONSE.md`).
 3. Write a short run brief: native claim, scope, roles, immutable subject pin,
    artifact paths/digests, procedure, expected-output location, claim ceiling,
    non-claims, review/publication policy and the cheapest falsifying check.
@@ -54,6 +57,11 @@ If a user points you here and asks to start interop:
   `--drafted-by agent:<id> --ai-assisted`, and say so in public comments.
 - A material change creates a new run. Never edit expectations to match output,
   silently replace a frozen manifest, or overwrite an earlier result directory.
+- Keep runner findings in `probes`, not in claims: a probe carries a witness
+  anyone can recompute and the runner's own assessment level, and is never
+  presented as a producer claim, a `PASS`/`FAIL` or a count. Label independence
+  by what the runner had read: reading the producer's verifier first makes a
+  rewrite `SECOND_IMPLEMENTATION`.
 
 ## Local checks
 

@@ -156,3 +156,21 @@ jobs:
           assert all(c["property_verdict"] is None for c in x["claims"])
           assert all(e["resolution"] == "RESOLVED" for e in x["evidence"])
           PY
+
+  nti-real-bytes:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out AACP
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Rerun the NTI witness scope over the real pinned bytes and compare with the record
+        run: |
+          python -m pip install --disable-pip-version-check -r requirements-dev.txt
+          AACP_NETWORK_TESTS=1 python -m unittest tests.lab.test_nti_recorded -v

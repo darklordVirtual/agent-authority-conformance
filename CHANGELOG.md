@@ -4,6 +4,34 @@
 
 - Distribute AACP as versioned GitHub Release assets: wheel, source archive, CycloneDX SBOM and `SHA256SUMS.txt`, with Sigstore-signed build-provenance and SBOM attestations. `.github/workflows/release.yml` runs on a `v*` tag: it checks that the tag matches `pyproject.toml`, has a changelog section and sits on `main`, reruns the conformance checks, builds the wheel twice to prove it is byte-reproducible, installs the wheel on Linux, macOS and Windows (Python 3.12 and 3.13) and the sdist on Linux and exercises the installed `aacp` outside a checkout, and publishes only after approval in the `release` environment. Pull requests that touch release inputs rehearse every step except publication. `scripts/release.py` holds the gates and `scripts/smoke_installed_cli.py` the installed-CLI check, which the CLI package job now shares. See [docs/INSTALL.md](docs/INSTALL.md) and [docs/RELEASING.md](docs/RELEASING.md). No PyPI publication; runtime dependencies are still resolved from the configured package index.
 
+- Lab: answer public verification challenges ([docs/CHALLENGE-RESPONSE.md](docs/CHALLENGE-RESPONSE.md)).
+  Verification inputs may set `format: bytes`, so checks verify signatures and digests over
+  the exact published bytes. Scopes may declare `probes`: runner-authored findings with a
+  class, a recomputable witness, source locators (read, never executed) and the runner's
+  assessment level, recorded in `results/probes.json`
+  ([schema](schema/lab/probe-results.schema.json)), compared on rerun and reported apart
+  from claim results; they never map to PASS/FAIL and are never counted. `challenge`
+  records a public request to verify as context, never as consent, and the report states
+  that no endorsement is given. `respond` drafts a reply from the run's own records, with
+  AI-drafting disclosure, outside the package manifest. `init --template <dir>/SCOPE.json`
+  copies the skeleton's `verifier/`. `respond` writes only under the run's `.local/` or
+  outside the run directory and replaces a draft only with `--force`; it groups findings by
+  whether they hold for the bytes as published. Rerun compares every field of every probe
+  record. Probe class `TERMINOLOGY_CHANGE` records an identifier whose meaning changed between
+  revisions without any inference about provenance. Worked example:
+  [templates/runs/nti-witness/](templates/runs/nti-witness/), the NTI witness package from
+  aeoess/agent-governance-vocabulary#177, with a standard-library RFC 8032 Ed25519, and its
+  real run kept in `recorded/RECORD.json` (`scripts/record_lab_run.py`), checked offline and
+  rerun over the real pinned bytes by the `nti-real-bytes` CI job.
+- Lab fixes for the public-boundary basis: `package` crashed rendering the track line,
+  `withhold`, `aacp next` and `aacp export map` assumed an offer, and the scope schema's
+  `public_boundary` patterns were double-escaped, so the schema rejected every valid
+  boundary. A public-boundary run is now bound to its boundary: every subject must be a
+  revision of the boundary's own repository (also with a single subject, which was not checked
+  before) and subject 0 must be pinned at the boundary commit. Several revisions of that
+  repository may be pinned for comparison. The schema agreement test now covers the public
+  boundary.
+
 - Add `AACP-OBSERVED-EFFECT-VANTAGE-2`, a revision of the observation-vantage profile. Positive observer-independence credit now also needs runner-owned evidence that the observer identity is established outside the producer, which cannot issue or revoke it, and that the producer cannot reach the observer's signing key. `evaluate_observation_vantage_r2` and `--profile-revision 2` apply it. Revision 1 and its function stay as published, as GOVERNANCE.md requires of a merged profile revision, so the reference vectors v1 and every record under revision 1 are unchanged.
 
 - Add frozen reference vectors, `vectors/aacp-reference-vectors-v1/`: 86 input and expected-answer pairs for nine deterministic operations (the E rule, the OE-08 observation vantage, AgentAvow tool keys, digests and bindings, the lab's canonical JSON, strict JSON reading, the no-aggregate key rule, and the A-G coverage matrix). Every expected answer names its source, a committed fixture, a producer's own published or signed expectation, or specification text written out by hand, and the build script imports none of the rules it checks. The bytes are pinned by `SHA256SUMS`, `MANIFEST.json` and a test, `scripts/build_reference_vectors.py --check` rebuilds them from their sources, and `--write` refuses to replace a frozen suite. `python -m conformance.vectors run --impl "<command>"` checks any implementation over a one-request stdio protocol and reports per vector, with no score. `tests/test_vectors_adequacy.py` seeds 34 plausible implementer faults, and every one is noticed; the first version let an implementation that never sorts keys pass, which the canonical-JSON vectors now catch by taking JSON text as input. The suite documents that the lab's canonical form is not RFC 8785 and that a repeated assessment component is a schema error. See [docs/REFERENCE-VECTORS.md](docs/REFERENCE-VECTORS.md).
