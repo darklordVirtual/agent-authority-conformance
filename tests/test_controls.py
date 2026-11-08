@@ -191,6 +191,111 @@ class RunTests(unittest.TestCase):
         self.assertEqual(r["probes"]["S-1"]["result"], "NON_VERDICT")
 
 
+# A protected authorizer: it requires a signature, so AACP-B-01 is not observed.
+PROTECTED_SRC = SUBJECT_SRC.replace(
+    '    return request["capability"]', '    return "signature" in request and request["capability"]')
+WEAKEN = {"file": "authz.py", "repair": "remove the signature requirement",
+          "old": '    return "signature" in request and request["capability"]',
+          "new": '    return request["capability"]'}
+
+
+class SensitivityTests(unittest.TestCase):
+    """A NOT_OBSERVED result counts only if the probe would have seen the weakness."""
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.fx = Fixture(pathlib.Path(self._tmp.name))
+        (self.fx.subject / "authz.py").write_text(PROTECTED_SRC)
+        git(self.fx.subject, "-c", "user.name=t", "-c", "user.email=t@t", "commit", "-qam", "protected")
+        self.fx.rev = subprocess.run(["git", "rev-parse", "HEAD"], cwd=self.fx.subject,
+                                     capture_output=True, text=True).stdout.strip()
+
+    def tearDown(self):
+        self._tmp.cleanup()
+
+    def expect(self, sensitivity):
+        return {"P-1": {"result": "NOT_OBSERVED", "discrimination": "NOT_RUN", "sensitivity": sensitivity}}
+
+    def test_sensitive_probe(self):
+        self.fx.write([command_probe(mutation=None, sensitivity="W-1",
+                                     argv=["{python}", "probe_b01.py"])],
+                      {"W-1": WEAKEN}, expected=self.expect("SENSITIVE"))
+        code, r = self.fx.run()
+        self.assertEqual(code, 0, r)
+        self.assertEqual(sha(self.fx.subject / "authz.py"),
+                         controls.sha256_bytes(PROTECTED_SRC.encode()), "subject restored")
+
+    def test_noop_weakening_is_insensitive(self):
+        self.fx.write([command_probe(mutation=None, sensitivity="W-1")],
+                      {"W-1": dict(WEAKEN, new=WEAKEN["old"])}, expected=self.expect("INSENSITIVE"))
+        code, r = self.fx.run()
+        self.assertEqual(code, 0, r)
+
+    def test_static_probe_sensitivity(self):
+        probe = {"id": "P-1", "control": "AACP-B-01", "relationship": "exact", "origin": "test",
+                 "kind": "source-check", "sensitivity": "W-1", "description": "x",
+                 "predicates": [{"op": "not_matches", "file": "authz.py", "pattern": "signature"}]}
+        self.fx.write([probe], {"W-1": WEAKEN}, expected=self.expect("SENSITIVE"))
+        code, r = self.fx.run()
+        self.assertEqual(code, 0, r)
+
+    def test_missing_sensitivity_expectation_is_a_mismatch(self):
+        self.fx.write([command_probe(mutation=None, sensitivity="W-1")], {"W-1": WEAKEN},
+                      expected={"P-1": {"result": "NOT_OBSERVED", "discrimination": "NOT_RUN"}})
+        _, r = self.fx.run()
+        self.assertEqual(r["probes"]["P-1"]["sensitivity"], "SENSITIVE")
+        # Declared keys are compared; CommittedBindingTests requires the key when a probe declares one.
+        self.assertTrue(r["expectations"]["met"])
+
+    def test_report_explains_sensitive_not_observed(self):
+        self.fx.write([command_probe(mutation=None, sensitivity="W-1")], {"W-1": WEAKEN},
+                      expected=self.expect("SENSITIVE"))
+        self.fx.run()
+        binding_dir, binding, _, ctl, _ = controls.load_binding(self.fx.binding)
+        a = controls.build_assessment(binding, ctl, json.loads(self.fx.out.read_text()), "r", "b")
+        row = {x["id"]: x for x in a["properties"]}["B"]
+        self.assertEqual(row["status"], "UNTESTED")
+        self.assertIn("shown to be sensitive", row["reasoning"])
+
+    def test_two_layer_protection_needs_both_edits(self):
+        """Removing one of two layers leaves the probe refused: INSENSITIVE, honestly."""
+        two_layer = PROTECTED_SRC.replace(
+            "def authorize(request):",
+            "def authorize(request):\n    if \"signature\" not in request:\n        return False")
+        (self.fx.subject / "authz.py").write_text(two_layer)
+        git(self.fx.subject, "-c", "user.name=t", "-c", "user.email=t@t", "commit", "-qam", "two layers")
+        self.fx.rev = subprocess.run(["git", "rev-parse", "HEAD"], cwd=self.fx.subject,
+                                     capture_output=True, text=True).stdout.strip()
+        layer2 = {"file": "authz.py", "old": '    if "signature" not in request:\n        return False\n',
+                  "new": ""}
+        self.fx.write([command_probe(mutation=None, sensitivity="W-1")], {"W-1": WEAKEN},
+                      expected=self.expect("INSENSITIVE"))
+        code, r = self.fx.run()
+        self.assertEqual(code, 0, r)
+        self.fx.write([command_probe(mutation=None, sensitivity="W-2")],
+                      {"W-2": {"repair": "both layers", "edits": [WEAKEN, layer2]}},
+                      expected=self.expect("SENSITIVE"))
+        code, r = self.fx.run()
+        self.assertEqual(code, 0, r)
+        self.assertEqual(sha(self.fx.subject / "authz.py"), controls.sha256_bytes(two_layer.encode()))
+
+    def test_crashing_probe_is_non_verdict_not_protection(self):
+        (self.fx.subject / "crash.py").write_text("raise SystemExit(3)\n")
+        self.fx.write([command_probe(mutation=None, argv=["{python}", "crash.py"],
+                                     not_observed_exit=[1])], {},
+                      expected={"P-1": {"result": "NON_VERDICT", "discrimination": "NOT_RUN"}})
+        code, r = self.fx.run()
+        self.assertEqual(code, 0, r)
+
+    def test_failing_setup_is_non_verdict(self):
+        self.fx.write([command_probe(mutation=None)], {},
+                      expected={"P-1": {"result": None, "discrimination": None}},
+                      runners={"command": {"setup": [["{python}", "-c", "raise SystemExit(3)"]]}})
+        _, r = self.fx.run()
+        self.assertEqual(r["verdict"], "NON_VERDICT")
+        self.assertIn("setup failed", r["non_verdict_errors"][0])
+
+
 class ReportTests(unittest.TestCase):
     """Status derivation: only executed, exact, OBSERVED, DISCRIMINATES probes give FAIL."""
 
@@ -323,6 +428,8 @@ class CommittedBindingTests(unittest.TestCase):
                 expected = json.loads((binding_dir / "expected.json").read_text())
                 self.assertEqual(set(expected["probes"]), {p["id"] for p in binding["probes"]})
                 for p in binding["probes"]:
+                    if p.get("sensitivity"):
+                        self.assertIn("sensitivity", expected["probes"][p["id"]], p["id"])
                     if p["kind"] == "cargo-test":
                         src = (binding_dir / p["reference"].split("#")[0]).read_text()
                         self.assertIn(f"fn {p['test']}()", src)

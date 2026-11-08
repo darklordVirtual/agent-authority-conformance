@@ -27,9 +27,25 @@ probe that would pass whether or not the weakness exists tests nothing
 | Probe result | Meaning |
 | :--- | :--- |
 | `OBSERVED` | weakness reproduced on the pristine subject |
-| `NOT_OBSERVED` | probe ran, weakness not reproduced. **Not a PASS.** |
+| `NOT_OBSERVED` | probe ran, weakness not reproduced. **Not a PASS**, and meaningful only if the probe is `SENSITIVE` (below). |
 | `NOT_APPLICABLE` | binding declares the subject has no such mechanism, with a reason |
 | `NON_VERDICT` | pin, bytes, region, build or harness failure |
+
+A probe that does not observe its weakness can be broken rather than the
+subject protected: a crashed fixture, a refusal for an unrelated reason, a
+path that never reaches the code. So a probe may declare a **weakening** (a
+`sensitivity` mutation that removes the protection). With it applied alone
+the probe must observe the weakness: `SENSITIVE`. Otherwise `INSENSITIVE`,
+and the `NOT_OBSERVED` result says nothing. Every `NOT_OBSERVED` probe in a
+binding should declare one; the report states for each whether it was shown
+sensitive.
+
+| Sensitivity | Meaning |
+| :--- | :--- |
+| `SENSITIVE` | with the protection removed, the probe observes the weakness |
+| `INSENSITIVE` | it still does not, so the probe does not test that protection |
+| `PROBE_ERROR` | the probe errored under the weakening |
+| `ANCHOR_ERROR` / `BUILD_ERROR` | as for repairs |
 
 A property row is `FAIL` only when at least one probe is **executed**
 (`cargo-test` or `command`), has an **`exact`** relationship to that property,
@@ -47,7 +63,7 @@ All three kinds are generic. A non-Rust project uses `command` and `source-check
 | Kind | Observed when | Fields |
 | :--- | :--- | :--- |
 | `cargo-test` | the named test in the binding's installed test target passes | `test`; binding `runners.cargo` gives `crate`, `test_target`, `install`, `rust_toolchain` |
-| `command` | `argv` exits 0 in `cwd` (pytest, go test, npm test, a script) | `argv`, optional `cwd` |
+| `command` | `argv` exits 0 in `cwd` (pytest, go test, npm test, a script) | `argv`, optional `cwd`, `not_observed_exit` |
 | `source-check` | every predicate holds | `predicates` |
 
 Source-check predicates: `matches` and `not_matches` (regex, optionally within a
@@ -56,6 +72,21 @@ Source-check predicates: `matches` and `not_matches` (regex, optionally within a
 (`path` may map lists with `name[]`), `json_exists`, `json_ne_head` (value
 differs from the checked-out commit). A missing file, region or marker is a
 `NON_VERDICT`, never a silent pass or fail.
+
+For a `command` probe, `not_observed_exit` lists the exit codes that mean
+"not observed" (pytest: `[1]`, a failed assertion). Any other non-zero code
+is a `NON_VERDICT`, so a probe that crashed, failed to collect, or reported
+its own failed setup (exit 3 by convention) is never read as a protection
+that held. `{python}` in an `argv` is the interpreter running AACP. A
+runner's `setup` commands (for example installing the subject's
+dependencies) run once before any executable probe; a failure is a
+`NON_VERDICT` for the run. Probe commands run with `PYTHONDONTWRITEBYTECODE`.
+
+A repair or weakening is one edit (`file`, `old`, `new`) or several
+(`edits`). Several are needed when a protection is enforced in more than one
+layer, because removing one layer alone would leave the probe refused and
+report `INSENSITIVE` for the wrong reason. The binding names the layers in
+the mutation's `repair` text.
 
 Every subject file a repair touches must be pinned by SHA-256 in
 `subject.files`. Repairs need a unique anchor; otherwise `ANCHOR_ERROR`. A

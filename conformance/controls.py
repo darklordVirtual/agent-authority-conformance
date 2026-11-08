@@ -100,9 +100,10 @@ def load_binding(binding_dir: pathlib.Path):
             raise BindingError(f"{pid}: control has no A-G property, relationship must be no_mapping")
         if probe["kind"] not in EXECUTABLE | {"source-check"}:
             raise BindingError(f"{pid}: unknown kind {probe['kind']}")
-        ref = probe.get("mutation")
-        if ref is not None and ref not in mutations:
-            raise BindingError(f"{pid}: unknown mutation {ref}")
+        for field in ("mutation", "sensitivity"):
+            ref = probe.get(field)
+            if ref is not None and ref not in mutations:
+                raise BindingError(f"{pid}: unknown {field} {ref}")
     for na in binding.get("not_applicable", []):
         if na["control"] not in controls or not na.get("reason"):
             raise BindingError(f"not_applicable entry needs a known control and a reason: {na}")
@@ -111,9 +112,22 @@ def load_binding(binding_dir: pathlib.Path):
 
 # ---------------------------------------------------------------- subject
 
-def run_cmd(argv, cwd):
-    proc = subprocess.run(argv, cwd=str(cwd), capture_output=True, text=True)
+def run_cmd(argv, cwd, env=None):
+    proc = subprocess.run(argv, cwd=str(cwd), capture_output=True, text=True, env=env)
     return proc.returncode, proc.stdout + proc.stderr
+
+
+def expand(argv):
+    """`{python}` names the interpreter running AACP, so a binding needs no absolute path."""
+    return [sys.executable if a == "{python}" else a for a in argv]
+
+
+def probe_env():
+    """No bytecode cache: a repaired and a restored file must never share a stale .pyc."""
+    import os
+    env = dict(os.environ)
+    env["PYTHONDONTWRITEBYTECODE"] = "1"
+    return env
 
 
 def tool_version(argv):
@@ -147,6 +161,24 @@ def apply_mutation(text: str, mutation: dict) -> str:
     if count != 1:
         raise ValueError(f"anchor occurs {count} times")
     return text.replace(mutation["old"], mutation["new"])
+
+
+def mutation_edits(mutation: dict) -> list[dict]:
+    """A mutation is one edit (`file`, `old`, `new`) or several (`edits`).
+
+    Several edits are needed when a protection is enforced in more than one
+    layer: removing one layer alone would leave the probe still refused.
+    """
+    return mutation["edits"] if "edits" in mutation else [mutation]
+
+
+def mutated_texts(mutation: dict, read) -> dict[str, str]:
+    """Apply every edit in order, per file; ValueError on a non-unique anchor."""
+    texts: dict[str, str] = {}
+    for edit in mutation_edits(mutation):
+        current = texts.get(edit["file"], read(edit["file"]))
+        texts[edit["file"]] = apply_mutation(current, edit)
+    return texts
 
 
 # ---------------------------------------------------------------- source checks
@@ -261,8 +293,29 @@ def cargo_run(subject_dir, runner, tests=None):
 
 
 def command_run(subject_dir, probe):
-    code, _ = run_cmd(probe["argv"], subject_dir / probe.get("cwd", "."))
+    code, _ = run_cmd(expand(probe["argv"]), subject_dir / probe.get("cwd", "."), env=probe_env())
     return code
+
+
+def command_result(probe, code):
+    """0 observes. With `not_observed_exit` (pytest: [1]) any other code is a probe error,
+    so a crashed or uncollected probe is never read as a protection that held."""
+    if code == 0:
+        return "OBSERVED"
+    allowed = probe.get("not_observed_exit")
+    if allowed is not None and code not in allowed:
+        return "NON_VERDICT"
+    return "NOT_OBSERVED"
+
+
+def run_setup(subject_dir, runners, record):
+    """Runner setup commands (dependency install), once, before any executable probe."""
+    for name, runner in sorted(runners.items()):
+        for argv in runner.get("setup", []):
+            code, out = run_cmd(expand(argv), subject_dir, env=probe_env())
+            record["setup"].append({"runner": name, "argv": argv, "exit": code})
+            if code != 0:
+                raise NonVerdict(f"setup failed ({name}): {' '.join(argv)}: {out[-400:]}")
 
 
 # ---------------------------------------------------------------- run
@@ -301,6 +354,7 @@ def run(args):
             **({"rustc": tool_version(["rustc", "--version"]), "cargo": tool_version(["cargo", "--version"])}
                if "cargo" in runners else {}),
         },
+        "setup": [],
         "probes": {},
         "not_applicable": binding.get("not_applicable", []),
         "non_verdict_errors": [],
@@ -336,14 +390,27 @@ def run(args):
                 if probe.get("mutation") and observed:
                     mut = mutations[probe["mutation"]]
                     try:
-                        mutated = apply_mutation(read_pristine(mut["file"]), mut)
+                        mutated = mutated_texts(mut, read_pristine)
                     except ValueError as exc:
                         entry["discrimination"] = "ANCHOR_ERROR"
                         entry["discrimination_detail"] = str(exc)
                     else:
                         still, _ = eval_source_check(
-                            probe, lambda rel: mutated if rel == mut["file"] else read_pristine(rel), head)
+                            probe, lambda rel: mutated[rel] if rel in mutated else read_pristine(rel), head)
                         entry["discrimination"] = "DOES_NOT_DISCRIMINATE" if still else "DISCRIMINATES"
+                if probe.get("sensitivity"):
+                    entry["sensitivity"] = "NOT_RUN"
+                if probe.get("sensitivity") and not observed:
+                    mut = mutations[probe["sensitivity"]]
+                    try:
+                        weakened = mutated_texts(mut, read_pristine)
+                    except ValueError as exc:
+                        entry["sensitivity"] = "ANCHOR_ERROR"
+                        entry["sensitivity_detail"] = str(exc)
+                    else:
+                        seen, _ = eval_source_check(
+                            probe, lambda rel: weakened[rel] if rel in weakened else read_pristine(rel), head)
+                        entry["sensitivity"] = "SENSITIVE" if seen else "INSENSITIVE"
             except NonVerdict as exc:
                 entry["result"] = "NON_VERDICT"
                 entry["detail"] = str(exc)
@@ -352,6 +419,7 @@ def run(args):
         if executable:
             install_runner_files(binding_dir, subject_dir, runners)
             try:
+                run_setup(subject_dir, runners, record)
                 run_executable(executable, record, subject_dir, runners, mutations, pristine)
             finally:
                 for rel, data in pristine.items():
@@ -392,49 +460,73 @@ def run_executable(probes, record, subject_dir, runners, mutations, pristine):
             e = record["probes"][p["id"]]
             e["argv"] = p["argv"]
             code = command_run(subject_dir, p)
-            e["result"] = "OBSERVED" if code == 0 else "NOT_OBSERVED"
+            e["result"] = command_result(p, code)
             e["baseline_exit"] = code
 
-    # Discrimination, grouped by mutation so each repair is applied once.
-    by_mut = {}
-    for p in probes:
-        e = record["probes"][p["id"]]
-        if not p.get("mutation"):
-            e["discrimination"] = "NOT_RUN"
-        elif e["result"] != "OBSERVED":
-            e["discrimination"] = "NOT_RUN"
-        else:
-            by_mut.setdefault(p["mutation"], []).append(p)
-    for ref, group in sorted(by_mut.items()):
-        mut = mutations[ref]
-        if mut["file"] not in pristine:
-            raise NonVerdict(f"mutation {ref} targets an unpinned file {mut['file']}")
-        try:
-            mutated = apply_mutation(pristine[mut["file"]].decode("utf-8"), mut)
-        except ValueError as exc:
-            for p in group:
-                record["probes"][p["id"]]["discrimination"] = "ANCHOR_ERROR"
-                record["probes"][p["id"]]["discrimination_detail"] = str(exc)
-            continue
-        (subject_dir / mut["file"]).write_text(mutated, encoding="utf-8")
-        try:
-            cargo_group = [p for p in group if p["kind"] == "cargo-test"]
-            if cargo_group:
-                built, statuses = cargo_run(subject_dir, runners["cargo"], [p["test"] for p in cargo_group])
-                for p in cargo_group:
-                    e = record["probes"][p["id"]]
-                    st = statuses.get(p["test"])
-                    e["mutated_status"] = st or "MISSING"
-                    e["discrimination"] = ("BUILD_ERROR" if not built else
-                                           "DISCRIMINATES" if st == "FAILED" else "DOES_NOT_DISCRIMINATE")
-            for p in group:
-                if p["kind"] == "command":
-                    e = record["probes"][p["id"]]
-                    code = command_run(subject_dir, p)
-                    e["mutated_exit"] = code
-                    e["discrimination"] = "DISCRIMINATES" if code != 0 else "DOES_NOT_DISCRIMINATE"
-        finally:
-            (subject_dir / mut["file"]).write_bytes(pristine[mut["file"]])
+    # Discrimination: a repair applied alone must make an OBSERVED probe stop observing.
+    # Sensitivity: a weakening applied alone must make a NOT_OBSERVED probe observe.
+    # Grouped by mutation so each one is applied once.
+    for field, when, good, bad in (("mutation", "OBSERVED", "DISCRIMINATES", "DOES_NOT_DISCRIMINATE"),
+                                   ("sensitivity", "NOT_OBSERVED", "SENSITIVE", "INSENSITIVE")):
+        out_key = "discrimination" if field == "mutation" else "sensitivity"
+        groups = {}
+        for p in probes:
+            e = record["probes"][p["id"]]
+            if not p.get(field):
+                if field == "mutation":
+                    e[out_key] = "NOT_RUN"
+                continue
+            if e["result"] != when:
+                e[out_key] = "NOT_RUN"
+            else:
+                groups.setdefault(p[field], []).append(p)
+        for ref, group in sorted(groups.items()):
+            apply_and_probe(ref, group, out_key, good, bad, record, subject_dir, runners, mutations, pristine)
+
+
+def apply_and_probe(ref, group, out_key, good, bad, record, subject_dir, runners, mutations, pristine):
+    """Apply one mutation, rerun its probes, restore the pristine file.
+
+    For a repair (`good` = DISCRIMINATES) the probe must stop observing; for a
+    weakening (`good` = SENSITIVE) it must start observing.
+    """
+    mut = mutations[ref]
+    want_observed = good == "SENSITIVE"
+    for edit in mutation_edits(mut):
+        if edit["file"] not in pristine:
+            raise NonVerdict(f"mutation {ref} targets an unpinned file {edit['file']}")
+    try:
+        mutated = mutated_texts(mut, lambda rel: pristine[rel].decode("utf-8"))
+    except ValueError as exc:
+        for p in group:
+            record["probes"][p["id"]][out_key] = "ANCHOR_ERROR"
+            record["probes"][p["id"]][out_key + "_detail"] = str(exc)
+        return
+    for rel, text in mutated.items():
+        (subject_dir / rel).write_text(text, encoding="utf-8")
+    try:
+        cargo_group = [p for p in group if p["kind"] == "cargo-test"]
+        if cargo_group:
+            built, statuses = cargo_run(subject_dir, runners["cargo"], [p["test"] for p in cargo_group])
+            for p in cargo_group:
+                e = record["probes"][p["id"]]
+                st = statuses.get(p["test"])
+                e["mutated_status" if out_key == "discrimination" else "sensitivity_status"] = st or "MISSING"
+                observed = st == "ok"
+                e[out_key] = ("BUILD_ERROR" if not built else
+                              good if observed == want_observed else bad)
+        for p in group:
+            if p["kind"] == "command":
+                e = record["probes"][p["id"]]
+                code = command_run(subject_dir, p)
+                e["mutated_exit" if out_key == "discrimination" else "sensitivity_exit"] = code
+                if command_result(p, code) == "NON_VERDICT":
+                    e[out_key] = "PROBE_ERROR"
+                else:
+                    e[out_key] = good if (code == 0) == want_observed else bad
+    finally:
+        for rel in mutated:
+            (subject_dir / rel).write_bytes(pristine[rel])
 
 
 def compare_expected(record, expected):
@@ -444,8 +536,8 @@ def compare_expected(record, expected):
         if got is None:
             mismatches[pid] = {"expected": want, "observed": "MISSING"}
             continue
-        obs = {"result": got.get("result"), "discrimination": got.get("discrimination")}
-        if obs != want:
+        obs = {k: got.get(k) for k in want}
+        if obs != want or not {"result", "discrimination"} <= set(want):
             mismatches[pid] = {"expected": want, "observed": obs}
     for pid in record["probes"]:
         if pid not in expected["probes"]:
@@ -561,6 +653,10 @@ def build_assessment(binding, controls, result, result_ref, binding_rel):
 
 
 def describe_not_counted(e):
+    if e.get("result") == "NOT_OBSERVED" and e.get("sensitivity") == "SENSITIVE":
+        return "NOT_OBSERVED by a probe shown to be sensitive (it observes the weakness when the protection is removed); not a PASS"
+    if e.get("result") == "NOT_OBSERVED" and e.get("sensitivity") not in (None, "NOT_RUN"):
+        return f"NOT_OBSERVED, but sensitivity is {e['sensitivity']}, so this says nothing about the weakness"
     if e.get("result") != "OBSERVED":
         return f"{e.get('result')}; not a PASS"
     if e["kind"] not in EXECUTABLE:
@@ -590,14 +686,21 @@ def build_markdown(binding, controls, result, assessment, binding_rel, result_re
     for row in assessment["properties"]:
         ids = sorted({e["control"] for pid, e in result["probes"].items() if counted(e, controls, row["id"])})
         out.append(f"| {row['id']} {row['property']} | **{row['status']}** | {', '.join(ids) or '-'} |")
+    sens = any("sensitivity" in e for e in result["probes"].values())
     out += ["", "Rows are not commensurable and are not combined (SPECIFICATION §7). AACP controls never "
-            "yield PASS.", "", "## Probes", "",
-            "| Probe | Control | Property | Relationship | Origin | Kind | Result | Discrimination |",
-            "| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |"]
+            "yield PASS.", "", "## Probes", ""]
+    if sens:
+        out += ["Discrimination: the weakness disappears when it alone is repaired. Sensitivity: a probe that "
+                "did not observe the weakness observes it when the protection alone is removed, so its "
+                "NOT_OBSERVED result is meaningful.", ""]
+    out += ["| Probe | Control | Property | Relationship | Origin | Kind | Result | Discrimination |"
+            + (" Sensitivity |" if sens else ""),
+            "| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |" + (" :--- |" if sens else "")]
     for pid, e in sorted(result["probes"].items()):
         c = controls[e["control"]]
         out.append(f"| {pid} | {e['control']} {c['title']} | {c['property'] or '-'} | {e['relationship']} | "
-                   f"{e['origin']} | {e['kind']} | {e.get('result')} | {e.get('discrimination')} |")
+                   f"{e['origin']} | {e['kind']} | {e.get('result')} | {e.get('discrimination')} |"
+                   + (f" {e.get('sensitivity', '-')} |" if sens else ""))
     if result.get("not_applicable"):
         out += ["", "## Not applicable", ""]
         out += [f"- {n['control']}: {n['reason']}" for n in result["not_applicable"]]
@@ -651,7 +754,7 @@ def strip_md(md):
 
 def compare(args):
     a, b = load_json(args.a), load_json(args.b)
-    keys = ("control", "kind", "relationship", "result", "discrimination")
+    keys = ("control", "kind", "relationship", "result", "discrimination", "sensitivity")
     pa = {k: {f: v.get(f) for f in keys} for k, v in a["probes"].items()}
     pb = {k: {f: v.get(f) for f in keys} for k, v in b["probes"].items()}
     diff = {k: {"a": pa.get(k), "b": pb.get(k)} for k in sorted(set(pa) | set(pb)) if pa.get(k) != pb.get(k)}

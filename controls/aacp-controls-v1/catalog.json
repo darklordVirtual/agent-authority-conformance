@@ -1,6 +1,6 @@
 {
   "schema": "aacp-control-catalog-v1",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Project-neutral AACP controls. A control names one weakness, the A-G property it bears on, and a probe contract: the scenario any binding must implement for the result to be comparable across projects. A control observes a weakness; it never certifies its absence. See docs/CONTROLS.md.",
   "result_vocabulary": {
     "OBSERVED": "the probe reproduced the weakness on the pristine subject",
@@ -378,9 +378,25 @@
       "origin": [
         "mythos:P-05"
       ]
+    },
+    {
+      "id": "AACP-X-04",
+      "property": null,
+      "title": "Persisted audit log fails verification after reload",
+      "question": "Does an untouched audit log that was persisted and reloaded fail its own integrity check, so the check cannot tell tampering from nothing?",
+      "probe_contract": {
+        "setup": "Write several audit records through the system's normal persistence path.",
+        "stimulus": "Reload the log without modifying it, as a restart would, and run the integrity check.",
+        "observation": "OBSERVED if verification fails on the untouched log.",
+        "repair": "Persist exactly the bytes that were hashed, so a reload recomputes the same hashes."
+      },
+      "origin": [
+        "aacp:remora-binding"
+      ]
     }
   ],
   "changes": [
-    "1.1.0: add normative_basis (specification text, rationale, boundary) to every A-G control; no control meaning changed."
+    "1.1.0: add normative_basis (specification text, rationale, boundary) to every A-G control; no control meaning changed.",
+    "1.2.0: add AACP-X-04 (persisted audit log fails verification after reload), found while binding REMORA."
   ]
 }
