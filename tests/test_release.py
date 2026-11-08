@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import hashlib
 import io
+import json
 from pathlib import Path
 import shutil
 import tarfile
@@ -207,6 +208,47 @@ class DistributionTests(unittest.TestCase):
         build_fake_dist(self.root, self.dist, self.version, entry="aacp = elsewhere:main")
         with self.assertRaisesRegex(release.ReleaseError, "console script"):
             self.check()
+
+
+
+class SbomSerialTest(unittest.TestCase):
+    def setUp(self):
+        self.dist = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, self.dist)
+        self.files = release.expected_files(VERSION)
+        (self.dist / self.files["wheel"]).write_bytes(b"wheel bytes")
+
+    def write_bom(self, **extra):
+        bom = {"bomFormat": "CycloneDX", "specVersion": "1.6", "version": 1, **extra}
+        (self.dist / self.files["sbom"]).write_text(json.dumps(bom), encoding="utf-8")
+
+    def read_bom(self):
+        return json.loads((self.dist / self.files["sbom"]).read_text(encoding="utf-8"))
+
+    def test_serial_is_added_and_deterministic(self):
+        # actions/attest refuses CycloneDX without serialNumber.
+        self.write_bom()
+        first = release.stamp_sbom_serial(self.dist, TAG)["serialNumber"]
+        self.assertRegex(first, r"^urn:uuid:[0-9a-f]{8}-[0-9a-f]{4}-5[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$")
+        self.assertEqual(self.read_bom()["serialNumber"], first)
+        self.write_bom()
+        self.assertEqual(release.stamp_sbom_serial(self.dist, TAG)["serialNumber"], first)
+        self.assertEqual(release.stamp_sbom_serial(self.dist, TAG)["serialNumber"], first)
+
+    def test_serial_follows_the_wheel(self):
+        self.write_bom()
+        first = release.stamp_sbom_serial(self.dist, TAG)["serialNumber"]
+        (self.dist / self.files["wheel"]).write_bytes(b"other wheel bytes")
+        self.write_bom()
+        self.assertNotEqual(release.stamp_sbom_serial(self.dist, TAG)["serialNumber"], first)
+
+    def test_foreign_serial_and_non_cyclonedx_are_refused(self):
+        self.write_bom(serialNumber="urn:uuid:00000000-0000-4000-8000-000000000000")
+        with self.assertRaises(release.ReleaseError):
+            release.stamp_sbom_serial(self.dist, TAG)
+        (self.dist / self.files["sbom"]).write_text(json.dumps({"spdxVersion": "SPDX-2.3"}), encoding="utf-8")
+        with self.assertRaises(release.ReleaseError):
+            release.stamp_sbom_serial(self.dist, TAG)
 
 
 if __name__ == "__main__":

@@ -161,6 +161,8 @@ jobs:
             --pyproject pyproject.toml --mc-type application \
             --output-reproducible --validate --of JSON \
             -o "dist/$SBOM" "$RUNNER_TEMP/sbom-env/bin/python"
+          # --output-reproducible drops serialNumber, which actions/attest requires.
+          python scripts/release.py sbom-serial --dist dist --tag "$TAG"
 
       - name: Write and verify SHA256SUMS.txt
         run: |

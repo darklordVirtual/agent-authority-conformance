@@ -19,6 +19,7 @@ import re
 import sys
 import tarfile
 import tomllib
+import uuid
 import zipfile
 from pathlib import Path
 
@@ -306,6 +307,33 @@ def check_dist(dist: Path, tag: str, root: Path = ROOT, rebuild: Path | None = N
     return result
 
 
+def stamp_sbom_serial(dist: Path, tag: str) -> dict:
+    """Give the SBOM a deterministic ``serialNumber``.
+
+    ``cyclonedx-py --output-reproducible`` omits ``serialNumber``, and
+    actions/attest refuses a CycloneDX document without one ("Unsupported SBOM
+    format"). A random UUID would break reproducibility, so the serial is a
+    UUIDv5 of the version and the wheel's SHA-256: the same wheel always gets
+    the same serial, and a different wheel a different one.
+    """
+    version = parse_tag(tag)
+    files = expected_files(version)
+    path = dist / files["sbom"]
+    try:
+        bom = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as error:
+        raise ReleaseError(f"cannot read SBOM {path.name}: {error}") from error
+    if bom.get("bomFormat") != "CycloneDX" or not bom.get("specVersion"):
+        raise ReleaseError(f"{path.name} is not a CycloneDX document")
+    wheel = sha256(dist / files["wheel"])
+    serial = "urn:uuid:" + str(uuid.uuid5(uuid.NAMESPACE_URL, f"aacp-conformance/{version}/sha256:{wheel}"))
+    if bom.get("serialNumber") not in (None, serial):
+        raise ReleaseError(f"{path.name} already has another serialNumber {bom['serialNumber']!r}")
+    bom["serialNumber"] = serial
+    path.write_text(json.dumps(bom, indent=2) + "\n", encoding="utf-8", newline="\n")
+    return {"sbom": files["sbom"], "serialNumber": serial}
+
+
 def _write_github_output(path: str, values: dict) -> None:
     with open(path, "a", encoding="utf-8") as handle:
         for key, value in values.items():
@@ -330,6 +358,9 @@ def main(argv=None) -> int:
     p.add_argument("--dist", required=True)
     p.add_argument("--tag", required=True)
     p.add_argument("--rebuild-dist")
+    p = commands.add_parser("sbom-serial", help="give the SBOM a deterministic serialNumber")
+    p.add_argument("--dist", required=True)
+    p.add_argument("--tag", required=True)
     p = commands.add_parser("checksums", help="write SHA256SUMS.txt")
     p.add_argument("--dist", required=True)
     p.add_argument("--out")
@@ -348,6 +379,8 @@ def main(argv=None) -> int:
         elif args.command == "check-dist":
             result = check_dist(Path(args.dist), args.tag,
                                 rebuild=Path(args.rebuild_dist) if args.rebuild_dist else None)
+        elif args.command == "sbom-serial":
+            result = stamp_sbom_serial(Path(args.dist), args.tag)
         elif args.command == "verify-checksums":
             names = None
             if args.tag:
