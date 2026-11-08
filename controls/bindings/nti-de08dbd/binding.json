@@ -549,9 +549,9 @@
   ],
   "not_applicable": [],
   "property_caveats": {
-    "A": "Token signature authenticity was not shown to fail: CapabilityToken::verify uses verify_strict over a canonical message and no forgery was attempted. Expiry, not-before and multi-process replay were not exercised.",
-    "B": "Issuer provenance is partly enforced: a token needs a configured issuer key and a local grant for the capability; that was not shown to fail. Delegation chains do not exist in the assessed API.",
-    "C": "The optional request signature covers id, actor, capability, action and input; argument substitution under a present, verified request signature was not attempted. Because that signature is optional and self-attested (row B), it does not establish exact-call binding.",
+    "A": "Boundary of AACP-A-01 is met: MaxExecutions is a caveat inside the signed CapabilityToken (message_to_sign covers caveats, lib.rs:76-81), so the limit belongs to the authorization artifact, not to a quota outside it. Token signature authenticity was not shown to fail: CapabilityToken::verify uses verify_strict over a canonical message and no forgery was attempted. Expiry, not-before and multi-process replay were not exercised.",
+    "B": "Boundaries are met: NTI has no authenticated channel or principal-key registry on the evaluate() path, and has not declared bearer semantics for tokens as a non-claim. If it does, the AACP-B-03 part of this row becomes OUT_OF_SCOPE for the token path. Issuer provenance is partly enforced: a token needs a configured issuer key and a local grant for the capability; that was not shown to fail. Delegation chains do not exist in the assessed API.",
+    "C": "Boundary of AACP-C-01 is met: probe P-C-01 sends no request signature, so the call is authorized by the token alone; the optional request signature is not on the mandatory path. If NTI declares tokens to be capabilities without call binding, this row becomes OUT_OF_SCOPE for the token path. The optional request signature covers id, actor, capability, action and input; argument substitution under a present, verified request signature was not attempted. Because that signature is optional and self-attested (row B), it does not establish exact-call binding.",
     "D": "Only two caveat types and one intent-policy path were exercised. P-D-03 shows the effect before the check with a real local file write; no payment or remote effect was produced."
   },
   "notes": [
