@@ -1,0 +1,13 @@
+{
+  "agent_reached_effect": false,
+  "agent_uids": "501",
+  "executor_start": {
+    "refused_to_start": "custody split violated for role 'executor': the process holding the effect credentials runs as uid 501, which REMORA_AGENT_OS_UIDS names as an agent uid"
+  },
+  "isolation": "os_user",
+  "platform": "darwin",
+  "profile": "controlled_pilot",
+  "runner_observed_effects": [],
+  "scenario": "darwin_os_user_naming_own_uid",
+  "schema_version": 2
+}

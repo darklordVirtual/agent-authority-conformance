@@ -1,0 +1,120 @@
+{
+  "authority_pid": 99320,
+  "cases": {
+    "authority_holds_credential": {
+      "custody_refused": true,
+      "pid": 99335
+    },
+    "concurrent": {
+      "attempts": [
+        {
+          "effect_count": 1,
+          "executed": false,
+          "pid": 99334,
+          "refusal_reason": "nonce_already_consumed",
+          "state_unknown": false
+        },
+        {
+          "effect_count": 1,
+          "executed": true,
+          "pid": 99333,
+          "refusal_reason": null,
+          "state_unknown": false
+        }
+      ],
+      "effect_count": 1
+    },
+    "executor_holds_signing_key": {
+      "custody_refused": true,
+      "pid": 99336
+    },
+    "expired": {
+      "effect_count": 0,
+      "executed": false,
+      "pid": 99328,
+      "refusal_reason": "lease_expired",
+      "state_unknown": false
+    },
+    "lost_response": {
+      "effect_count": 1,
+      "executed": false,
+      "pid": 99331,
+      "refusal_reason": "tool_failed_nonce_burned",
+      "state_unknown": true
+    },
+    "lost_response_restart": {
+      "effect_count": 1,
+      "executed": false,
+      "pid": 99332,
+      "refusal_reason": "nonce_already_consumed",
+      "state_unknown": false
+    },
+    "restart_replay": {
+      "effect_count": 1,
+      "executed": false,
+      "pid": 99323,
+      "refusal_reason": "nonce_already_consumed",
+      "state_unknown": false
+    },
+    "self_mint": {
+      "effect_count": 0,
+      "executed": false,
+      "pid": 99330,
+      "refusal_reason": "custody_violation",
+      "state_unknown": false
+    },
+    "tampered": {
+      "effect_count": 0,
+      "executed": false,
+      "pid": 99329,
+      "refusal_reason": "signature_invalid",
+      "state_unknown": false
+    },
+    "undeclared_inventory": {
+      "custody_refused": true,
+      "pid": 99337
+    },
+    "valid": {
+      "effect_count": 1,
+      "executed": true,
+      "pid": 99321,
+      "refusal_reason": null,
+      "state_unknown": false
+    },
+    "wrong_call": {
+      "effect_count": 0,
+      "executed": false,
+      "pid": 99324,
+      "refusal_reason": "tool_args_hash_mismatch",
+      "state_unknown": false
+    },
+    "wrong_principal": {
+      "effect_count": 0,
+      "executed": false,
+      "pid": 99326,
+      "refusal_reason": "actor_identity_mismatch",
+      "state_unknown": false
+    },
+    "wrong_runtime": {
+      "effect_count": 0,
+      "executed": false,
+      "pid": 99327,
+      "refusal_reason": "runtime_identity_mismatch",
+      "state_unknown": false
+    },
+    "wrong_tenant": {
+      "effect_count": 0,
+      "executed": false,
+      "pid": 99325,
+      "refusal_reason": "tenant_mismatch",
+      "state_unknown": false
+    }
+  },
+  "claim_boundary": {
+    "external_reproduction": false,
+    "host_isolation": "NOT_ESTABLISHED",
+    "scope": "separate local processes, same OS user, synthetic credential",
+    "undeclared_credentials": "NOT_ESTABLISHED"
+  },
+  "schema_version": 1
+}

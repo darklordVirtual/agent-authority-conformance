@@ -1,0 +1,13 @@
+{
+  "agent_reached_effect": false,
+  "agent_uids": "",
+  "executor_start": {
+    "refused_to_start": "custody split violated for role 'executor': REMORA_EXECUTION_ISOLATION='same_user' makes no custody claim and is accepted only under the review profile"
+  },
+  "isolation": "same_user",
+  "platform": "darwin",
+  "profile": "controlled_pilot",
+  "runner_observed_effects": [],
+  "scenario": "darwin_same_user_declared_controlled_pilot",
+  "schema_version": 2
+}

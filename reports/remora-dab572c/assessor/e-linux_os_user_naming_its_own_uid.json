@@ -1,0 +1,13 @@
+{
+  "agent_reached_effect": false,
+  "agent_uids": "1001",
+  "executor_start": {
+    "refused_to_start": "custody split violated for role 'executor': the process holding the effect credentials runs as uid 1001, which REMORA_AGENT_OS_UIDS names as an agent uid"
+  },
+  "isolation": "os_user",
+  "platform": "linux",
+  "profile": "controlled_pilot",
+  "runner_observed_effects": [],
+  "scenario": "linux_os_user_naming_its_own_uid",
+  "schema_version": 2
+}
