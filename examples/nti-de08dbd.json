@@ -4,17 +4,17 @@
   "system_version": "0.1.7",
   "revision": "de08dbdcd27e01c27585d936091c69b59d173a97",
   "assessed_at": "2026-11-08",
-  "assessor": "Agent Authority Conformance project (maintainer Stian Skogbrott; drafted and executed by an AI agent, reviewed by the maintainer)",
+  "assessor": "Agent Authority Conformance project (maintainer Stian Skogbrott; probes drafted and executed by an AI agent from the Mythos and OpenAI Daybreak sweeps, reviewed by the maintainer)",
   "scope": {
-    "process_model": "single-process; in-process library calls to TrustEngine, DistributedRegistry, RecommendationLayer and AgentMeshNode from Rust integration tests",
-    "deployment_model": "library API only; the HTTP API in src/network.rs, the Python bindings and multi-node operation were not exercised",
-    "external_effects": "none",
+    "process_model": "single-process; in-process library calls to TrustEngine, Orchestrator, AutonomousAgent, DistributedRegistry, RecommendationLayer and AgentMeshNode from Rust integration tests, plus static checks of src/network.rs and the witness package",
+    "deployment_model": "library API only; the HTTP API, Python bindings and multi-node operation were not exercised at runtime",
+    "external_effects": "mixed",
     "trust_assumptions": [
-      "Assessment is limited to the immutable public revision named above and the AACP-authored tests and mutations in docs/nti-source-inspection/",
+      "Limited to the pinned revision and the probes in controls/bindings/nti-de08dbd",
       "The implementer has not supplied a scope declaration or explicit non-claims; properties are assessed against the public library API as published",
-      "Every FAIL row rests on a test that passes on the pristine revision and fails when the weakness alone is repaired (scripts/run_nti_inspection.py)",
-      "The tests and mutations were written by the assessor; this is an author run and its CI rerun a reproduction, not an independent implementation",
-      "NTI's own witness package (conformance/witness) is treated as REPORTED evidence and was not relied on"
+      "Probe P-D-03 performs a real file write in a temporary directory; every other effect is the decision returned by the library",
+      "Probes and repairs were written by the assessor from the Mythos and OpenAI Daybreak sweeps; runs are author runs or reproductions, not independent implementations",
+      "NTI's own witness package is treated as REPORTED producer evidence and is not relied on"
     ],
     "explicit_non_claims": []
   },
@@ -25,25 +25,25 @@
       "status": "FAIL",
       "evidence_tier": "RESOLVED",
       "claimed_status": "not supplied by implementer",
-      "reasoning": "A capability token carrying MaxExecutions(1) is accepted a second time once ten unrelated records have been committed to an audit batch, because the counter reads only the uncommitted event buffer (lib.rs:396-411, 594-612). The single-use semantics named by property A do not hold under that tested condition. The test passes on the pristine revision and fails when the counter also reads committed batches (M-04).",
-      "caveat": "Token signature authenticity and tamper detection were not shown to fail: CapabilityToken::verify uses verify_strict over a canonical message and no attempt to forge or modify a token was made. Expiry, not-before and multi-process replay were not exercised. Related observations outside this row: revocation of marketplace credentials fails open (NTI-10, partial mapping to A) and consensus votes carry no nonce (NTI-02, static only).",
+      "reasoning": "AACP-A-01 (Use-limited authorization survives a persistence boundary) is OBSERVED by probe P-A-01 and discriminates under repair M-04 (count token uses across committed batches as well as the pending buffer).",
+      "caveat": "Token signature authenticity was not shown to fail: CapabilityToken::verify uses verify_strict over a canonical message and no forgery was attempted. Expiry, not-before and multi-process replay were not exercised. Also: P-A-02 (AACP-A-02, partial, cargo-test): OBSERVED, DISCRIMINATES, but the relationship is partial; P-A-03 (AACP-A-03, structural, cargo-test): OBSERVED, DISCRIMINATES, but the relationship is structural; S-A-04 (AACP-A-04, exact, source-check): OBSERVED by static source check only.",
       "evidence": [
         {
           "kind": "test",
-          "reference": "docs/nti-source-inspection/reproduction_candidates.rs#nti_04_max_executions_resets_on_batch_commit",
-          "command": "python scripts/run_nti_inspection.py --nti <checkout> --out <file> --run-id <id>",
-          "description": "Uses a MaxExecutions(1) token, is denied on the second use, records eight unrelated requests to trigger commit_batch, then is allowed again."
+          "reference": "controls/bindings/nti-de08dbd/tests/reproduction_candidates.rs#nti_04_max_executions_resets_on_batch_commit",
+          "command": "python -m conformance.controls run --binding controls/bindings/nti-de08dbd --subject <checkout> --out <result.json> --run-id <id>",
+          "description": "Probe P-A-01 for AACP-A-01: A MaxExecutions(1) token is denied on second use, then allowed again after eight unrelated records trigger commit_batch."
         },
         {
           "kind": "code",
           "reference": "https://github.com/abisheakp197/Neutral-Trust-Infrastructure/blob/de08dbdcd27e01c27585d936091c69b59d173a97/ube-foundation/src/lib.rs#L396-L411",
           "revision": "de08dbdcd27e01c27585d936091c69b59d173a97",
-          "description": "MaxExecutions counts engine.events only."
+          "description": "Subject code exercised by probe P-A-01."
         },
         {
           "kind": "artifact",
-          "reference": "docs/nti-source-inspection/results/2026-11-08-local-author-run-2.json",
-          "description": "Result record: baseline ok, mutation M-04 DISCRIMINATES."
+          "reference": "reports/nti-de08dbd/results/nti-de08dbd-2026-11-08-author-1.json",
+          "description": "Result record of the run this assessment was generated from."
         }
       ]
     },
@@ -53,34 +53,49 @@
       "status": "FAIL",
       "evidence_tier": "RESOLVED",
       "claimed_status": "not supplied by implementer",
-      "reasoning": "TrustEngine::evaluate grants an action to whatever actor string the request names. With no signature at all, a request naming a granted actor is allowed (NTI-01). With a signature, the verifying key is taken from the request and never bound to the actor, so any key works (NTI-01b). A capability token has no subject: the token path never examines request.actor, so one token authorizes any actor string (NTI-08). Each test passes on the pristine revision and fails under its single repair (M-01, M-08).",
-      "caveat": "Issuer provenance is partly enforced: a token is accepted only if its root_actor has a configured issuer key and a local grant for the capability; this was not shown to fail. Delegation chains do not exist in the assessed API, so attenuation was not assessed.",
+      "reasoning": "AACP-B-01 (Unauthenticated principal accepted) is OBSERVED by probe P-B-01 and discriminates under repair M-01 (require a request signature by the key registered for the actor). AACP-B-02 (Principal key is self-attested) is OBSERVED by probe P-B-02 and discriminates under repair M-01 (require a request signature by the key registered for the actor). AACP-B-03 (Bearer authorization not bound to a subject) is OBSERVED by probe P-B-03 and discriminates under repair M-08 (bind the token to the requesting actor).",
+      "caveat": "Issuer provenance is partly enforced: a token needs a configured issuer key and a local grant for the capability; that was not shown to fail. Delegation chains do not exist in the assessed API. Also: S-B-03 (AACP-B-03, exact, source-check): OBSERVED by static source check only, DISCRIMINATES; S-B-04 (AACP-B-04, exact, source-check): OBSERVED by static source check only.",
       "evidence": [
         {
           "kind": "test",
-          "reference": "docs/nti-source-inspection/reproduction_candidates.rs#nti_01_actor_spoofing_no_signature_required",
-          "description": "Unsigned request naming the granted actor 'admin' is allowed."
-        },
-        {
-          "kind": "test",
-          "reference": "docs/nti-source-inspection/reproduction_candidates.rs#nti_01b_signature_is_self_attested",
-          "description": "Request signed by an unregistered key while naming 'admin' is allowed."
-        },
-        {
-          "kind": "test",
-          "reference": "docs/nti-source-inspection/reproduction_candidates.rs#nti_08_token_is_unbound_bearer",
-          "description": "One token is accepted for actors 'alice', 'mallory', '' and 'issuer'."
+          "reference": "controls/bindings/nti-de08dbd/tests/reproduction_candidates.rs#nti_01_actor_spoofing_no_signature_required",
+          "command": "python -m conformance.controls run --binding controls/bindings/nti-de08dbd --subject <checkout> --out <result.json> --run-id <id>",
+          "description": "Probe P-B-01 for AACP-B-01: An unsigned request naming the granted actor 'admin' is allowed."
         },
         {
           "kind": "code",
           "reference": "https://github.com/abisheakp197/Neutral-Trust-Infrastructure/blob/de08dbdcd27e01c27585d936091c69b59d173a97/ube-foundation/src/lib.rs#L685-L776",
           "revision": "de08dbdcd27e01c27585d936091c69b59d173a97",
-          "description": "Optional signature checks and the final capabilities[actor] decision."
+          "description": "Subject code exercised by probe P-B-01."
+        },
+        {
+          "kind": "test",
+          "reference": "controls/bindings/nti-de08dbd/tests/reproduction_candidates.rs#nti_01b_signature_is_self_attested",
+          "command": "python -m conformance.controls run --binding controls/bindings/nti-de08dbd --subject <checkout> --out <result.json> --run-id <id>",
+          "description": "Probe P-B-02 for AACP-B-02: A request signed by an unregistered key it supplies itself, naming 'admin', is allowed."
+        },
+        {
+          "kind": "code",
+          "reference": "https://github.com/abisheakp197/Neutral-Trust-Infrastructure/blob/de08dbdcd27e01c27585d936091c69b59d173a97/ube-foundation/src/lib.rs#L685-L710",
+          "revision": "de08dbdcd27e01c27585d936091c69b59d173a97",
+          "description": "Subject code exercised by probe P-B-02."
+        },
+        {
+          "kind": "test",
+          "reference": "controls/bindings/nti-de08dbd/tests/reproduction_candidates.rs#nti_08_token_is_unbound_bearer",
+          "command": "python -m conformance.controls run --binding controls/bindings/nti-de08dbd --subject <checkout> --out <result.json> --run-id <id>",
+          "description": "Probe P-B-03 for AACP-B-03: One capability token is accepted for actors 'alice', 'mallory', '' and 'issuer'."
+        },
+        {
+          "kind": "code",
+          "reference": "https://github.com/abisheakp197/Neutral-Trust-Infrastructure/blob/de08dbdcd27e01c27585d936091c69b59d173a97/ube-foundation/src/lib.rs#L712-L759",
+          "revision": "de08dbdcd27e01c27585d936091c69b59d173a97",
+          "description": "Subject code exercised by probe P-B-03."
         },
         {
           "kind": "artifact",
-          "reference": "docs/nti-source-inspection/results/2026-11-08-local-author-run-2.json",
-          "description": "Result record: baseline ok, mutations M-01 and M-08 DISCRIMINATE."
+          "reference": "reports/nti-de08dbd/results/nti-de08dbd-2026-11-08-author-1.json",
+          "description": "Result record of the run this assessment was generated from."
         }
       ]
     },
@@ -90,24 +105,25 @@
       "status": "FAIL",
       "evidence_tier": "RESOLVED",
       "claimed_status": "not supplied by implementer",
-      "reasoning": "The token signature covers id, issuer, capability and caveats only (lib.rs:76-81). The same token authorizes two calls with different call identities, targets and amounts (NTI-08b). The test passes on the pristine revision and fails when the token is bound to one call identity (M-08b).",
-      "caveat": "The optional request signature does cover id, actor, capability, action and input (lib.rs:244-255); argument substitution under a present, verified request signature was not attempted. Because that signature is optional and self-attested (row B), it does not establish exact-call binding by itself.",
+      "reasoning": "AACP-C-01 (Authorization not bound to the exact call) is OBSERVED by probe P-C-01 and discriminates under repair M-08b (bind the token to one call identity).",
+      "caveat": "The optional request signature covers id, actor, capability, action and input; argument substitution under a present, verified request signature was not attempted. Because that signature is optional and self-attested (row B), it does not establish exact-call binding.",
       "evidence": [
         {
           "kind": "test",
-          "reference": "docs/nti-source-inspection/reproduction_candidates.rs#nti_08b_token_not_bound_to_call",
-          "description": "One token is accepted for call c1 (acct-A, amount 1) and call c2 (acct-Z, amount 999)."
+          "reference": "controls/bindings/nti-de08dbd/tests/reproduction_candidates.rs#nti_08b_token_not_bound_to_call",
+          "command": "python -m conformance.controls run --binding controls/bindings/nti-de08dbd --subject <checkout> --out <result.json> --run-id <id>",
+          "description": "Probe P-C-01 for AACP-C-01: One token authorizes call c1 (acct-A, amount 1) and call c2 (acct-Z, amount 999)."
         },
         {
           "kind": "code",
           "reference": "https://github.com/abisheakp197/Neutral-Trust-Infrastructure/blob/de08dbdcd27e01c27585d936091c69b59d173a97/ube-foundation/src/lib.rs#L76-L81",
           "revision": "de08dbdcd27e01c27585d936091c69b59d173a97",
-          "description": "CapabilityToken::message_to_sign."
+          "description": "Subject code exercised by probe P-C-01."
         },
         {
           "kind": "artifact",
-          "reference": "docs/nti-source-inspection/results/2026-11-08-local-author-run-2.json",
-          "description": "Result record: baseline ok, mutation M-08b DISCRIMINATES."
+          "reference": "reports/nti-de08dbd/results/nti-de08dbd-2026-11-08-author-1.json",
+          "description": "Result record of the run this assessment was generated from."
         }
       ]
     },
@@ -117,29 +133,49 @@
       "status": "FAIL",
       "evidence_tier": "RESOLVED",
       "claimed_status": "not supplied by implementer",
-      "reasoning": "Caveats meant to bound the resource and value of an action are not enforced in their operational meaning. ValueLimit(100, NOK) accepts amounts given as a string, float, negative number or object, all read as 0, and ignores the currency (NTI-05). PathRestricted('/srv/app/data') accepts '/srv/app/data/../../../etc/passwd' and '/srv/app/data_secret/key' (NTI-06). Each test passes on the pristine revision and fails under its single repair (M-05, M-06).",
-      "caveat": "Only the two caveat types were exercised. IntentVerifier and Orchestrator-level policy checks were inspected but not tested. No real file or payment effect was produced; the decision returned by evaluate() is the observed outcome.",
+      "reasoning": "AACP-D-01 (Value constraint defeated by type confusion) is OBSERVED by probe P-D-01 and discriminates under repair M-05 (reject an amount that is not a non-negative integer). AACP-D-02 (Resource constraint not canonicalised) is OBSERVED by probe P-D-02 and discriminates under repair M-06 (component-wise prefix match and reject parent-directory components). AACP-D-03 (Policy evaluated after the effect) is OBSERVED by probe P-D-03 and discriminates under repair M-13 (evaluate intent policies before dispatch).",
+      "caveat": "Only two caveat types and one intent-policy path were exercised. P-D-03 shows the effect before the check with a real local file write; no payment or remote effect was produced. Also: S-D-03 (AACP-D-03, exact, source-check): OBSERVED by static source check only, DISCRIMINATES.",
       "evidence": [
         {
           "kind": "test",
-          "reference": "docs/nti-source-inspection/reproduction_candidates.rs#nti_05_value_limit_type_confusion",
-          "description": "Four non-u64 encodings of 1000000 pass a limit of 100."
-        },
-        {
-          "kind": "test",
-          "reference": "docs/nti-source-inspection/reproduction_candidates.rs#nti_06_path_prefix_escape",
-          "description": "Three paths outside the restricted prefix pass."
+          "reference": "controls/bindings/nti-de08dbd/tests/reproduction_candidates.rs#nti_05_value_limit_type_confusion",
+          "command": "python -m conformance.controls run --binding controls/bindings/nti-de08dbd --subject <checkout> --out <result.json> --run-id <id>",
+          "description": "Probe P-D-01 for AACP-D-01: Four non-integer encodings of 1000000 pass ValueLimit(100, NOK); currency is not compared."
         },
         {
           "kind": "code",
-          "reference": "https://github.com/abisheakp197/Neutral-Trust-Infrastructure/blob/de08dbdcd27e01c27585d936091c69b59d173a97/ube-foundation/src/lib.rs#L412-L429",
+          "reference": "https://github.com/abisheakp197/Neutral-Trust-Infrastructure/blob/de08dbdcd27e01c27585d936091c69b59d173a97/ube-foundation/src/lib.rs#L412-L420",
           "revision": "de08dbdcd27e01c27585d936091c69b59d173a97",
-          "description": "ValueLimit and PathRestricted interpretation."
+          "description": "Subject code exercised by probe P-D-01."
+        },
+        {
+          "kind": "test",
+          "reference": "controls/bindings/nti-de08dbd/tests/reproduction_candidates.rs#nti_06_path_prefix_escape",
+          "command": "python -m conformance.controls run --binding controls/bindings/nti-de08dbd --subject <checkout> --out <result.json> --run-id <id>",
+          "description": "Probe P-D-02 for AACP-D-02: Three paths outside PathRestricted('/srv/app/data') pass, by traversal and sibling prefix."
+        },
+        {
+          "kind": "code",
+          "reference": "https://github.com/abisheakp197/Neutral-Trust-Infrastructure/blob/de08dbdcd27e01c27585d936091c69b59d173a97/ube-foundation/src/lib.rs#L421-L429",
+          "revision": "de08dbdcd27e01c27585d936091c69b59d173a97",
+          "description": "Subject code exercised by probe P-D-02."
+        },
+        {
+          "kind": "test",
+          "reference": "controls/bindings/nti-de08dbd/tests/reproduction_candidates.rs#nti_13_intent_policy_checked_after_effect",
+          "command": "python -m conformance.controls run --binding controls/bindings/nti-de08dbd --subject <checkout> --out <result.json> --run-id <id>",
+          "description": "Probe P-D-03 for AACP-D-03: In FailSafe mode, a write_file forbidden by an intent policy reports a violation but the file has already been written (real write in a temporary directory)."
+        },
+        {
+          "kind": "code",
+          "reference": "https://github.com/abisheakp197/Neutral-Trust-Infrastructure/blob/de08dbdcd27e01c27585d936091c69b59d173a97/ube-foundation/src/lib.rs#L1591-L1611",
+          "revision": "de08dbdcd27e01c27585d936091c69b59d173a97",
+          "description": "Subject code exercised by probe P-D-03."
         },
         {
           "kind": "artifact",
-          "reference": "docs/nti-source-inspection/results/2026-11-08-local-author-run-2.json",
-          "description": "Result record: baseline ok, mutations M-05 and M-06 DISCRIMINATE."
+          "reference": "reports/nti-de08dbd/results/nti-de08dbd-2026-11-08-author-1.json",
+          "description": "Result record of the run this assessment was generated from."
         }
       ]
     },
@@ -148,8 +184,8 @@
       "property": "Execution-Boundary Integrity",
       "status": "UNTESTED",
       "evidence_tier": "NONE",
-      "reasoning": "Neither half of the SPECIFICATION §12 procedure was performed: no credential topology register exists for NTI and no bypass attempts against a running deployment were made.",
-      "caveat": "UNTESTED records absent evidence, not failure. Static reading suggests SystemModule writes files with no capability check of its own, which a §12.2 attempt could test.",
+      "reasoning": "No executed, exact, discriminating probe observed a weakness for this property.",
+      "caveat": "UNTESTED records absent evidence, not failure. AACP controls never yield PASS; a PASS needs an assessor's direct evidence (SPECIFICATION \u00a75).",
       "evidence": []
     },
     {
@@ -157,8 +193,8 @@
       "property": "TOCTOU Resistance",
       "status": "UNTESTED",
       "evidence_tier": "NONE",
-      "reasoning": "No test exercised a change of state, expiry or target between evaluation and dispatch, or concurrent use.",
-      "caveat": "UNTESTED records absent evidence, not failure. Orchestrator::run_task evaluates immediately before dispatch in-process; that ordering was read, not tested.",
+      "reasoning": "No executed, exact, discriminating probe observed a weakness for this property.",
+      "caveat": "UNTESTED records absent evidence, not failure. AACP controls never yield PASS; a PASS needs an assessor's direct evidence (SPECIFICATION \u00a75).",
       "evidence": []
     },
     {
@@ -166,16 +202,17 @@
       "property": "Effect Verification",
       "status": "UNTESTED",
       "evidence_tier": "NONE",
-      "reasoning": "No test exercised read-back of an external effect.",
-      "caveat": "UNTESTED records absent evidence, not failure. Static reading found module-output agreement checks across modules, not effect read-back.",
+      "reasoning": "No executed, exact, discriminating probe observed a weakness for this property.",
+      "caveat": "UNTESTED records absent evidence, not failure. AACP controls never yield PASS; a PASS needs an assessor's direct evidence (SPECIFICATION \u00a75).",
       "evidence": []
     }
   ],
   "notes": [
-    "No aggregate is implied. Per SPECIFICATION §7 the rows are not commensurable and must not be combined into a score or ranking.",
-    "Additional reproduced observations without an A-G status (relationship in parentheses): NTI-03 air-gap bundles trusted on their embedded signer key (structural to A, state-sync artifact rather than an authorization artifact); NTI-07 trailing audit batches removable undetected (no_mapping, audit integrity is outside the model); NTI-09 unauthenticated handshake (no_mapping, transport); NTI-10 revocation fail-open for marketplace credentials (partial to A); NTI-11 odd-node duplication in the engine's audit Merkle root (no_mapping). Each passes on the pristine revision and fails under its single repair.",
-    "Static-only observations, not executed: NTI-02 /vote signs Allow for any proposal; NTI-12 hygiene; P-01 to P-05 on the PR #63 witness package. See docs/NTI-SOURCE-INSPECTION.md.",
-    "Reproduce: python scripts/run_nti_inspection.py --nti <checkout at the revision> --out <file> --run-id <id>; CI: .github/workflows/nti-inspection.yml.",
-    "Implementer review: not yet requested. Disagreement will be recorded, not normalized away (SPECIFICATION §8)."
+    "No aggregate is implied. Per SPECIFICATION \u00a77 the rows are not commensurable and must not be combined into a score or ranking.",
+    "Generated by `python -m conformance.controls report` from catalog controls/aacp-controls-v1/catalog.json v1.0.0 and binding controls/bindings/nti-de08dbd. FAIL requires an executed probe with an exact relationship that is OBSERVED and DISCRIMINATES under its declared repair.",
+    "Controls outside A-G: AACP-X-01 Audit log tail truncation undetected via P-X-01 (cargo-test): OBSERVED, DISCRIMINATES; AACP-X-02 Merkle root ambiguous under odd-node duplication via P-X-02 (cargo-test): OBSERVED, DISCRIMINATES; AACP-X-03 Key exchange with an unauthenticated peer via P-X-03 (cargo-test): OBSERVED, DISCRIMINATES; AACP-EV-01 Bound evidence digest is a constant via S-EV-01 (source-check): OBSERVED; AACP-EV-02 Evidence package does not attest the code under assessment via S-EV-02 (source-check): OBSERVED; AACP-EV-03 Stale evidence re-sealable under a new commit via S-EV-03 (source-check): OBSERVED; AACP-EV-04 Verifier trust anchor shipped inside the package via S-EV-04 (source-check): OBSERVED; AACP-EV-05 Evidence totals not derived from the run via S-EV-05 (source-check): OBSERVED.",
+    "Probe origins: 'mythos' from the Claude Mythos sweep of 2026-11-08, 'daybreak' from the OpenAI Daybreak source checks (nti_security_checks.ps1). A static probe never sets a row status; it is recorded alongside.",
+    "Implementer review: not yet requested. Disagreement will be recorded, not normalized away (SPECIFICATION \u00a78).",
+    "Reproduce: python -m conformance.controls run --binding controls/bindings/nti-de08dbd --subject <checkout at de08dbdcd27e01c27585d936091c69b59d173a97> --out <result.json> --run-id <id>."
   ]
 }
