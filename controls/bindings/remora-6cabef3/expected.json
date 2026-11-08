@@ -1,6 +1,6 @@
 {
   "schema": "aacp-control-expected-v1",
-  "note": "Authored before the recorded run, from source reading of dab572c and development runs of each probe and weakening in a disposable checkout. Never edit to match output; a changed expectation is a new run.",
+  "note": "Authored before the recorded run, from source reading of 6cabef3 and development runs of each probe and weakening in a disposable checkout. Never edit to match output; a changed expectation is a new run.",
   "probes": {
     "P-A-01": {
       "result": "NOT_OBSERVED",

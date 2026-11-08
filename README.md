@@ -91,7 +91,7 @@ A control names one weakness and the A-G property it bears on; a binding probes 
 | [`remora-b5e4c42`](reports/remora-b5e4c42/REPORT.md) | REMORA `b5e4c42` (fix) | 1.2.0 | all 20 not observed, all sensitive |
 | [`remora-428b823`](reports/remora-428b823/REPORT.md) | REMORA `428b823` | 1.3.0 | AACP-CY-11 and AACP-F-01 (ACCEPT path) observed; E-01 observed (partial) |
 | [`remora-eed92c8`](reports/remora-eed92c8/REPORT.md) | REMORA `eed92c8` (fix) | 1.3.0 | 36 of 37 not observed, all sensitive; E-01 observed (partial) |
-| [`remora-dab572c`](reports/remora-dab572c/REPORT.md) | REMORA `dab572c` (custody rule 4) | 1.3.0 | 37 of 38 not observed, all sensitive, including the new same-user split probe P-E-01s; E-01 single-process observed (partial, a REMORA non-claim) |
+| [`remora-6cabef3`](reports/remora-6cabef3/REPORT.md) | REMORA `6cabef3` (custody rule 4) | 1.3.0 | 37 of 38 not observed, all sensitive, including the new same-user split probe P-E-01s; E-01 single-process observed (partial, a REMORA non-claim) |
 
 These are self-assessments (`AUTHOR_RUN`); the `controls` workflow reruns every binding as a `REPRODUCTION` on a clean runner. Reproductions by others, and bindings that implement the same probe contracts independently, are welcome: `python -m conformance.controls run --binding controls/bindings/<id> --subject <checkout> --out <result.json> --run-id <id> --independence REPRODUCTION`. Use a disposable environment; a run executes the subject's code.
 
@@ -101,12 +101,12 @@ A `PASS` is assigned in an assessment, not by a control run. The assessor names 
 
 | Assessment | Subject | A | B | C | D | E | F | G |
 |---|---|---|---|---|---|---|---|---|
-| [`remora-dab572c`](reports/remora-dab572c/ASSESSMENT.md) ([JSON](examples/remora-dab572c-assessor.json)) | REMORA `dab572c` | PASS | PASS | PASS | PASS | PASS | PASS | PASS |
+| [`remora-6cabef3`](reports/remora-6cabef3/ASSESSMENT.md) ([JSON](examples/remora-6cabef3-assessor.json)) | REMORA `6cabef3` | PASS | PASS | PASS | PASS | PASS | PASS | PASS |
 
-What backs the `remora-dab572c` rows:
-- Each row rests on the sensitive probes of the [control run](reports/remora-dab572c/REPORT.md) and REMORA's own tests for the property. The tests were run at the same revision, and their JUnit records are committed in [`reports/remora-dab572c/assessor/`](reports/remora-dab572c/assessor/).
+What backs the `remora-6cabef3` rows:
+- Each row rests on the sensitive probes of the [control run](reports/remora-6cabef3/REPORT.md) and REMORA's own tests for the property. The tests were run at the same revision, and their JUnit records are committed in [`reports/remora-6cabef3/assessor/`](reports/remora-6cabef3/assessor/).
 - E is a `PASS` only where the process holding the effect credential runs as a separate OS user. REMORA's custody guard checks that under `controlled_pilot`. The single-process deployment and a same-user split still leak, and both are kept in the record as REMORA non-claims (`OUT_OF_SCOPE`).
-- The E bypass attempts first found that leak at `eed92c8`. REMORA fixed it in `dab572c` (custody rule 4).
+- The E bypass attempts first found that leak at `eed92c8`. REMORA fixed it with custody rule 4 (`63615f5`), assessed here at the PR head `6cabef3`.
 - This is a self-assessment (`AUTHOR_RUN`), not an independent review.
 
 ## Runs against other projects

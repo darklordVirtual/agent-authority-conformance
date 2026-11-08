@@ -1,6 +1,6 @@
 {
  "schema": "aacp-control-binding-v1",
- "binding_id": "remora-dab572c",
+ "binding_id": "remora-6cabef3",
  "catalog": "controls/aacp-controls-v1.3.0/catalog.json",
  "assessor": "Agent Authority Conformance project (maintainer Stian Skogbrott, who also maintains REMORA; probes drafted and executed by an AI agent, reviewed by the maintainer)",
  "claimed_status": "not supplied as an AACP scope declaration",
@@ -8,7 +8,7 @@
   "name": "REMORA (remora-assurance)",
   "version": "0.12.0",
   "repository": "https://github.com/darklordVirtual/REMORA-research",
-  "revision": "dab572c9d001b9a76ca7adfe8bcac379b30e3b6a",
+  "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
   "files": {
    ".github/workflows/attestation.yml": "a123c8b9a75acd60a274b5c95bb3904b790681dd6d030a2ea71f25153b2a18f9",
    "remora/adapters/audit/jsonl.py": "8521a8543f1b88c894f22adeb5c1eae76ce0ce4122d575c403295694f04a47f1",
@@ -17,7 +17,7 @@
    "remora/capabilities/resource.py": "2bb7b0cfb442c20c1dee1b0500b89849c1f6a950cd4c9f71343e1b19e7e9d138",
    "remora/enforcement/capability_mediator.py": "3d19d7c1a5a0a85d0b5d3033dbc6cd2306b612f542a3d6ecd5caf86da6784c4a",
    "remora/enforcement/cumulative_limits.py": "2f5c09f1755ec4eb211fb4e53021878758cc34ae81b49d2e7aa6a480c0b80c88",
-   "remora/enforcement/custody.py": "ae80868c704cfa081927cbdb45e1f3b52ec5f616e8f77d013b39cbae2c2081fc",
+   "remora/enforcement/custody.py": "f403079b10b7861a87508bfa4180c75ae8b06d33cd33c92aaa9200d7cbf2da65",
    "remora/enforcement/gate.py": "d34a94ab376ffbfac0f2c0153805ee7e101533ddf588530e47126f61019d0eb7",
    "remora/enforcement/outbox.py": "a82d9abf460a49a539909a612dc097f37140c7bca7e22cb11ff88ec4acdb52d4",
    "remora/enforcement/token.py": "18410713baf4a85ce92190006723579db3a080a63a3797f2b3ab4536e04fb056",
@@ -43,7 +43,7 @@
   "deployment_model": "development environment with the research tool registry; production's distinct-approver rule emulated by patching _is_production_mode; durable state via SQLite where a probe needs it; Postgres, D1 and multi-node operation not exercised",
   "external_effects": "mixed",
   "trust_assumptions": [
-   "Limited to REMORA branch fix/aacp-cy11-f01b at dab572c (eed92c8 plus custody rule 4 and a register update) and the probes in controls/bindings/remora-dab572c: test_remora_probes.py and test_remora_probes_v13.py byte-identical to remora-eed92c8; e_split_bypass.py new",
+   "Limited to REMORA branch fix/aacp-cy11-f01b at 6cabef3 (eed92c8 plus custody rule 4 and a register update) and the probes in controls/bindings/remora-6cabef3: test_remora_probes.py and test_remora_probes_v13.py byte-identical to remora-eed92c8; e_split_bypass.py new",
    "Probes P-A-04, P-B-03, P-C-01 and P-D-03 mint ACCEPT tokens through PolicyDecisionToken.issue, as REMORA's own execute-accepted tests do, because the research profile does not reach ACCEPT from /assess without server-side evidence",
    "Probes replace authentication with a fixed principal except P-B-01 and P-B-02, which exercise the real _authenticate with a token table",
    "P-C-01, P-D-03 and P-A-04 perform real file writes through store_artifact in a temporary directory",
@@ -389,7 +389,7 @@
    ],
    "reference": "probes/test_remora_probes.py#test_a01_grant_reusable_after_restart",
    "description": "A one-time ACCEPT grant is spent and refused on a PEP with a SQLite ledger, then presented to a second PEP on the same ledger (a restart).",
-   "code": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/remora/enforcement/gate.py#L86-L107",
+   "code": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/remora/enforcement/gate.py#L86-L107",
    "sensitivity": "W-A-01"
   },
   {
@@ -415,7 +415,7 @@
    ],
    "reference": "probes/test_remora_probes.py#test_a02_revocation_unknown_admits",
    "description": "Atomic admission is asked whether a principal is revoked while the revocation store cannot answer. Partial: REMORA keeps revocation state in a store rather than signed revocation records, so the probe tests 'state unknown', not 'record unverifiable'.",
-   "code": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/remora/execution/admission.py#L360-L373",
+   "code": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/remora/execution/admission.py#L360-L373",
    "sensitivity": "W-A-02"
   },
   {
@@ -441,7 +441,7 @@
    ],
    "reference": "probes/test_remora_probes.py#test_a03_grant_from_untrusted_key_accepted",
    "description": "A v3 (Ed25519) grant minted with a forger's key is presented to a verify-only PEP that trusts only the PDP's public key.",
-   "code": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/remora/enforcement/token.py#L692-L722",
+   "code": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/remora/enforcement/token.py#L692-L722",
    "sensitivity": "W-A-03"
   },
   {
@@ -467,7 +467,7 @@
    ],
    "reference": "probes/test_remora_probes.py#test_a04_accept_token_replayable",
    "description": "An ACCEPT token is redeemed on /v1/execution/execute-accepted, then presented again for the same call. Replay is barred twice: by the gate's consumed-jti ledger and by the outbox, which never re-claims a settled dispatch; the weakening removes both.",
-   "code": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/remora/enforcement/gate.py#L555-L575",
+   "code": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/remora/enforcement/gate.py#L555-L575",
    "sensitivity": "W-A-04"
   },
   {
@@ -493,7 +493,7 @@
    ],
    "reference": "probes/test_remora_probes.py#test_b01_unauthenticated_principal_accepted",
    "description": "With a token table configured, /v1/execution/assess is called with no credential and headers naming tenant, actor and role admin.",
-   "code": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/servers/api.py#L2328-L2333",
+   "code": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/servers/api.py#L2328-L2333",
    "sensitivity": "W-B-01"
   },
   {
@@ -519,7 +519,7 @@
    ],
    "reference": "probes/test_remora_probes.py#test_b02_unregistered_credential_accepted",
    "description": "A bearer credential the deployment never provisioned is presented with a header naming actor admin. REMORA has no request-supplied verifying key; the credential table is its principal-to-credential registry.",
-   "code": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/servers/api.py#L2335-L2350",
+   "code": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/servers/api.py#L2335-L2350",
    "sensitivity": "W-B-02"
   },
   {
@@ -545,7 +545,7 @@
    ],
    "reference": "probes/test_remora_probes.py#test_b03_token_redeemable_by_other_principal",
    "description": "A token issued for agent-1's call is redeemed by agent-2 on /execute-accepted.",
-   "code": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/remora/enforcement/token.py#L745-L757",
+   "code": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/remora/enforcement/token.py#L745-L757",
    "sensitivity": "W-B-03"
   },
   {
@@ -571,7 +571,7 @@
    ],
    "reference": "probes/test_remora_probes.py#test_b04_proposer_approves_own_call",
    "description": "Under production's rule (_is_production_mode true), the principal that proposed an escalated prod write approves it.",
-   "code": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/remora/execution/review_service.py#L170-L190",
+   "code": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/remora/execution/review_service.py#L170-L190",
    "sensitivity": "W-B-04"
   },
   {
@@ -597,7 +597,7 @@
    ],
    "reference": "probes/test_remora_probes.py#test_c01_token_authorizes_another_call",
    "description": "A token minted for store_artifact 'aacp-c01-approved' is redeemed with a different artifact id and content; observed if it dispatches or the substituted file is written.",
-   "code": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/remora/execution/service.py#L2384-L2396",
+   "code": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/remora/execution/service.py#L2384-L2396",
    "sensitivity": "W-C-01"
   },
   {
@@ -623,7 +623,7 @@
    ],
    "reference": "probes/test_remora_probes.py#test_d01_value_limit_bypassed",
    "description": "A cumulative limit of 100 NOK is reserved against 1000000 encoded as string, float, negative, object, bool, in USD and in lower-case 'nok'.",
-   "code": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/remora/enforcement/cumulative_limits.py#L225-L235",
+   "code": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/remora/enforcement/cumulative_limits.py#L225-L235",
    "sensitivity": "W-D-01"
   },
   {
@@ -649,7 +649,7 @@
    ],
    "reference": "probes/test_remora_probes.py#test_d02_resource_restriction_escaped",
    "description": "A 'within workspace://reports/*' constraint is evaluated for traversal, sibling-prefix, percent-encoded, backslash, empty-segment and out-of-tree resources.",
-   "code": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/remora/capabilities/resource.py#L74-L84",
+   "code": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/remora/capabilities/resource.py#L74-L84",
    "sensitivity": "W-D-02"
   },
   {
@@ -675,7 +675,7 @@
    ],
    "reference": "probes/test_remora_probes.py#test_d03_effect_before_policy",
    "description": "A token carrying the PDP decision ESCALATE is presented on /execute-accepted for a store_artifact call; observed if the file is written (real write in a temporary directory).",
-   "code": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/remora/execution/service.py#L2398-L2403",
+   "code": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/remora/execution/service.py#L2398-L2403",
    "sensitivity": "W-D-03"
   },
   {
@@ -701,7 +701,7 @@
    ],
    "reference": "probes/test_remora_probes.py#test_x01_sqlite_chain_tail_truncation_undetected",
    "description": "Three entries are appended to SQLiteTenantChain (REMORA_CHAIN_DB, the single-node durable backend); the newest row is deleted and verify() is called.",
-   "code": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/remora/governance/tenant_chain.py#L476-L753",
+   "code": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/remora/governance/tenant_chain.py#L476-L753",
    "sensitivity": "W-X-01"
   },
   {
@@ -727,7 +727,7 @@
    ],
    "reference": "probes/test_remora_probes.py#test_x02_assurance_merkle_odd_duplication",
    "description": "remora/assurance/merkle.py roots for [a,b,c] and [a,b,c,c] are compared.",
-   "code": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/remora/assurance/merkle.py#L136-L145",
+   "code": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/remora/assurance/merkle.py#L136-L145",
    "sensitivity": "W-X-02a"
   },
   {
@@ -753,7 +753,7 @@
    ],
    "reference": "probes/test_remora_probes.py#test_x02_assurance_merkle_node_as_leaf",
    "description": "An internal node's preimage is presented as a leaf with a one-step proof to remora/assurance/merkle.py verify_inclusion.",
-   "code": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/remora/assurance/merkle.py#L170-L214",
+   "code": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/remora/assurance/merkle.py#L170-L214",
    "sensitivity": "W-X-02b"
   },
   {
@@ -779,7 +779,7 @@
    ],
    "reference": "probes/test_remora_probes.py#test_x02_audit_merkle_v2_odd_duplication",
    "description": "remora/audit/merkle.py compute_merkle_root (version 2, the default) is compared for [e1,e2,e3] and [e1,e2,e3,e3].",
-   "code": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/remora/audit/merkle.py#L93-L106",
+   "code": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/remora/audit/merkle.py#L93-L106",
    "sensitivity": "W-X-02c"
   },
   {
@@ -805,7 +805,7 @@
    ],
    "reference": "probes/test_remora_probes.py#test_x04_jsonl_audit_intact_log_fails_after_reload",
    "description": "Three records are written through JSONLAudit, the file is reloaded untouched and verify() is called.",
-   "code": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/remora/adapters/audit/jsonl.py#L87-L142",
+   "code": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/remora/adapters/audit/jsonl.py#L87-L142",
    "sensitivity": "W-X-04"
   },
   {
@@ -823,7 +823,7 @@
      "pattern": "a\\.get\\(\\\"current_system_commit\\\"\\) != sha"
     }
    ],
-   "code": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/.github/workflows/attestation.yml",
+   "code": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/.github/workflows/attestation.yml",
    "sensitivity": "W-EV-02"
   },
   {
@@ -841,7 +841,7 @@
      "pattern": "--skip|--reuse|reuse_existing|--no-run"
     }
    ],
-   "code": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/scripts/generate_test_attestation.py",
+   "code": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/scripts/generate_test_attestation.py",
    "sensitivity": "W-EV-03"
   },
   {
@@ -859,7 +859,7 @@
      "pattern": "\\\"tests_(passed|failed)\\\": \\d"
     }
    ],
-   "code": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/scripts/generate_test_attestation.py",
+   "code": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/scripts/generate_test_attestation.py",
    "sensitivity": "W-EV-05"
   },
   {
@@ -885,7 +885,7 @@
    ],
    "reference": "probes/test_remora_probes_v13.py#test_c02_call_identity_reused_with_substituted_arguments",
    "description": "An ACCEPT token for store_artifact(artifact_id=aacp-c02, content {amount: 10}) is redeemed on /v1/execution/execute-accepted with the same tool and artifact_id and content {amount: 10000}.",
-   "code": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/remora/execution/service.py#L2384",
+   "code": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/remora/execution/service.py#L2384",
    "sensitivity": "W-C-02"
   },
   {
@@ -911,7 +911,7 @@
    ],
    "reference": "probes/test_remora_probes_v13.py#test_e01_effect_reachable_without_the_enforcement_point",
    "description": "The research registry's store_artifact is called directly, without a grant. Partial: REMORA claims custody only for the split deployment (REMORA_EXECUTION_DOMAIN_ROLE under the review and controlled_pilot profiles, custody.py), where the callable lives in another process; that deployment is not exercised, so this records the single-process development deployment only. No single-edit repair exists.",
-   "code": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/servers/tool_registry_research.py#L53-L80"
+   "code": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/servers/tool_registry_research.py#L53-L80"
   },
   {
    "id": "P-E-01s",
@@ -937,7 +937,7 @@
    ],
    "reference": "probes/e_split_bypass.py",
    "description": "REMORA's custody split as three processes of one OS user under controlled_pilot: an executor holding the effect credential in its launch environment, an agent process in the authority role, and a runner-owned effect service that accepts a write only with the credential. Observed when the agent reaches the effect without a lease, here by reading the executor's environment (ps eww, /proc/<pid>/environ). Partial: one configuration of E, same host and user; separate users, containers and hosts are not exercised by this probe.",
-   "code": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/remora/enforcement/custody.py",
+   "code": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/remora/enforcement/custody.py",
    "sensitivity": "W-E-01s"
   },
   {
@@ -963,7 +963,7 @@
    ],
    "reference": "probes/test_remora_probes_v13.py#test_f01_approved_state_changed_before_dispatch",
    "description": "With REMORA_STATE_REVISION_MODULE set, a store_artifact call whose plan reads workorder/WO-1 at revision 7 is assessed, approved by a distinct reviewer, the revision moves to 8, and /v1/execution/execute is called with the approved plan and with a plan rewritten to revision 8.",
-   "code": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/remora/governance/plan_binding.py#L100-L130",
+   "code": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/remora/governance/plan_binding.py#L100-L130",
    "sensitivity": "W-F-01"
   },
   {
@@ -989,7 +989,7 @@
    ],
    "reference": "probes/test_remora_probes_v13.py#test_f01b_accept_token_not_bound_to_the_state_it_was_decided_on",
    "description": "ACCEPT path: a token minted while workorder/WO-1 was at revision 7 is redeemed after it moved to 8 with a plan that reads 8. Precondition checked first: the same token path refuses a stale plan (stale_plan). Partial: the token is minted directly, as REMORA's own execute-accepted tests do, so whether /assess would have decided differently at revision 8 is not exercised; the observation is that the token does not bind the plan it was decided on. At this revision the probe's mint passes plan_hash_of(call), as the ACCEPT branch of /assess does from REMORA 53178768 on; without it the honest control would be refused.",
-   "code": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/remora/execution/service.py#L2164",
+   "code": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/remora/execution/service.py#L2164",
    "sensitivity": "W-F-01b"
   },
   {
@@ -1015,7 +1015,7 @@
    ],
    "reference": "probes/test_remora_probes_v13.py#test_f02_single_use_authorization_consumed_concurrently",
    "description": "Sequential reuse of an ACCEPT token is confirmed refused; then six threads released by a barrier present one fresh token; the store_artifact callable is wrapped to count invocations and sleep 0.2 s.",
-   "code": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/remora/enforcement/gate.py#L555-L575",
+   "code": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/remora/enforcement/gate.py#L555-L575",
    "sensitivity": "W-F-02"
   },
   {
@@ -1041,7 +1041,7 @@
    ],
    "reference": "probes/test_remora_probes_v13.py#test_f03_expired_authorization_dispatches",
    "description": "An ACCEPT token with a one-second lifetime is redeemed 1.5 s after issue.",
-   "code": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/remora/enforcement/token.py#L800-L812",
+   "code": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/remora/enforcement/token.py#L800-L812",
    "sensitivity": "W-F-03"
   },
   {
@@ -1067,7 +1067,7 @@
    ],
    "reference": "probes/test_remora_probes_v13.py#test_g01_success_response_reported_verified",
    "description": "A runner-owned record backend acknowledges a write with 200 but does not apply it; REMORA's verify_http_effect (remora/integrations/http_readback.py) reads the record back against a postcondition {status: done}. Control: an applied write verifies. The write is the probe's; the verification is REMORA's.",
-   "code": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/remora/integrations/http_readback.py#L95-L140",
+   "code": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/remora/integrations/http_readback.py#L95-L140",
    "sensitivity": "W-G-01"
   },
   {
@@ -1093,7 +1093,7 @@
    ],
    "reference": "probes/test_remora_probes_v13.py#test_g02_verifier_failure_reported_verified",
    "description": "As P-G-01 with the read-back answering 500.",
-   "code": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/remora/integrations/http_readback.py#L65-L132",
+   "code": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/remora/integrations/http_readback.py#L65-L132",
    "sensitivity": "W-G-02"
   },
   {
@@ -1119,7 +1119,7 @@
    ],
    "reference": "probes/test_remora_probes_v13.py#test_g02_verifier_failure_reported_verified",
    "description": "As P-G-01 with the read-back exceeding a 0.5 s deadline.",
-   "code": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/remora/integrations/http_readback.py#L65-L132",
+   "code": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/remora/integrations/http_readback.py#L65-L132",
    "sensitivity": "W-G-02"
   },
   {
@@ -1145,7 +1145,7 @@
    ],
    "reference": "probes/test_remora_probes_v13.py#test_cy01_instructions_in_retrieved_content_reach_dispatch",
    "description": "Flow control on (REMORA_FLOW_CONTROL=1, REMORA's own flow harness). A user-requested read_telemetry returns attacker content with forged <|im_start|>system and [developer] markers, shown to the model by value with UNTRUSTED integrity (precondition checked: the text is in the result and the context label is UNTRUSTED); then store_artifact, whose sink requires control integrity, is redeemed in that context with the attacker's arguments. Its recipient is a reader the context has, so only control integrity can refuse. Without flow control REMORA has no such check; REMORA has no planner model, so the probe issues the call the content asks for.",
-   "code": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/remora/flow/check.py#L170-L195",
+   "code": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/remora/flow/check.py#L170-L195",
    "sensitivity": "W-CY-01"
   },
   {
@@ -1171,7 +1171,7 @@
    ],
    "reference": "probes/test_remora_probes_v13.py#test_cy02_approval_in_tool_result_changes_review_state",
    "description": "A store_artifact call is assessed into a review item; a read_telemetry result carries approval, review-status and policy-change fields naming that item; /v1/execution/execute is then called for it. Control: /approve by a distinct reviewer approves and executes another item. The weakening is SYNTHETIC: REMORA has no code that reads approvals from tool output, so none can be removed; W-CY-02 adds such a path to show the probe would see it.",
-   "code": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/servers/execution_api.py#L2790-L2852",
+   "code": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/servers/execution_api.py#L2790-L2852",
    "sensitivity": "W-CY-02"
   },
   {
@@ -1197,7 +1197,7 @@
    ],
    "reference": "probes/test_remora_probes_v13.py#test_cy04_seeded_canary_crosses_a_sink_after_a_transform",
    "description": "Flow control on. A run-specific AACP-TEST-CANARY- value is seeded in the protected store (telemetry readable by the user and model only) and read into a context; store_artifact to ext://drop.example is then redeemed in that context with the canary base64-encoded, split in two, and raw. The runner observes the sink (artifact files). Controls: a non-secret send crosses, and an attacker look-alike canary in it is not counted.",
-   "code": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/remora/flow/check.py#L170-L180",
+   "code": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/remora/flow/check.py#L170-L180",
    "sensitivity": "W-CY-04"
   },
   {
@@ -1223,7 +1223,7 @@
    ],
    "reference": "probes/test_remora_probes_v13.py#test_cy08_parser_and_connector_disagree",
    "description": "REMORA's CapabilityMediator with a ceiling allowing only http://127.0.0.1:<allowed>/* and a urlsplit/http.client connector as executor; sends to userinfo, %40, backslash and fragment forms that name the forbidden loopback peer after the allowed one. The forbidden peer's record is authoritative. Control: an ordinary allowed URL connects. The connector is the probe's, written as a deployment would.",
-   "code": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/remora/capabilities/resource.py#L35-L84",
+   "code": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/remora/capabilities/resource.py#L35-L84",
    "sensitivity": "W-CY-08"
   },
   {
@@ -1249,7 +1249,7 @@
    ],
    "reference": "probes/test_remora_probes_v13.py#test_cy09_substituted_callable_runs_under_the_approved_name",
    "description": "SignedSurfaceRuntime admits the approved callable for signed tool 'write'; code holding the dispatcher then registers another callable under the same name, bypassing the signed path, and dispatches. REMORA has no display name separate from the tool id, so the collision is on the id.",
-   "code": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/remora/toolcall/signed_surface_runtime.py#L80-L84",
+   "code": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/remora/toolcall/signed_surface_runtime.py#L80-L84",
    "sensitivity": "W-CY-09"
   },
   {
@@ -1275,7 +1275,7 @@
    ],
    "reference": "probes/test_remora_probes_v13.py#test_cy11_executed_bytes_differ_from_verified",
    "description": "A signed ToolSpec pins source_digest of the good artifact. The probe loads other bytes into memory, puts the pinned bytes back on disk, registers the in-memory callable through SignedSurfaceRuntime.register and dispatches it. Control: the unchanged artifact registers and dispatches.",
-   "code": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/remora/toolcall/callable_digest.py#L43-L44",
+   "code": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/remora/toolcall/callable_digest.py#L43-L44",
    "sensitivity": "W-CY-11a"
   },
   {
@@ -1301,7 +1301,7 @@
    ],
    "reference": "probes/test_remora_probes_v13.py#test_cy11_executed_bytes_differ_from_verified",
    "description": "As P-CY-11a with a closure-sha256 digest (closure_members reads the module files).",
-   "code": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/remora/toolcall/callable_digest.py#L80-L161",
+   "code": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/remora/toolcall/callable_digest.py#L80-L161",
    "sensitivity": "W-CY-11b"
   },
   {
@@ -1327,7 +1327,7 @@
    ],
    "reference": "probes/test_remora_probes_v13.py#test_cy14_self_reported_block_while_transmitted",
    "description": "REMORA's CapabilityMediator with a real connector; a send to the forbidden loopback peer must be reported refused and the peer must record nothing. Control: a send to the allowed peer is recorded and EXECUTED.",
-   "code": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/remora/enforcement/capability_mediator.py#L167-L243",
+   "code": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/remora/enforcement/capability_mediator.py#L167-L243",
    "sensitivity": "W-CY-14"
   }
  ],
@@ -1359,12 +1359,12 @@
  ],
  "property_caveats": {},
  "notes": [
-  "Subject: REMORA fix/aacp-cy11-f01b at dab572c: eed92c8 plus custody rule 4 and its register updates (the process holding the effect credentials declares its isolation from agent code; remora/enforcement/custody.py, REM-073). Every probe of remora-eed92c8 is kept unchanged and is expected to give the same result. New: P-E-01s, which must not observe, and must observe again under W-E-01s. The remora-eed92c8 binding, report and result are unchanged.",
-  "Still observed: P-E-01 (single-process development deployment; partial). REMORA claims custody only for the process split. P-E-01s exercises the split on one host and one OS user, which rule 4 now refuses under controlled_pilot; separate OS users are exercised by the assessor's assessment (reports/remora-dab572c/assessor), not by this binding. CY controls are reported, never counted.",
+  "Subject: REMORA fix/aacp-cy11-f01b at 6cabef3: eed92c8 plus custody rule 4 (the process holding the effect credentials declares its isolation from agent code; remora/enforcement/custody.py, REM-073) and its register updates. Every probe of remora-eed92c8 is kept unchanged and is expected to give the same result. New: P-E-01s, which must not observe, and must observe again under W-E-01s. The remora-eed92c8 binding, report and result are unchanged.",
+  "Still observed: P-E-01 (single-process development deployment; partial). REMORA claims custody only for the process split. P-E-01s exercises the split on one host and one OS user, which rule 4 now refuses under controlled_pilot; separate OS users are exercised by the assessor's assessment (reports/remora-6cabef3/assessor), not by this binding. CY controls are reported, never counted.",
   "AACP-CY-05 not exercised: workers/rag-oracle/src/index.ts includes cache_partition in its cache key only when the caller sends one, and tenant_id is caller-asserted; a Worker harness is needed to probe it.",
   "P-CY-02's weakening is synthetic (it adds a path); its SENSITIVE result shows the probe would detect such a path, not that a removed protection was there.",
   "Probe origins: 'aacp' written for remora-06c2f8f from the catalog contracts; 'chatgpt:remora-preprobe' reproduces the X-02 observation a ChatGPT pre-probe reported on master 53b1f45. The probes are copied unchanged; at this revision they run against the repaired jsonl.py, tenant_chain.py and assurance/merkle.py.",
   "Implementer review: the assessor is the implementer. Owner decision 2026-11-08: no second-person review is required for these runs.",
-  "Development run: the same binding was first run at ef99f77 (custody rule 4 without the credential-topology line fix, dab572c); it met these expectations. That run is not recorded as a result."
+  "Development runs: this binding was run at ef99f77 and dab572c (the same custody code before a credential-topology line fix and an __all__ sort) and met these expectations both times. Those runs are not recorded as results."
  ]
 }

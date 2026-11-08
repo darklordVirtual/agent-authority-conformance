@@ -2,7 +2,7 @@
  "spec_version": "0.1",
  "system": "REMORA (remora-assurance)",
  "system_version": "0.12.0",
- "revision": "dab572c9d001b9a76ca7adfe8bcac379b30e3b6a",
+ "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
  "assessed_at": "2026-11-08",
  "assessor": "Agent Authority Conformance project (maintainer Stian Skogbrott, who also maintains REMORA; evidence gathered and assessment drafted by an AI agent, at the maintainer's request)",
  "scope": {
@@ -10,7 +10,7 @@
   "deployment_model": "development environment with the research tool registry; production's distinct-approver rule emulated by patching _is_production_mode; durable state via SQLite where a probe needs it; Postgres, D1 and multi-node operation not exercised",
   "external_effects": "simulated",
   "trust_assumptions": [
-   "Limited to REMORA branch fix/aacp-cy11-f01b at dab572c (eed92c8 plus custody rule 4 and a register update) and the probes in controls/bindings/remora-dab572c: test_remora_probes.py and test_remora_probes_v13.py byte-identical to remora-eed92c8; e_split_bypass.py new",
+   "Limited to REMORA branch fix/aacp-cy11-f01b at 6cabef3 (eed92c8 plus custody rule 4 and a register update) and the probes in controls/bindings/remora-6cabef3: test_remora_probes.py and test_remora_probes_v13.py byte-identical to remora-eed92c8; e_split_bypass.py new",
    "Probes P-A-04, P-B-03, P-C-01 and P-D-03 mint ACCEPT tokens through PolicyDecisionToken.issue, as REMORA's own execute-accepted tests do, because the research profile does not reach ACCEPT from /assess without server-side evidence",
    "Probes replace authentication with a fixed principal except P-B-01 and P-B-02, which exercise the real _authenticate with a token table",
    "P-C-01, P-D-03 and P-A-04 perform real file writes through store_artifact in a temporary directory",
@@ -43,77 +43,77 @@
    "evidence": [
     {
      "kind": "artifact",
-     "reference": "reports/remora-dab572c/results/remora-dab572c-2026-11-08-author-1.json",
-     "revision": "dab572c9d001b9a76ca7adfe8bcac379b30e3b6a",
-     "command": "python -m conformance.controls run --binding controls/bindings/remora-dab572c --subject <REMORA checkout at dab572c9d001b9a76ca7adfe8bcac379b30e3b6a> --out result.json --run-id <id>",
-     "description": "AACP control run remora-dab572c-2026-11-08-author-1 (AUTHOR_RUN, EXPECTATIONS_MET): probes P-A-01, P-A-02, P-A-03, P-A-04 did not observe their weakness, and each observes it again when its protection alone is removed (SENSITIVE), so these results would not survive removal of the property."
+     "reference": "reports/remora-6cabef3/results/remora-6cabef3-2026-11-08-author-1.json",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+     "command": "python -m conformance.controls run --binding controls/bindings/remora-6cabef3 --subject <REMORA checkout at 6cabef3a6d14d8e61813e1467aa1b25086545b74> --out result.json --run-id <id>",
+     "description": "AACP control run remora-6cabef3-2026-11-08-author-1 (AUTHOR_RUN, EXPECTATIONS_MET): probes P-A-01, P-A-02, P-A-03, P-A-04 did not observe their weakness, and each observes it again when its protection alone is removed (SENSITIVE), so these results would not survive removal of the property."
     },
     {
      "kind": "test",
-     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/tests/test_execution_lease.py",
-     "revision": "dab572c9d001b9a76ca7adfe8bcac379b30e3b6a",
+     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/tests/test_execution_lease.py",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
      "description": "REMORA test file, part of the A evidence run"
     },
     {
      "kind": "test",
-     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/tests/test_token_golden_vectors.py",
-     "revision": "dab572c9d001b9a76ca7adfe8bcac379b30e3b6a",
+     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/tests/test_token_golden_vectors.py",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
      "description": "REMORA test file, part of the A evidence run"
     },
     {
      "kind": "test",
-     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/tests/test_lease_nonce_durability.py",
-     "revision": "dab572c9d001b9a76ca7adfe8bcac379b30e3b6a",
+     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/tests/test_lease_nonce_durability.py",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
      "description": "REMORA test file, part of the A evidence run"
     },
     {
      "kind": "test",
-     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/tests/test_revocation_durability.py",
-     "revision": "dab572c9d001b9a76ca7adfe8bcac379b30e3b6a",
+     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/tests/test_revocation_durability.py",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
      "description": "REMORA test file, part of the A evidence run"
     },
     {
      "kind": "test",
-     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/tests/test_tenant_chain_head_guard.py",
-     "revision": "dab572c9d001b9a76ca7adfe8bcac379b30e3b6a",
+     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/tests/test_tenant_chain_head_guard.py",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
      "description": "REMORA test file, part of the A evidence run"
     },
     {
      "kind": "test",
-     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/tests/security/test_aacp_x04_jsonl_reload.py",
-     "revision": "dab572c9d001b9a76ca7adfe8bcac379b30e3b6a",
+     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/tests/security/test_aacp_x04_jsonl_reload.py",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
      "description": "REMORA test file, part of the A evidence run"
     },
     {
      "kind": "test",
-     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/tests/test_jsonl_audit_hash_chain.py",
-     "revision": "dab572c9d001b9a76ca7adfe8bcac379b30e3b6a",
+     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/tests/test_jsonl_audit_hash_chain.py",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
      "description": "REMORA test file, part of the A evidence run"
     },
     {
      "kind": "test",
-     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/tests/security/test_audit_chain_anchor.py",
-     "revision": "dab572c9d001b9a76ca7adfe8bcac379b30e3b6a",
+     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/tests/security/test_audit_chain_anchor.py",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
      "description": "REMORA test file, part of the A evidence run"
     },
     {
      "kind": "test",
-     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/tests/security/test_aacp_x02_assurance_merkle_v2.py",
-     "revision": "dab572c9d001b9a76ca7adfe8bcac379b30e3b6a",
+     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/tests/security/test_aacp_x02_assurance_merkle_v2.py",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
      "description": "REMORA test file, part of the A evidence run"
     },
     {
      "kind": "test",
-     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/tests/test_assurance_merkle.py",
-     "revision": "dab572c9d001b9a76ca7adfe8bcac379b30e3b6a",
+     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/tests/test_assurance_merkle.py",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
      "description": "REMORA test file, part of the A evidence run"
     },
     {
      "kind": "artifact",
-     "reference": "reports/remora-dab572c/assessor/junit-A.xml",
-     "revision": "dab572c9d001b9a76ca7adfe8bcac379b30e3b6a",
+     "reference": "reports/remora-6cabef3/assessor/junit-A.xml",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
      "command": "python -m pytest -q -o addopts= tests/test_execution_lease.py tests/test_token_golden_vectors.py tests/test_lease_nonce_durability.py tests/test_revocation_durability.py tests/test_tenant_chain_head_guard.py tests/security/test_aacp_x04_jsonl_reload.py tests/test_jsonl_audit_hash_chain.py tests/security/test_audit_chain_anchor.py tests/security/test_aacp_x02_assurance_merkle_v2.py tests/test_assurance_merkle.py",
-     "description": "JUnit record of that run at dab572c9: 239 tests, 0 failed, 0 skipped"
+     "description": "JUnit record of that run at 6cabef3a: 239 tests, 0 failed, 0 skipped"
     }
    ]
   },
@@ -130,29 +130,29 @@
    "evidence": [
     {
      "kind": "artifact",
-     "reference": "reports/remora-dab572c/results/remora-dab572c-2026-11-08-author-1.json",
-     "revision": "dab572c9d001b9a76ca7adfe8bcac379b30e3b6a",
-     "command": "python -m conformance.controls run --binding controls/bindings/remora-dab572c --subject <REMORA checkout at dab572c9d001b9a76ca7adfe8bcac379b30e3b6a> --out result.json --run-id <id>",
-     "description": "AACP control run remora-dab572c-2026-11-08-author-1 (AUTHOR_RUN, EXPECTATIONS_MET): probes P-B-01, P-B-02, P-B-03, P-B-04 did not observe their weakness, and each observes it again when its protection alone is removed (SENSITIVE), so these results would not survive removal of the property."
+     "reference": "reports/remora-6cabef3/results/remora-6cabef3-2026-11-08-author-1.json",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+     "command": "python -m conformance.controls run --binding controls/bindings/remora-6cabef3 --subject <REMORA checkout at 6cabef3a6d14d8e61813e1467aa1b25086545b74> --out result.json --run-id <id>",
+     "description": "AACP control run remora-6cabef3-2026-11-08-author-1 (AUTHOR_RUN, EXPECTATIONS_MET): probes P-B-01, P-B-02, P-B-03, P-B-04 did not observe their weakness, and each observes it again when its protection alone is removed (SENSITIVE), so these results would not survive removal of the property."
     },
     {
      "kind": "test",
-     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/tests/test_separation_of_duties.py",
-     "revision": "dab572c9d001b9a76ca7adfe8bcac379b30e3b6a",
+     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/tests/test_separation_of_duties.py",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
      "description": "REMORA test file, part of the B evidence run"
     },
     {
      "kind": "test",
-     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/tests/capabilities/test_capability_revocation.py",
-     "revision": "dab572c9d001b9a76ca7adfe8bcac379b30e3b6a",
+     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/tests/capabilities/test_capability_revocation.py",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
      "description": "REMORA test file, part of the B evidence run"
     },
     {
      "kind": "artifact",
-     "reference": "reports/remora-dab572c/assessor/junit-B.xml",
-     "revision": "dab572c9d001b9a76ca7adfe8bcac379b30e3b6a",
+     "reference": "reports/remora-6cabef3/assessor/junit-B.xml",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
      "command": "python -m pytest -q -o addopts= tests/test_separation_of_duties.py tests/capabilities/test_capability_revocation.py",
-     "description": "JUnit record of that run at dab572c9: 32 tests, 0 failed, 0 skipped"
+     "description": "JUnit record of that run at 6cabef3a: 32 tests, 0 failed, 0 skipped"
     }
    ]
   },
@@ -169,29 +169,29 @@
    "evidence": [
     {
      "kind": "artifact",
-     "reference": "reports/remora-dab572c/results/remora-dab572c-2026-11-08-author-1.json",
-     "revision": "dab572c9d001b9a76ca7adfe8bcac379b30e3b6a",
-     "command": "python -m conformance.controls run --binding controls/bindings/remora-dab572c --subject <REMORA checkout at dab572c9d001b9a76ca7adfe8bcac379b30e3b6a> --out result.json --run-id <id>",
-     "description": "AACP control run remora-dab572c-2026-11-08-author-1 (AUTHOR_RUN, EXPECTATIONS_MET): probes P-C-01, P-C-02 did not observe their weakness, and each observes it again when its protection alone is removed (SENSITIVE), so these results would not survive removal of the property."
+     "reference": "reports/remora-6cabef3/results/remora-6cabef3-2026-11-08-author-1.json",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+     "command": "python -m conformance.controls run --binding controls/bindings/remora-6cabef3 --subject <REMORA checkout at 6cabef3a6d14d8e61813e1467aa1b25086545b74> --out result.json --run-id <id>",
+     "description": "AACP control run remora-6cabef3-2026-11-08-author-1 (AUTHOR_RUN, EXPECTATIONS_MET): probes P-C-01, P-C-02 did not observe their weakness, and each observes it again when its protection alone is removed (SENSITIVE), so these results would not survive removal of the property."
     },
     {
      "kind": "test",
-     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/tests/test_enforcement_properties.py",
-     "revision": "dab572c9d001b9a76ca7adfe8bcac379b30e3b6a",
+     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/tests/test_enforcement_properties.py",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
      "description": "REMORA test file, part of the C evidence run"
     },
     {
      "kind": "test",
-     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/tests/test_lease_verification_completeness.py",
-     "revision": "dab572c9d001b9a76ca7adfe8bcac379b30e3b6a",
+     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/tests/test_lease_verification_completeness.py",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
      "description": "REMORA test file, part of the C evidence run"
     },
     {
      "kind": "artifact",
-     "reference": "reports/remora-dab572c/assessor/junit-C.xml",
-     "revision": "dab572c9d001b9a76ca7adfe8bcac379b30e3b6a",
+     "reference": "reports/remora-6cabef3/assessor/junit-C.xml",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
      "command": "python -m pytest -q -o addopts= tests/test_enforcement_properties.py tests/test_lease_verification_completeness.py",
-     "description": "JUnit record of that run at dab572c9: 72 tests, 0 failed, 0 skipped"
+     "description": "JUnit record of that run at 6cabef3a: 72 tests, 0 failed, 0 skipped"
     }
    ]
   },
@@ -208,23 +208,23 @@
    "evidence": [
     {
      "kind": "artifact",
-     "reference": "reports/remora-dab572c/results/remora-dab572c-2026-11-08-author-1.json",
-     "revision": "dab572c9d001b9a76ca7adfe8bcac379b30e3b6a",
-     "command": "python -m conformance.controls run --binding controls/bindings/remora-dab572c --subject <REMORA checkout at dab572c9d001b9a76ca7adfe8bcac379b30e3b6a> --out result.json --run-id <id>",
-     "description": "AACP control run remora-dab572c-2026-11-08-author-1 (AUTHOR_RUN, EXPECTATIONS_MET): probes P-D-01, P-D-02, P-D-03 did not observe their weakness, and each observes it again when its protection alone is removed (SENSITIVE), so these results would not survive removal of the property."
+     "reference": "reports/remora-6cabef3/results/remora-6cabef3-2026-11-08-author-1.json",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+     "command": "python -m conformance.controls run --binding controls/bindings/remora-6cabef3 --subject <REMORA checkout at 6cabef3a6d14d8e61813e1467aa1b25086545b74> --out result.json --run-id <id>",
+     "description": "AACP control run remora-6cabef3-2026-11-08-author-1 (AUTHOR_RUN, EXPECTATIONS_MET): probes P-D-01, P-D-02, P-D-03 did not observe their weakness, and each observes it again when its protection alone is removed (SENSITIVE), so these results would not survive removal of the property."
     },
     {
      "kind": "test",
-     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/tests/test_intent_scope.py",
-     "revision": "dab572c9d001b9a76ca7adfe8bcac379b30e3b6a",
+     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/tests/test_intent_scope.py",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
      "description": "REMORA test file, part of the D evidence run"
     },
     {
      "kind": "artifact",
-     "reference": "reports/remora-dab572c/assessor/junit-D.xml",
-     "revision": "dab572c9d001b9a76ca7adfe8bcac379b30e3b6a",
+     "reference": "reports/remora-6cabef3/assessor/junit-D.xml",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
      "command": "python -m pytest -q -o addopts= tests/test_intent_scope.py",
-     "description": "JUnit record of that run at dab572c9: 70 tests, 0 failed, 0 skipped"
+     "description": "JUnit record of that run at 6cabef3a: 70 tests, 0 failed, 0 skipped"
     }
    ]
   },
@@ -241,109 +241,109 @@
    "evidence": [
     {
      "kind": "artifact",
-     "reference": "reports/remora-dab572c/results/remora-dab572c-2026-11-08-author-1.json",
-     "revision": "dab572c9d001b9a76ca7adfe8bcac379b30e3b6a",
-     "command": "python -m conformance.controls run --binding controls/bindings/remora-dab572c --subject <REMORA checkout at dab572c9d001b9a76ca7adfe8bcac379b30e3b6a> --out result.json --run-id <id>",
-     "description": "AACP control run remora-dab572c-2026-11-08-author-1 (AUTHOR_RUN, EXPECTATIONS_MET): probes P-E-01s did not observe their weakness, and each observes it again when its protection alone is removed (SENSITIVE), so these results would not survive removal of the property."
+     "reference": "reports/remora-6cabef3/results/remora-6cabef3-2026-11-08-author-1.json",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+     "command": "python -m conformance.controls run --binding controls/bindings/remora-6cabef3 --subject <REMORA checkout at 6cabef3a6d14d8e61813e1467aa1b25086545b74> --out result.json --run-id <id>",
+     "description": "AACP control run remora-6cabef3-2026-11-08-author-1 (AUTHOR_RUN, EXPECTATIONS_MET): probes P-E-01s did not observe their weakness, and each observes it again when its protection alone is removed (SENSITIVE), so these results would not survive removal of the property."
     },
     {
      "kind": "test",
-     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/tests/conformance/test_execution_boundary.py",
-     "revision": "dab572c9d001b9a76ca7adfe8bcac379b30e3b6a",
+     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/tests/conformance/test_execution_boundary.py",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
      "description": "REMORA test file, part of the E evidence run"
     },
     {
      "kind": "test",
-     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/tests/conformance/test_custody_guard.py",
-     "revision": "dab572c9d001b9a76ca7adfe8bcac379b30e3b6a",
+     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/tests/conformance/test_custody_guard.py",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
      "description": "REMORA test file, part of the E evidence run"
     },
     {
      "kind": "test",
-     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/tests/test_check_credential_topology.py",
-     "revision": "dab572c9d001b9a76ca7adfe8bcac379b30e3b6a",
+     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/tests/test_check_credential_topology.py",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
      "description": "REMORA test file, part of the E evidence run"
     },
     {
      "kind": "test",
-     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/tests/test_custody_split_dispatch.py",
-     "revision": "dab572c9d001b9a76ca7adfe8bcac379b30e3b6a",
+     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/tests/test_custody_split_dispatch.py",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
      "description": "REMORA test file, part of the E evidence run"
     },
     {
      "kind": "artifact",
-     "reference": "reports/remora-dab572c/assessor/junit-E.xml",
-     "revision": "dab572c9d001b9a76ca7adfe8bcac379b30e3b6a",
+     "reference": "reports/remora-6cabef3/assessor/junit-E.xml",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
      "command": "python -m pytest -q -o addopts= tests/conformance/test_execution_boundary.py tests/conformance/test_custody_guard.py tests/test_check_credential_topology.py tests/test_custody_split_dispatch.py",
-     "description": "JUnit record of that run at dab572c9: 80 tests, 0 failed, 0 skipped"
+     "description": "JUnit record of that run at 6cabef3a: 80 tests, 0 failed, 0 skipped"
     },
     {
      "kind": "code",
-     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/docs/assurance/credential_topology.yaml",
-     "revision": "dab572c9d001b9a76ca7adfe8bcac379b30e3b6a",
+     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/docs/assurance/credential_topology.yaml",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
      "description": "§12.1 declared topology: 43 credentials, agent zone roots remora/sdk and remora/agent_hook, limits L1 to L5"
     },
     {
      "kind": "artifact",
-     "reference": "reports/remora-dab572c/assessor/credential-topology.txt",
-     "revision": "dab572c9d001b9a76ca7adfe8bcac379b30e3b6a",
+     "reference": "reports/remora-6cabef3/assessor/credential-topology.txt",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
      "command": "python scripts/check_credential_topology.py",
      "description": "§12.1 drift check at this revision: PASS (fails on an undeclared read, a stale entry and a changed reader set; tests/test_check_credential_topology.py)"
     },
     {
      "kind": "artifact",
-     "reference": "reports/remora-dab572c/assessor/e-linux_separate_uids_controlled_pilot.json",
-     "revision": "dab572c9d001b9a76ca7adfe8bcac379b30e3b6a",
+     "reference": "reports/remora-6cabef3/assessor/e-linux_separate_uids_controlled_pilot.json",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
      "command": "python e_split_bypass.py --subject <checkout> --scenario linux_separate_uids_controlled_pilot --profile controlled_pilot --isolation os_user --agent-uids 1002 --executor-user 1001 --agent-user 1002 (as root in the container of Dockerfile.e-split)",
      "description": "§12.2 five classes from the agent process (uid 1002) against an executor as uid 1001: no lease refused, unregistered tool refused, no dispatcher in the agent process, ps eww empty and /proc/<pid>/environ PermissionError, subprocess without the credential; the runner-owned effect service saw only the one leased write"
     },
     {
      "kind": "artifact",
-     "reference": "reports/remora-dab572c/assessor/e-linux_same_uid_declared_review.json",
-     "revision": "dab572c9d001b9a76ca7adfe8bcac379b30e3b6a",
+     "reference": "reports/remora-6cabef3/assessor/e-linux_same_uid_declared_review.json",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
      "description": "§12.3(1): the bypass still succeeds where the configuration is permitted. Same uid under review with same_user: /proc environ and ps eww give the credential and the agent writes to the effect without a lease"
     },
     {
      "kind": "artifact",
-     "reference": "reports/remora-dab572c/assessor/e-darwin_same_user_declared_review.json",
-     "revision": "dab572c9d001b9a76ca7adfe8bcac379b30e3b6a",
+     "reference": "reports/remora-6cabef3/assessor/e-darwin_same_user_declared_review.json",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
      "description": "§12.3(1) on macOS: ps eww gives the credential and the agent reaches the effect"
     },
     {
      "kind": "artifact",
-     "reference": "reports/remora-dab572c/assessor/e-darwin_same_user_undeclared.json",
-     "revision": "dab572c9d001b9a76ca7adfe8bcac379b30e3b6a",
+     "reference": "reports/remora-6cabef3/assessor/e-darwin_same_user_undeclared.json",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
      "description": "§12.3(2): refused at startup without REMORA_EXECUTION_ISOLATION (controlled_pilot)"
     },
     {
      "kind": "artifact",
-     "reference": "reports/remora-dab572c/assessor/e-darwin_same_user_declared_controlled_pilot.json",
-     "revision": "dab572c9d001b9a76ca7adfe8bcac379b30e3b6a",
+     "reference": "reports/remora-6cabef3/assessor/e-darwin_same_user_declared_controlled_pilot.json",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
      "description": "§12.3(2): same_user refused under controlled_pilot"
     },
     {
      "kind": "artifact",
-     "reference": "reports/remora-dab572c/assessor/e-darwin_os_user_naming_own_uid.json",
-     "revision": "dab572c9d001b9a76ca7adfe8bcac379b30e3b6a",
+     "reference": "reports/remora-6cabef3/assessor/e-darwin_os_user_naming_own_uid.json",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
      "description": "§12.3(2): os_user refused when the executor runs as a declared agent uid"
     },
     {
      "kind": "artifact",
-     "reference": "reports/remora-dab572c/assessor/e-linux_os_user_naming_its_own_uid.json",
-     "revision": "dab572c9d001b9a76ca7adfe8bcac379b30e3b6a",
+     "reference": "reports/remora-6cabef3/assessor/e-linux_os_user_naming_its_own_uid.json",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
      "description": "the same refusal on Linux"
     },
     {
      "kind": "artifact",
-     "reference": "reports/remora-dab572c/assessor/custody-reproduction.json",
-     "revision": "dab572c9d001b9a76ca7adfe8bcac379b30e3b6a",
+     "reference": "reports/remora-6cabef3/assessor/custody-reproduction.json",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
      "command": "python scripts/reproduce_custody.py --output custody-reproduction.json",
      "description": "REMORA's separate-process custody reproduction: the executor verifies authority-signed leases, refuses its own, tampered, expired and mismatched leases, and keeps one effect per nonce across restart and concurrency"
     },
     {
      "kind": "code",
-     "reference": "controls/bindings/remora-dab572c/probes/e_split_bypass.py",
-     "revision": "dab572c9d001b9a76ca7adfe8bcac379b30e3b6a",
+     "reference": "controls/bindings/remora-6cabef3/probes/e_split_bypass.py",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
      "description": "assessor harness used for every e-*.json record and for probe P-E-01s"
     }
    ]
@@ -361,35 +361,35 @@
    "evidence": [
     {
      "kind": "artifact",
-     "reference": "reports/remora-dab572c/results/remora-dab572c-2026-11-08-author-1.json",
-     "revision": "dab572c9d001b9a76ca7adfe8bcac379b30e3b6a",
-     "command": "python -m conformance.controls run --binding controls/bindings/remora-dab572c --subject <REMORA checkout at dab572c9d001b9a76ca7adfe8bcac379b30e3b6a> --out result.json --run-id <id>",
-     "description": "AACP control run remora-dab572c-2026-11-08-author-1 (AUTHOR_RUN, EXPECTATIONS_MET): probes P-F-01, P-F-01b, P-F-02, P-F-03 did not observe their weakness, and each observes it again when its protection alone is removed (SENSITIVE), so these results would not survive removal of the property."
+     "reference": "reports/remora-6cabef3/results/remora-6cabef3-2026-11-08-author-1.json",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+     "command": "python -m conformance.controls run --binding controls/bindings/remora-6cabef3 --subject <REMORA checkout at 6cabef3a6d14d8e61813e1467aa1b25086545b74> --out result.json --run-id <id>",
+     "description": "AACP control run remora-6cabef3-2026-11-08-author-1 (AUTHOR_RUN, EXPECTATIONS_MET): probes P-F-01, P-F-01b, P-F-02, P-F-03 did not observe their weakness, and each observes it again when its protection alone is removed (SENSITIVE), so these results would not survive removal of the property."
     },
     {
      "kind": "test",
-     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/tests/security/test_aacp_cy11_f01b.py",
-     "revision": "dab572c9d001b9a76ca7adfe8bcac379b30e3b6a",
+     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/tests/security/test_aacp_cy11_f01b.py",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
      "description": "REMORA test file, part of the F evidence run"
     },
     {
      "kind": "test",
-     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/tests/test_plan_binding.py",
-     "revision": "dab572c9d001b9a76ca7adfe8bcac379b30e3b6a",
+     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/tests/test_plan_binding.py",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
      "description": "REMORA test file, part of the F evidence run"
     },
     {
      "kind": "test",
-     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/tests/test_pre_federation_toctou_adversarial.py",
-     "revision": "dab572c9d001b9a76ca7adfe8bcac379b30e3b6a",
+     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/tests/test_pre_federation_toctou_adversarial.py",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
      "description": "REMORA test file, part of the F evidence run"
     },
     {
      "kind": "artifact",
-     "reference": "reports/remora-dab572c/assessor/junit-F.xml",
-     "revision": "dab572c9d001b9a76ca7adfe8bcac379b30e3b6a",
+     "reference": "reports/remora-6cabef3/assessor/junit-F.xml",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
      "command": "python -m pytest -q -o addopts= tests/security/test_aacp_cy11_f01b.py tests/test_plan_binding.py tests/test_pre_federation_toctou_adversarial.py",
-     "description": "JUnit record of that run at dab572c9: 33 tests, 0 failed, 0 skipped"
+     "description": "JUnit record of that run at 6cabef3a: 33 tests, 0 failed, 0 skipped"
     }
    ]
   },
@@ -406,61 +406,61 @@
    "evidence": [
     {
      "kind": "artifact",
-     "reference": "reports/remora-dab572c/results/remora-dab572c-2026-11-08-author-1.json",
-     "revision": "dab572c9d001b9a76ca7adfe8bcac379b30e3b6a",
-     "command": "python -m conformance.controls run --binding controls/bindings/remora-dab572c --subject <REMORA checkout at dab572c9d001b9a76ca7adfe8bcac379b30e3b6a> --out result.json --run-id <id>",
-     "description": "AACP control run remora-dab572c-2026-11-08-author-1 (AUTHOR_RUN, EXPECTATIONS_MET): probes P-G-01, P-G-02a, P-G-02b did not observe their weakness, and each observes it again when its protection alone is removed (SENSITIVE), so these results would not survive removal of the property."
+     "reference": "reports/remora-6cabef3/results/remora-6cabef3-2026-11-08-author-1.json",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+     "command": "python -m conformance.controls run --binding controls/bindings/remora-6cabef3 --subject <REMORA checkout at 6cabef3a6d14d8e61813e1467aa1b25086545b74> --out result.json --run-id <id>",
+     "description": "AACP control run remora-6cabef3-2026-11-08-author-1 (AUTHOR_RUN, EXPECTATIONS_MET): probes P-G-01, P-G-02a, P-G-02b did not observe their weakness, and each observes it again when its protection alone is removed (SENSITIVE), so these results would not survive removal of the property."
     },
     {
      "kind": "test",
-     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/tests/test_effect_verification.py",
-     "revision": "dab572c9d001b9a76ca7adfe8bcac379b30e3b6a",
+     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/tests/test_effect_verification.py",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
      "description": "REMORA test file, part of the G evidence run"
     },
     {
      "kind": "test",
-     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/tests/test_effect_verification_wiring.py",
-     "revision": "dab572c9d001b9a76ca7adfe8bcac379b30e3b6a",
+     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/tests/test_effect_verification_wiring.py",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
      "description": "REMORA test file, part of the G evidence run"
     },
     {
      "kind": "test",
-     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/tests/test_effect_verification_attribution_limit.py",
-     "revision": "dab572c9d001b9a76ca7adfe8bcac379b30e3b6a",
+     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/tests/test_effect_verification_attribution_limit.py",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
      "description": "REMORA test file, part of the G evidence run"
     },
     {
      "kind": "test",
-     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/tests/test_bounded_readback.py",
-     "revision": "dab572c9d001b9a76ca7adfe8bcac379b30e3b6a",
+     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/tests/test_bounded_readback.py",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
      "description": "REMORA test file, part of the G evidence run"
     },
     {
      "kind": "test",
-     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/tests/test_review_http_readback_redirects.py",
-     "revision": "dab572c9d001b9a76ca7adfe8bcac379b30e3b6a",
+     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/tests/test_review_http_readback_redirects.py",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
      "description": "REMORA test file, part of the G evidence run"
     },
     {
      "kind": "test",
-     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/dab572c9d001b9a76ca7adfe8bcac379b30e3b6a/tests/test_effect_receipt_endpoint_signed.py",
-     "revision": "dab572c9d001b9a76ca7adfe8bcac379b30e3b6a",
+     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/tests/test_effect_receipt_endpoint_signed.py",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
      "description": "REMORA test file, part of the G evidence run"
     },
     {
      "kind": "artifact",
-     "reference": "reports/remora-dab572c/assessor/junit-G.xml",
-     "revision": "dab572c9d001b9a76ca7adfe8bcac379b30e3b6a",
+     "reference": "reports/remora-6cabef3/assessor/junit-G.xml",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
      "command": "python -m pytest -q -o addopts= tests/test_effect_verification.py tests/test_effect_verification_wiring.py tests/test_effect_verification_attribution_limit.py tests/test_bounded_readback.py tests/test_review_http_readback_redirects.py tests/test_effect_receipt_endpoint_signed.py",
-     "description": "JUnit record of that run at dab572c9: 130 tests, 0 failed, 0 skipped"
+     "description": "JUnit record of that run at 6cabef3a: 130 tests, 0 failed, 0 skipped"
     }
    ]
   }
  ],
  "notes": [
-  "This is an assessor's assessment under SPECIFICATION §5, separate from the control report reports/remora-dab572c/REPORT.md, whose rows stay UNTESTED because AACP controls never yield PASS. The two must be read together, and neither replaces the other.",
+  "This is an assessor's assessment under SPECIFICATION §5, separate from the control report reports/remora-6cabef3/REPORT.md, whose rows stay UNTESTED because AACP controls never yield PASS. The two must be read together, and neither replaces the other.",
   "Rows are not commensurable and are not combined (SPECIFICATION §7).",
   "Independence: AUTHOR_RUN. The assessor is the implementer. Owner decision 2026-11-08: no second-person review for these runs. A REPRODUCTION in CI reruns the control probes, not this assessment's REMORA test runs or E scenarios.",
-  "E finding during this assessment: at eed92c8 a same-user custody split let the agent read the executor's credential (ps eww) and reach the effect; REMORA dab572c adds custody rule 4 (REM-073). The eed92c8 records are unchanged."
+  "E finding during this assessment: at eed92c8 a same-user custody split let the agent read the executor's credential (ps eww) and reach the effect; REMORA 63615f5 adds custody rule 4 (REM-073). The eed92c8 records are unchanged."
  ]
 }
