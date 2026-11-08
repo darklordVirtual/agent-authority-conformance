@@ -1,0 +1,445 @@
+{
+  "schema": "aacp-control-run-v1",
+  "run_id": "nti-de08dbd-2026-11-08-author-3",
+  "started_at_utc": "2026-11-08T13:44:54Z",
+  "operator": "Stian Skogbrott (maintainer); executed by Claude agent in a disposable cloud container",
+  "independence": "AUTHOR_RUN",
+  "binding": "nti-de08dbd",
+  "subject": {
+    "name": "Neutral Trust Infrastructure (ube-foundation)",
+    "version": "0.1.7",
+    "repository": "https://github.com/abisheakp197/Neutral-Trust-Infrastructure",
+    "revision": "de08dbdcd27e01c27585d936091c69b59d173a97"
+  },
+  "procedure": {
+    "runner": "conformance/controls.py",
+    "runner_sha256": "82ed78f7fd8aeb50383170b384dd40c7f45d83a779efc82b58a280aa51849ab7",
+    "catalog": "controls/aacp-controls-v1/catalog.json",
+    "catalog_version": "1.2.0",
+    "catalog_sha256": "b822eb29a72553ef788caf0ed3e586d1b797be81a237fdb5692554cd4ce2152d",
+    "binding_sha256": {
+      "controls/bindings/nti-de08dbd/binding.json": "823cad7bfcbbb81a852057642d3a81e7c779cd360ede7448428d7566ff8c29be",
+      "controls/bindings/nti-de08dbd/expected.json": "bc062a3afbc100e8e19863f5863fcb5bdf0469e30f72c1475d0a11e5242259f1",
+      "controls/bindings/nti-de08dbd/tests/reproduction_candidates.rs": "940b2528814305b17d6721ad480db0930162b653fcdbe4a2d9f96f60c646eb1a"
+    },
+    "aacp_revision": "7096bc68e7c605b57b95d32d0588ec7c3eb5cf8c",
+    "aacp_tree_clean": true
+  },
+  "environment": {
+    "python": "3.13.18",
+    "platform": "Linux-6.18.44-fc-v310-x86_64-with-glibc2.39",
+    "rustc": "rustc 1.97.0 (2d8144b78 2026-07-07)",
+    "cargo": "cargo 1.97.0 (c980f4866 2026-06-30)"
+  },
+  "setup": [],
+  "probes": {
+    "P-A-01": {
+      "control": "AACP-A-01",
+      "kind": "cargo-test",
+      "relationship": "exact",
+      "origin": "mythos:NTI-04",
+      "mutation": "M-04",
+      "test": "nti_04_max_executions_resets_on_batch_commit",
+      "result": "OBSERVED",
+      "baseline_status": "ok",
+      "mutated_status": "FAILED",
+      "discrimination": "DISCRIMINATES"
+    },
+    "P-A-02": {
+      "control": "AACP-A-02",
+      "kind": "cargo-test",
+      "relationship": "partial",
+      "origin": "mythos:NTI-10",
+      "mutation": "M-10",
+      "test": "nti_10_revocation_fail_open",
+      "result": "OBSERVED",
+      "baseline_status": "ok",
+      "mutated_status": "FAILED",
+      "discrimination": "DISCRIMINATES"
+    },
+    "P-A-03": {
+      "control": "AACP-A-03",
+      "kind": "cargo-test",
+      "relationship": "structural",
+      "origin": "mythos:NTI-03",
+      "mutation": "M-03",
+      "test": "nti_03_airgap_bundle_self_signed_trust",
+      "result": "OBSERVED",
+      "baseline_status": "ok",
+      "mutated_status": "FAILED",
+      "discrimination": "DISCRIMINATES"
+    },
+    "P-B-01": {
+      "control": "AACP-B-01",
+      "kind": "cargo-test",
+      "relationship": "exact",
+      "origin": "mythos:NTI-01",
+      "mutation": "M-01",
+      "test": "nti_01_actor_spoofing_no_signature_required",
+      "result": "OBSERVED",
+      "baseline_status": "ok",
+      "mutated_status": "FAILED",
+      "discrimination": "DISCRIMINATES"
+    },
+    "P-B-02": {
+      "control": "AACP-B-02",
+      "kind": "cargo-test",
+      "relationship": "exact",
+      "origin": "mythos:NTI-01b",
+      "mutation": "M-01",
+      "test": "nti_01b_signature_is_self_attested",
+      "result": "OBSERVED",
+      "baseline_status": "ok",
+      "mutated_status": "FAILED",
+      "discrimination": "DISCRIMINATES"
+    },
+    "P-B-03": {
+      "control": "AACP-B-03",
+      "kind": "cargo-test",
+      "relationship": "exact",
+      "origin": "mythos:NTI-08",
+      "mutation": "M-08",
+      "test": "nti_08_token_is_unbound_bearer",
+      "result": "OBSERVED",
+      "baseline_status": "ok",
+      "mutated_status": "FAILED",
+      "discrimination": "DISCRIMINATES"
+    },
+    "P-C-01": {
+      "control": "AACP-C-01",
+      "kind": "cargo-test",
+      "relationship": "exact",
+      "origin": "mythos:NTI-08b",
+      "mutation": "M-08b",
+      "test": "nti_08b_token_not_bound_to_call",
+      "result": "OBSERVED",
+      "baseline_status": "ok",
+      "mutated_status": "FAILED",
+      "discrimination": "DISCRIMINATES"
+    },
+    "P-D-01": {
+      "control": "AACP-D-01",
+      "kind": "cargo-test",
+      "relationship": "exact",
+      "origin": "mythos:NTI-05",
+      "mutation": "M-05",
+      "test": "nti_05_value_limit_type_confusion",
+      "result": "OBSERVED",
+      "baseline_status": "ok",
+      "mutated_status": "FAILED",
+      "discrimination": "DISCRIMINATES"
+    },
+    "P-D-02": {
+      "control": "AACP-D-02",
+      "kind": "cargo-test",
+      "relationship": "exact",
+      "origin": "mythos:NTI-06",
+      "mutation": "M-06",
+      "test": "nti_06_path_prefix_escape",
+      "result": "OBSERVED",
+      "baseline_status": "ok",
+      "mutated_status": "FAILED",
+      "discrimination": "DISCRIMINATES"
+    },
+    "P-D-03": {
+      "control": "AACP-D-03",
+      "kind": "cargo-test",
+      "relationship": "exact",
+      "origin": "daybreak:intent-after-dispatch",
+      "mutation": "M-13",
+      "test": "nti_13_intent_policy_checked_after_effect",
+      "result": "OBSERVED",
+      "baseline_status": "ok",
+      "mutated_status": "FAILED",
+      "discrimination": "DISCRIMINATES"
+    },
+    "P-X-01": {
+      "control": "AACP-X-01",
+      "kind": "cargo-test",
+      "relationship": "no_mapping",
+      "origin": "mythos:NTI-07",
+      "mutation": "M-07",
+      "test": "nti_07_audit_batch_truncation_undetected",
+      "result": "OBSERVED",
+      "baseline_status": "ok",
+      "mutated_status": "FAILED",
+      "discrimination": "DISCRIMINATES"
+    },
+    "P-X-02": {
+      "control": "AACP-X-02",
+      "kind": "cargo-test",
+      "relationship": "no_mapping",
+      "origin": "mythos:NTI-11",
+      "mutation": "M-11",
+      "test": "nti_11_merkle_odd_node_duplication_collision",
+      "result": "OBSERVED",
+      "baseline_status": "ok",
+      "mutated_status": "FAILED",
+      "discrimination": "DISCRIMINATES"
+    },
+    "P-X-03": {
+      "control": "AACP-X-03",
+      "kind": "cargo-test",
+      "relationship": "no_mapping",
+      "origin": "mythos:NTI-09",
+      "mutation": "M-09",
+      "test": "nti_09_handshake_accepts_unknown_peer",
+      "result": "OBSERVED",
+      "baseline_status": "ok",
+      "mutated_status": "FAILED",
+      "discrimination": "DISCRIMINATES"
+    },
+    "S-A-04": {
+      "control": "AACP-A-04",
+      "kind": "source-check",
+      "relationship": "exact",
+      "origin": "mythos:NTI-02",
+      "mutation": null,
+      "result": "OBSERVED",
+      "predicates": [
+        {
+          "op": "not_matches",
+          "file": "ube-foundation/src/lib.rs",
+          "holds": true,
+          "detail": "no match"
+        }
+      ],
+      "discrimination": "NOT_RUN"
+    },
+    "S-B-03": {
+      "control": "AACP-B-03",
+      "kind": "source-check",
+      "relationship": "exact",
+      "origin": "daybreak:token-actor-binding",
+      "mutation": "M-08",
+      "result": "OBSERVED",
+      "predicates": [
+        {
+          "op": "not_matches",
+          "file": "ube-foundation/src/lib.rs",
+          "holds": true,
+          "detail": "no match"
+        },
+        {
+          "op": "matches",
+          "file": "ube-foundation/src/lib.rs",
+          "holds": true,
+          "detail": "line 756"
+        },
+        {
+          "op": "not_matches",
+          "file": "ube-foundation/src/lib.rs",
+          "holds": true,
+          "detail": "no match"
+        }
+      ],
+      "discrimination": "DISCRIMINATES"
+    },
+    "S-B-04": {
+      "control": "AACP-B-04",
+      "kind": "source-check",
+      "relationship": "exact",
+      "origin": "mythos:NTI-02",
+      "mutation": null,
+      "result": "OBSERVED",
+      "predicates": [
+        {
+          "op": "matches",
+          "file": "ube-foundation/src/network.rs",
+          "holds": true,
+          "detail": "line 92"
+        },
+        {
+          "op": "matches",
+          "file": "ube-foundation/src/network.rs",
+          "holds": true,
+          "detail": "line 98"
+        },
+        {
+          "op": "matches",
+          "file": "ube-foundation/src/network.rs",
+          "holds": true,
+          "detail": "line 129"
+        },
+        {
+          "op": "not_matches",
+          "file": "ube-foundation/src/network.rs",
+          "holds": true,
+          "detail": "no match"
+        }
+      ],
+      "discrimination": "NOT_RUN"
+    },
+    "S-D-03": {
+      "control": "AACP-D-03",
+      "kind": "source-check",
+      "relationship": "exact",
+      "origin": "daybreak:intent-after-dispatch",
+      "mutation": "M-13",
+      "result": "OBSERVED",
+      "predicates": [
+        {
+          "op": "order",
+          "file": "ube-foundation/src/lib.rs",
+          "holds": true,
+          "detail": "first at line 1595, then at line 1599"
+        },
+        {
+          "op": "matches",
+          "file": "ube-foundation/src/lib.rs",
+          "holds": true,
+          "detail": "line 1466"
+        }
+      ],
+      "discrimination": "DISCRIMINATES"
+    },
+    "S-EV-01": {
+      "control": "AACP-EV-01",
+      "kind": "source-check",
+      "relationship": "no_mapping",
+      "origin": "mythos:P-01",
+      "mutation": null,
+      "result": "OBSERVED",
+      "predicates": [
+        {
+          "op": "json_equals",
+          "file": "conformance/witness/MANIFEST.json",
+          "holds": true,
+          "detail": "value '08344a03a3788eec6baf26a976eb3e99799736cd4d0f4f6a439e4c5d416efe20'"
+        },
+        {
+          "op": "json_equals",
+          "file": "conformance/witness/MANIFEST.json",
+          "holds": true,
+          "detail": "value '08344a03a3788eec6baf26a976eb3e99799736cd4d0f4f6a439e4c5d416efe20'"
+        }
+      ],
+      "discrimination": "NOT_RUN"
+    },
+    "S-EV-02": {
+      "control": "AACP-EV-02",
+      "kind": "source-check",
+      "relationship": "no_mapping",
+      "origin": "mythos:P-02 + daybreak:witness-commit-vs-head",
+      "mutation": null,
+      "result": "OBSERVED",
+      "predicates": [
+        {
+          "op": "json_lacks",
+          "file": "conformance/witness/MANIFEST.json",
+          "holds": true,
+          "detail": "12 entries"
+        },
+        {
+          "op": "json_ne_head",
+          "file": "conformance/witness/MANIFEST.json",
+          "holds": true,
+          "detail": "'ea763c0c7e41344bd82b0db0eb211840926e1c3c' vs HEAD de08dbdcd27e01c27585d936091c69b59d173a97"
+        },
+        {
+          "op": "not_matches",
+          "file": "conformance/witness/verify.sh",
+          "holds": true,
+          "detail": "no match"
+        }
+      ],
+      "discrimination": "NOT_RUN"
+    },
+    "S-EV-03": {
+      "control": "AACP-EV-03",
+      "kind": "source-check",
+      "relationship": "no_mapping",
+      "origin": "mythos:P-03",
+      "mutation": null,
+      "result": "OBSERVED",
+      "predicates": [
+        {
+          "op": "matches",
+          "file": "conformance/witness_generator/generate_seals.py",
+          "holds": true,
+          "detail": "line 434"
+        },
+        {
+          "op": "matches",
+          "file": "conformance/witness_generator/generate_seals.py",
+          "holds": true,
+          "detail": "line 483"
+        },
+        {
+          "op": "not_matches",
+          "file": "conformance/witness_generator/generate_seals.py",
+          "holds": true,
+          "detail": "no match"
+        }
+      ],
+      "discrimination": "NOT_RUN"
+    },
+    "S-EV-04": {
+      "control": "AACP-EV-04",
+      "kind": "source-check",
+      "relationship": "no_mapping",
+      "origin": "mythos:P-04 + daybreak:packaged-trust-anchor",
+      "mutation": null,
+      "result": "OBSERVED",
+      "predicates": [
+        {
+          "op": "matches",
+          "file": "conformance/witness/verify.sh",
+          "holds": true,
+          "detail": "line 33"
+        },
+        {
+          "op": "not_matches",
+          "file": "conformance/witness/verify.sh",
+          "holds": true,
+          "detail": "no match"
+        },
+        {
+          "op": "json_exists",
+          "file": "conformance/witness/MANIFEST.json",
+          "holds": true,
+          "detail": "present"
+        }
+      ],
+      "discrimination": "NOT_RUN"
+    },
+    "S-EV-05": {
+      "control": "AACP-EV-05",
+      "kind": "source-check",
+      "relationship": "no_mapping",
+      "origin": "mythos:P-05",
+      "mutation": null,
+      "result": "OBSERVED",
+      "predicates": [
+        {
+          "op": "matches",
+          "file": "conformance/witness_generator/generate_seals.py",
+          "holds": true,
+          "detail": "line 493"
+        }
+      ],
+      "discrimination": "NOT_RUN"
+    },
+    "P-X-04": {
+      "control": "AACP-X-04",
+      "kind": "cargo-test",
+      "relationship": "no_mapping",
+      "origin": "aacp:remora-binding",
+      "mutation": null,
+      "test": "nti_14_persisted_state_fails_after_reload",
+      "result": "NOT_OBSERVED",
+      "baseline_status": "FAILED",
+      "discrimination": "NOT_RUN",
+      "sensitivity_status": "ok",
+      "sensitivity": "SENSITIVE"
+    }
+  },
+  "not_applicable": [],
+  "non_verdict_errors": [],
+  "expectations": {
+    "met": true,
+    "mismatches": {}
+  },
+  "verdict": "EXPECTATIONS_MET",
+  "finished_at_utc": "2026-11-08T13:45:57Z"
+}
