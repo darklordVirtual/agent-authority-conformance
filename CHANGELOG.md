@@ -1,14 +1,42 @@
 # Changelog
 
-## Unreleased
+## 0.3.0a1 — alpha
+
+- Distribute AACP as versioned GitHub Release assets: wheel, source archive, CycloneDX SBOM and `SHA256SUMS.txt`, with Sigstore-signed build-provenance and SBOM attestations. `.github/workflows/release.yml` runs on a `v*` tag: it checks that the tag matches `pyproject.toml`, has a changelog section and sits on `main`, reruns the conformance checks, builds the wheel twice to prove it is byte-reproducible, installs the wheel on Linux, macOS and Windows (Python 3.12 and 3.13) and the sdist on Linux and exercises the installed `aacp` outside a checkout, and publishes only after approval in the `release` environment. Pull requests that touch release inputs rehearse every step except publication. `scripts/release.py` holds the gates and `scripts/smoke_installed_cli.py` the installed-CLI check, which the CLI package job now shares. See [docs/INSTALL.md](docs/INSTALL.md) and [docs/RELEASING.md](docs/RELEASING.md). No PyPI publication; runtime dependencies are still resolved from the configured package index.
+
+- Lab: answer public verification challenges ([docs/CHALLENGE-RESPONSE.md](docs/CHALLENGE-RESPONSE.md)).
+  Verification inputs may set `format: bytes`, so checks verify signatures and digests over
+  the exact published bytes. Scopes may declare `probes`: runner-authored findings with a
+  class, a recomputable witness, source locators (read, never executed) and the runner's
+  assessment level, recorded in `results/probes.json`
+  ([schema](schema/lab/probe-results.schema.json)), compared on rerun and reported apart
+  from claim results; they never map to PASS/FAIL and are never counted. `challenge`
+  records a public request to verify as context, never as consent, and the report states
+  that no endorsement is given. `respond` drafts a reply from the run's own records, with
+  AI-drafting disclosure, outside the package manifest. `init --template <dir>/SCOPE.json`
+  copies the skeleton's `verifier/`. `respond` writes only under the run's `.local/` or
+  outside the run directory and replaces a draft only with `--force`; it groups findings by
+  whether they hold for the bytes as published. Rerun compares every field of every probe
+  record. Probe class `TERMINOLOGY_CHANGE` records an identifier whose meaning changed between
+  revisions without any inference about provenance. Worked example:
+  [templates/runs/nti-witness/](templates/runs/nti-witness/), the NTI witness package from
+  aeoess/agent-governance-vocabulary#177, with a standard-library RFC 8032 Ed25519, and its
+  real run kept in `recorded/RECORD.json` (`scripts/record_lab_run.py`), checked offline and
+  rerun over the real pinned bytes by the `nti-real-bytes` CI job.
+- Lab fixes for the public-boundary basis: `package` crashed rendering the track line,
+  `withhold`, `aacp next` and `aacp export map` assumed an offer, and the scope schema's
+  `public_boundary` patterns were double-escaped, so the schema rejected every valid
+  boundary. A public-boundary run is now bound to its boundary: every subject must be a
+  revision of the boundary's own repository (also with a single subject, which was not checked
+  before) and subject 0 must be pinned at the boundary commit. Several revisions of that
+  repository may be pinned for comparison. The schema agreement test now covers the public
+  boundary.
 
 - Catalog v1.3.0, a new file `controls/aacp-controls-v1.3.0/catalog.json` (v1.2.0 at `controls/aacp-controls-v1/` is frozen because committed results pin its SHA-256; a test now enforces that): add E, F and G controls (AACP-E-01, AACP-F-01..03, AACP-G-01..02), AACP-C-02 (argument substitution under a reused call identity) and the `AACP-CY` family outside A-G for the agent cyber boundary (instruction promotion, approval injection, memory taint, secret egress with runner-seeded canaries, tenant isolation, redirect and parser-disagreement network policy, tool substitution, verify-then-execute artifact admission, observer precedence over self-reports), mapped to the Stage 0 JX candidates. Each new control has a reference subject under `tests/controls_reference/` (weak module, single-edit repair, probe with the 0/1/3 exit convention) that `tests/test_controls_reference_subjects.py` runs through the real runner: OBSERVED and DISCRIMINATES on the weak subject, NOT_OBSERVED and SENSITIVE on the repaired one, NON_VERDICT on a broken one, FAIL on exactly the control's property and never PASS. `tests/test_controls_adversarial.py` checks that a tampering probe, a probe-breaking repair, a relationship downgrade, an out-of-A-G control, an evasive subject or an edited `expected.json` cannot manufacture a FAIL or a PASS, that runs are byte-for-byte reproducible apart from the clock, and records two runner gaps as expected failures (a JSON predicate over a non-JSON file aborts the run; an unknown predicate op is not rejected at load). No existing control, binding or result changed.
 
-- Add a REMORA binding under the same catalog ([report](reports/remora-06c2f8f/REPORT.md), [assessment](examples/remora-06c2f8f.json), [inspection and fix guide](docs/REMORA-CONTROL-INSPECTION.md)): 20 probes against REMORA-research `dev` at `06c2f8f`. None of the A-D weaknesses found in NTI reproduces; every such probe is shown sensitive, so its NOT_OBSERVED is meaningful, and A-G stay `UNTESTED` because controls never yield `PASS`. Three defects outside A-G reproduce and discriminate: the JSONL audit log fails verification after any reload (AACP-X-04), the SQLite tenant chain does not detect tail truncation (AACP-X-01), and the assurance Merkle tree duplicates odd nodes without domain separation (AACP-X-02). Probes now declare sensitivity (a weakening that must make a NOT_OBSERVED probe observe), mutations may carry several edits, and command probes take `not_observed_exit` and runner `setup`. Self-assessment: the AACP maintainer is REMORA's author.
+- Add a REMORA binding under the same catalog ([report](reports/remora-06c2f8f/REPORT.md), [assessment](examples/remora-06c2f8f.json), [inspection and fix guide](docs/REMORA-CONTROL-INSPECTION.md)): 20 probes against REMORA-research `dev` at `06c2f8f`. None of the catalog's A-D weaknesses reproduces; every such probe is shown sensitive, so its NOT_OBSERVED is meaningful, and A-G stay `UNTESTED` because controls never yield `PASS`. Three defects outside A-G reproduce and discriminate: the JSONL audit log fails verification after any reload (AACP-X-04), the SQLite tenant chain does not detect tail truncation (AACP-X-01), and the assurance Merkle tree duplicates odd nodes without domain separation (AACP-X-02). Probes now declare sensitivity (a weakening that must make a NOT_OBSERVED probe observe), mutations may carry several edits, and command probes take `not_observed_exit` and runner `setup`. Self-assessment: the AACP maintainer is REMORA's author.
 
 - Add AACP controls ([docs/CONTROLS.md](docs/CONTROLS.md)): a project-neutral catalog, `controls/aacp-controls-v1/catalog.json` (20 controls over A-D plus audit, transport and evidence-provenance controls outside A-G, each with a probe contract), per-subject bindings under `controls/bindings/`, and `python -m conformance.controls run|report|compare`. Probe kinds `cargo-test`, `command` and `source-check` are generic. A property is `FAIL` only on an executed probe with an `exact` relationship that reproduces the weakness and stops reproducing it when that weakness alone is repaired; controls never yield `PASS`. The `controls` workflow reruns every binding as a reproduction and fails if the findings or the regenerated report differ from the committed run. `tests/test_controls.py` covers the semantics without a Rust toolchain.
-
-- Add the first binding, Neutral Trust Infrastructure at `de08dbd` ([report](reports/nti-de08dbd/REPORT.md), [assessment](examples/nti-de08dbd.json), [inspection](docs/NTI-SOURCE-INSPECTION.md)), with 22 probes from the Claude Mythos sweep and the OpenAI Daybreak source checks. A, B, C and D are `FAIL`; E, F and G are `UNTESTED`. Daybreak's post-dispatch intent check is reproduced with a real file write (AACP-D-03).
 
 - Add `AACP-OBSERVED-EFFECT-VANTAGE-2`, a revision of the observation-vantage profile. Positive observer-independence credit now also needs runner-owned evidence that the observer identity is established outside the producer, which cannot issue or revoke it, and that the producer cannot reach the observer's signing key. `evaluate_observation_vantage_r2` and `--profile-revision 2` apply it. Revision 1 and its function stay as published, as GOVERNANCE.md requires of a merged profile revision, so the reference vectors v1 and every record under revision 1 are unchanged.
 

@@ -6,7 +6,14 @@ Git pin inspection. It does not run a property verifier or discover evidence.
 
 ## Install and start
 
-Python 3.12 or newer, from an AACP checkout:
+Python 3.12 or newer. From a GitHub Release (see [INSTALL.md](INSTALL.md) for
+checksum and attestation verification):
+
+```sh
+pipx install https://github.com/darklordVirtual/agent-authority-conformance/releases/download/v0.3.0a1/aacp_conformance-0.3.0a1-py3-none-any.whl
+```
+
+Or from an AACP checkout:
 
 ```sh
 pipx install .
@@ -18,8 +25,8 @@ aacp inspect --json
 
 Without pipx, install into a virtual environment with `python -m pip install .`.
 For development, `python -m aacp` provides the same interface from the checkout.
-No PyPI release is implied: `pipx install aacp-conformance` becomes available
-only after an explicitly authorized package publication. The distribution
+Releases are published on GitHub Releases only: `pipx install aacp-conformance`
+from PyPI becomes available only after an explicitly authorized package publication. The distribution
 includes the committed JSON schemas; no AACP checkout is needed at runtime.
 The existing `python -m conformance.*` developer tools remain separate and
 require the repository and its committed corpus.

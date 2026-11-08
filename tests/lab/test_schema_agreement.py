@@ -47,6 +47,47 @@ class SchemaAgreementTest(unittest.TestCase):
         manual_without_parties = copy.deepcopy(ver)
         manual_without_parties.pop("agreement_parties")
         yield "manual without parties", manual_without_parties
+        boundary = copy.deepcopy(offer_run)
+        boundary.pop("offer")
+        boundary["public_boundary"] = {
+            "repo": boundary["subjects"][0]["repo"], "commit": boundary["subjects"][0]["commit"],
+            "path": "docs/BOUNDARY.md",
+            "sha256": "b" * 64, "procedure_ref": "docs/BOUNDARY.md#procedure",
+            "claims_ref": "docs/BOUNDARY.md#claims", "classification_ref": "docs/BOUNDARY.md#classification"}
+        yield "public boundary", boundary
+        two_revisions = copy.deepcopy(boundary)
+        two_revisions["subjects"].append({**two_revisions["subjects"][0], "commit": "c" * 40})
+        yield "public boundary, two revisions of its repository", two_revisions
+        two_offer_subjects = copy.deepcopy(offer_run)
+        two_offer_subjects["subjects"].append({**two_offer_subjects["subjects"][0], "commit": "c" * 40})
+        yield "offer with two subjects", two_offer_subjects
+        bad_boundary_path = copy.deepcopy(boundary)
+        bad_boundary_path["public_boundary"]["path"] = "../escape.md"
+        yield "public boundary path escapes", bad_boundary_path
+        probe = {"id": "p1", "text": "probed", "class": "BINDING_GAP", "check": "m:f", "inputs": ["within"],
+                 "reads_fields": ["x"], "runner_assessment": {"level": "low", "rationale": "r"},
+                 "source_locators": [{"subject": 0, "path": "receipts/within.json", "lines": "1-3", "note": "n"}]}
+        challenge = {"ref": "https://example.invalid/c", "by": "p", "asked": ["recompute"],
+                     "requests_endorsement": False}
+        rich = copy.deepcopy(ver)
+        rich["probes"] = [probe]
+        rich["challenge"] = challenge
+        rich["inputs"][0]["format"] = "bytes"
+        yield "probes, challenge and bytes input", rich
+        for label, edit in {
+            "probe bad class": lambda s: s["probes"][0].__setitem__("class", "SEVERE"),
+            "probe bad level": lambda s: s["probes"][0]["runner_assessment"].__setitem__("level", "critical"),
+            "probe bad lines": lambda s: s["probes"][0]["source_locators"][0].__setitem__("lines", "a-b"),
+            "challenge http": lambda s: s["challenge"].__setitem__("ref", "http://x"),
+            "challenge extra key": lambda s: s["challenge"].__setitem__("consent", True),
+            "bad input format": lambda s: s["inputs"][0].__setitem__("format", "yaml"),
+        }.items():
+            scope = copy.deepcopy(rich)
+            edit(scope)
+            yield label, scope
+        adequacy_with_probes = copy.deepcopy(base)
+        adequacy_with_probes["probes"] = [probe]
+        yield "adequacy with probes", adequacy_with_probes
         edits = {
             "no ceiling": lambda s: s.pop("claim_ceiling"),
             "score key": lambda s: s.__setitem__("score", 3),
@@ -117,7 +158,7 @@ class SchemaAgreementTest(unittest.TestCase):
                 offer.validate_offers(bad)
 
     def test_remaining_schemas_are_valid_schemas(self):
-        for name in ("consent", "claim-results", "row-result"):
+        for name in ("consent", "claim-results", "row-result", "probe-results"):
             validator(name)
 
 

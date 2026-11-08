@@ -2,10 +2,9 @@
 
 Executed on 2026-11-08 against
 [REMORA-research](https://github.com/darklordVirtual/REMORA-research) `dev` at
-`06c2f8f038d9d24668158ce24cbd444e89fd306a`, with the same AACP control
-catalog (v1.2.0) used for [NTI](NTI-SOURCE-INSPECTION.md). The purpose is to
-check whether REMORA has the weaknesses found in NTI, and to give the
-maintainer what is needed to fix any it has.
+`06c2f8f038d9d24668158ce24cbd444e89fd306a`, with AACP control catalog
+v1.2.0. The purpose is to check whether REMORA has the weaknesses the catalog
+names, and to give the maintainer what is needed to fix any it has.
 
 - **Generated report:** [`reports/remora-06c2f8f/REPORT.md`](../reports/remora-06c2f8f/REPORT.md)
 - **Assessment (schema v0.1):** [`examples/remora-06c2f8f.json`](../examples/remora-06c2f8f.json)
@@ -14,7 +13,7 @@ maintainer what is needed to fix any it has.
 
 This is a **self-assessment**. The AACP maintainer is REMORA's author; the
 probes were drafted and executed by an AI agent and reviewed by the maintainer.
-The same rules applied to NTI apply here, with one addition made for this
+The catalog's status rules apply unchanged, with one addition made for this
 binding: every probe that did not find its weakness had to be shown
 **sensitive**, meaning that with the protection removed it does find it. A
 "not observed" from a probe that could not have observed anything is
@@ -22,15 +21,15 @@ reported as such, never as a protection that held.
 
 ## Result
 
-| Property | REMORA | NTI (for comparison) |
-| :--- | :--- | :--- |
-| A Receipt Integrity | UNTESTED; 4 controls not observed, all sensitive | FAIL (AACP-A-01) |
-| B Authority Provenance | UNTESTED; 4 controls not observed, all sensitive | FAIL (AACP-B-01, B-02, B-03) |
-| C Exact-Call Integrity | UNTESTED; 1 control not observed, sensitive | FAIL (AACP-C-01) |
-| D Semantic Authority | UNTESTED; 3 controls not observed, all sensitive | FAIL (AACP-D-01, D-02, D-03) |
-| E, F, G | UNTESTED, no probes | UNTESTED, no probes |
+| Property | REMORA |
+| :--- | :--- |
+| A Receipt Integrity | UNTESTED; 4 controls not observed, all sensitive |
+| B Authority Provenance | UNTESTED; 4 controls not observed, all sensitive |
+| C Exact-Call Integrity | UNTESTED; 1 control not observed, sensitive |
+| D Semantic Authority | UNTESTED; 3 controls not observed, all sensitive |
+| E, F, G | UNTESTED, no probes |
 
-None of the A-D weaknesses found in NTI reproduces in REMORA. That is
+None of the catalog's A-D weaknesses reproduces in REMORA. That is
 `UNTESTED`, not `PASS`: AACP controls never yield PASS, because a set of
 probes failing to find a weakness is not direct evidence that a property
 holds (SPECIFICATION §3, §5). What it does establish is narrower and
@@ -148,7 +147,7 @@ remove one of the two observations.
 
 ## Verified protections
 
-Each of these was probed with the weakness found in NTI, refused, and then
+Each of these was probed with the catalog weakness, refused, and then
 shown sensitive by removing the named protection. Line references are at the
 pinned revision.
 

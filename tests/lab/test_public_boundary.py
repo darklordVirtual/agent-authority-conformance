@@ -24,6 +24,8 @@ class PublicBoundaryScopeTest(unittest.TestCase):
         scope = json.loads((FIXTURES / "toy-offer-run" / "SCOPE.json").read_text(encoding="utf-8"))
         scope.pop("offer")
         scope["public_boundary"] = dict(BOUNDARY)
+        scope["subjects"][0]["repo"] = BOUNDARY["repo"]
+        scope["subjects"][0]["commit"] = BOUNDARY["commit"]
         return scope
 
     def test_public_boundary_is_valid_self_service_basis(self):
@@ -48,6 +50,23 @@ class PublicBoundaryScopeTest(unittest.TestCase):
         }
         with self.assertRaisesRegex(ScopeError, "exactly one basis"):
             validate_scope(scope)
+
+    def test_single_subject_from_another_repository_is_refused(self):
+        scope = self.scope()
+        scope["subjects"][0]["repo"] = "https://github.com/example/other-project"
+        with self.assertRaisesRegex(ScopeError, "only its own repository"):
+            validate_scope(scope)
+
+    def test_primary_subject_must_be_at_the_boundary_commit(self):
+        scope = self.scope()
+        scope["subjects"][0]["commit"] = "f" * 40
+        with self.assertRaisesRegex(ScopeError, "public_boundary commit"):
+            validate_scope(scope)
+
+    def test_repository_match_ignores_case_and_trailing_slash(self):
+        scope = self.scope()
+        scope["subjects"][0]["repo"] = BOUNDARY["repo"].upper().replace("HTTPS", "https") + "/"
+        validate_scope(scope)
 
     def test_public_boundary_requires_classification_rules(self):
         scope = self.scope()

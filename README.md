@@ -38,9 +38,13 @@ Properties are separable. Evidence for one grants no credit in another, and **Aâ
 
 Evidence tiers are `RESOLVED` (inspected at a stated revision), `REPORTED` (described, not resolved) and `NONE`. In v0.2, `PASS` and `FAIL` require pinned `RESOLVED` evidence. A runtime success, valid receipt or passing test is not a property verdict, and missing evidence is never a demonstrated violation.
 
+## Install
+
+The `aacp` command is distributed as a wheel on [GitHub Releases](https://github.com/darklordVirtual/agent-authority-conformance/releases), not PyPI. Install, checksum and attestation verification: [docs/INSTALL.md](docs/INSTALL.md). Maintainers: [docs/RELEASING.md](docs/RELEASING.md).
+
 ## Quick start
 
-Python 3.12 or newer:
+From a checkout, Python 3.12 or newer:
 
 ```sh
 python -m venv .venv && . .venv/bin/activate   # Windows: .venv\Scripts\Activate.ps1
@@ -62,7 +66,8 @@ All checks run offline, are read-only and never regenerate committed expectation
 | Project onboarding (`aacp init`, `validate`, `inspect`) | [CLI onboarding](docs/CLI-ONBOARDING.md) |
 | Local C/F/G adversarial probes (`aacp adversarial`) | [Adversarial self-service](docs/ADVERSARIAL-SELF-SERVICE.md) |
 | Runs against another project's pinned artifacts | [Federation tracks](docs/FEDERATION-TRACKS.md), [RUN-PROTOCOL-v0.3.md](RUN-PROTOCOL-v0.3.md) |
-| Repeatable security controls against a pinned project, with an A-G report | [AACP controls](docs/CONTROLS.md), example [NTI report](reports/nti-de08dbd/REPORT.md) |
+| Answering a public "verify our hashes" challenge, with runner findings kept apart from claims | [Challenge response](docs/CHALLENGE-RESPONSE.md), `python -m conformance.lab respond <run>` |
+| Repeatable security controls against a pinned project, with an A-G report | [AACP controls](docs/CONTROLS.md), example [REMORA report](reports/remora-b5e4c42/REPORT.md) |
 | Cross-implementation comparison | `python -m conformance.coverage <assessment.json> ...` |
 | Checking another implementation, in any language, against frozen reference vectors | [Reference vectors](docs/REFERENCE-VECTORS.md), `python -m conformance.vectors run --impl "<command>"` |
 
@@ -71,6 +76,8 @@ All checks run offline, are read-only and never regenerate committed expectation
 ## Published bounded reproductions
 
 - [AEGIS Core 3.4.0, Run 002](https://github.com/darklordVirtual/agent-authority-conformance/blob/026097b21c2c5544448e05ca275dc0104d4f873a/publications/aegis-issue-21-run-002/PUBLICATION.md): operator-controlled manual reproduction of a producer-authored fixture, **REPRODUCTION / BCR-1 at most**. The producer [confirmed the published archive and representation](https://github.com/darklordVirtual/agent-authority-conformance/issues/21#issuecomment-6366973494). The publication note links the approved archive and report and states the claim limits.
+
+- [NTI witness package, 2026-11-07](publications/nti-witness-2026-11-07/PUBLICATION.md): runner-attributed verification over a pinned public boundary, answering the challenge in aeoess/agent-governance-vocabulary#177, **SECOND_IMPLEMENTATION / BCR-2 at most**. Not reviewed or endorsed by the NTI maintainer; gives no endorsement. Package reruns to `REPRODUCED`.
 
 ## Runs against other projects
 

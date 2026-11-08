@@ -49,6 +49,10 @@ def _comparable(rel, obj):
     if rel == "results/claims.json":
         return {f"{r['input']} / {r['claim']}": [r["execution"], r["result"], r.get("reads"),
                                                  r.get("unresolved_obligations")] for r in obj["records"]}
+    if rel == "results/probes.json":
+        # The whole record: a changed explanation, class, input list or non-verdict
+        # reason is a divergence even when the observation and witness are unchanged.
+        return {f"probe {r['probe']}": dict(r) for r in obj["records"]}
     return {"status": obj["status"],
             "controls": {k: v["outcome"] for k, v in obj["controls"].items()},
             **{f"mutant {m['fault_id']}": [m["outcome"], m["moved"], m["crashed"], m.get("engine_verdict")]

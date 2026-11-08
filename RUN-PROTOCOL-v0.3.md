@@ -132,6 +132,20 @@ relative path) and `claims` (id, text,
 layer, `check` as `<module>:<function>` in `verifier/`, `reads_fields`,
 `inputs`, optional `temporal`). A temporal claim requires `reference_time`.
 
+An input may set `format` to `json` (the default, as above) or `bytes`. A
+`bytes` file reaches the check as `{name: bytes}`; a `bytes` directory as
+`{relative path: bytes}` of every file under it. Use `bytes` whenever a check
+verifies a signature or a digest: re-serialised JSON is not the signed message.
+A file's evidence digest is its SHA-256; a bundle's is the SHA-256 of the
+canonical `{path: sha256}` map.
+
+A verification scope may add `probes` (§5.5) and, for any run, `challenge`:
+`ref` (https link to a public request to verify something), `by`, `asked` (what
+it asked, in the runner's words) and `requests_endorsement`. A challenge is
+context only. It is never consent, an offer, admission or a publication
+approval, it satisfies no gate, and answering it is not endorsement; the report
+says so, and says explicitly that no endorsement is given when one was asked for.
+
 ### 5.2 Verification results
 
 `results/claims.json` holds one record per (input, claim) with `execution`
@@ -176,6 +190,51 @@ verdict the lab does not map, kept verbatim). Row status:
 Counts are per row and per named fault set. Nothing is summed across rows or
 sets, and there is no percentage.
 
+### 5.5 Probes
+
+A probe records a property the runner observed about the pinned bytes: a
+specification that the published code does not follow, a construction that
+admits two inputs with one digest, a field a signature does not bind, an
+unannounced key change. Probes are separate from claims because they are the
+runner's own questions, often formed after reading the subject, and they must
+never borrow the standing of a claim result.
+
+A probe declares `id` (unique among claims and probes), `text` (the property
+probed, stated neutrally), `class` (`SPEC_IMPLEMENTATION_DIVERGENCE`,
+`CONSTRUCTION_AMBIGUITY`, `BINDING_GAP`, `FRAMING_GAP`, `KEY_REUSE`,
+`TRUST_ANCHOR`, `ATTESTATION_SCOPE`, `TERMINOLOGY_CHANGE`, `PROVENANCE_ATTRIBUTION` or
+`OTHER`),
+`check`, `inputs`, `reads_fields`, `runner_assessment` (`level`
+`informational`, `low`, `medium` or `high`, with a `rationale`) and optionally
+`remediation` and `source_locators` (subject, pinned path, line range, note;
+after `pin` the path must be a pinned file). Locators point at bytes that were
+read; they are never executed.
+
+Unlike a claim, a probe runs once over all its inputs together, so it can
+compare two pinned revisions. The check receives `{input id: document}` and
+returns `observation` (`DEMONSTRATED` or `NOT_DEMONSTRATED`), `reads`,
+`witness` (plain JSON, no floats, no aggregate keys, nonempty when
+`DEMONSTRATED`), `affects_pinned_artifact` (true when the observation holds
+for the bytes as published, false when shown only on constructed inputs) and
+`message`. Contract violations and crashes are `ERROR` non-verdicts; an input
+that is not admitted or cannot be read makes the probe `NOT_ADMITTED` or
+`INVALID_INPUT` without running it. Records go to `results/probes.json`
+([schema](schema/lab/probe-results.schema.json)), are compared on rerun
+including the witness, and are reported in their own section. A probe never
+maps to `PASS` or `FAIL`, assessment levels are never summed, and the report
+does not count probes.
+
+A public-boundary run (§9) is bound to its boundary: every subject must be a
+revision of the boundary's own repository, with one subject as with several,
+and subject 0, the primary subject, must be pinned at the boundary commit, so
+the boundary text describes exactly the bytes verified. Further subjects are
+other revisions kept for comparison. The basis never covers a second project.
+
+Probes describe what the pinned bytes show. A difference between two revisions
+supports a statement about the difference (for example that an identifier
+changed meaning), not about where code or a construction came from; that needs
+its own evidence and is outside every probe in this protocol.
+
 ## 6. Package
 
 | File | Content |
@@ -191,6 +250,24 @@ sets, and there is no percentage.
 | `REPRODUCE.md`, `rerun.py`, `lab/` | Rerun instructions, entry point and the vendored lab code. |
 | `NOTICE`, `UPSTREAM-LICENSE-<n>.txt` | Attribution and upstream licence texts. |
 | `.github/workflows/rerun.yml` | Optional manual rerun in CI. |
+
+`respond <run_id>` drafts a public reply to a challenge from the run's own
+records: pins and every pinned file digest, the frozen plan hash and whether it
+was preregistered, the runner's check hashes, every claim result with its
+input digest, every probe with its witness and locators, the claim ceiling,
+the endorsement statement and reproduce steps. It requires a measured run whose
+scope, run-owned files and results are unchanged, writes outside the package
+(`.local/CHALLENGE-RESPONSE.md` by default) so MANIFEST.json is untouched, and
+ends with who drafted it (`--drafted-by human|agent:<id>`, `--ai-assisted`).
+Inside the run directory it writes only under `.local/` (symlinks resolved), and
+it replaces an existing draft only with `--force`. Findings are grouped by
+`affects_pinned_artifact`: those that hold for the bytes as published come
+first, and those shown only on constructed inputs say that no attack on the
+published package is demonstrated. On rerun, every field of every probe record
+is compared, including its message, class, inputs and any verifier error.
+It states the lab status; before `PUBLISHED` the package is not citable as
+published evidence, although every value in the draft is recomputable from the
+pinned bytes. See [docs/CHALLENGE-RESPONSE.md](docs/CHALLENGE-RESPONSE.md).
 
 ## 7. Rerun
 
