@@ -222,3 +222,36 @@ review. Development environment with emulated production rules where noted;
 ACCEPT tokens minted directly, as REMORA's own tests do. E, F and G have no
 probes in either binding. A weakening shows a probe is sensitive to one
 removal; it does not show the protection is complete.
+
+## After the fix (b5e4c42)
+
+The text above records the run against `06c2f8f` and is kept as it was. REMORA
+fixed the three findings on branch `fix/aacp-x01-x02-x04`, commit
+`b5e4c42509c856c297d6a79210394ecbe90a05a4` (not yet merged to `dev`). A new
+binding, [`controls/bindings/remora-b5e4c42/`](../controls/bindings/remora-b5e4c42/),
+runs the same catalog and the same probe file against it; the `06c2f8f`
+binding, report and result are unchanged.
+
+- **Generated report:** [`reports/remora-b5e4c42/REPORT.md`](../reports/remora-b5e4c42/REPORT.md)
+- **Assessment (schema v0.1):** [`examples/remora-b5e4c42.json`](../examples/remora-b5e4c42.json)
+
+| Probe | `06c2f8f` | `b5e4c42` | Weakening that makes it observe again |
+| :--- | :--- | :--- | :--- |
+| P-X-01 | OBSERVED, repair discriminates | NOT_OBSERVED, sensitive | W-X-01: `stored_head()` returns nothing |
+| P-X-02a | OBSERVED, repair discriminates | NOT_OBSERVED, sensitive | W-X-02a: v2 duplicates the odd node |
+| P-X-02b | OBSERVED, repair discriminates | NOT_OBSERVED, sensitive | W-X-02b: v1 is the default again |
+| P-X-04 | OBSERVED, repair discriminates | NOT_OBSERVED, sensitive | W-X-04: reload uses the written metadata |
+
+The other 16 probes give the same result on both revisions. Before the new run
+the `06c2f8f` binding was re-run on the pinned revision as a `REPRODUCTION`
+and compared with the recorded result: `same_findings: true`.
+
+P-X-02b is refused by three v2 layers at once (domain prefixes, raw-digest
+node input and a mandatory `leaf_count`), so its weakening has to remove all
+three. REMORA's own tests remove each alone.
+
+What did not change: NOT_OBSERVED is not PASS and every A-G row stays
+UNTESTED. The run is `AUTHOR_RUN` by the person who wrote the fix. Two gaps
+remain: a stored head in the same database does not stop an attacker who
+rewrites the whole file, and the JSONL log keeps no head at all (REMORA SDD
+`docs/design/aacp-audit-integrity-remediation-sdd-v1.md`, R1 to R3).
