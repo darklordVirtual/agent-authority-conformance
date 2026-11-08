@@ -1,0 +1,535 @@
+{
+  "schema": "aacp-control-run-v1",
+  "run_id": "remora-b5e4c42-2026-11-08-author-1",
+  "started_at_utc": "2026-11-08T14:08:41Z",
+  "operator": "Stian Skogbrott (maintainer of AACP and REMORA); executed by Claude agent locally in a disposable venv and worktree",
+  "independence": "AUTHOR_RUN",
+  "binding": "remora-b5e4c42",
+  "subject": {
+    "name": "REMORA (remora-assurance)",
+    "version": "0.12.0",
+    "repository": "https://github.com/darklordVirtual/REMORA-research",
+    "revision": "b5e4c42509c856c297d6a79210394ecbe90a05a4"
+  },
+  "procedure": {
+    "runner": "conformance/controls.py",
+    "runner_sha256": "82ed78f7fd8aeb50383170b384dd40c7f45d83a779efc82b58a280aa51849ab7",
+    "catalog": "controls/aacp-controls-v1/catalog.json",
+    "catalog_version": "1.2.0",
+    "catalog_sha256": "b822eb29a72553ef788caf0ed3e586d1b797be81a237fdb5692554cd4ce2152d",
+    "binding_sha256": {
+      "controls/bindings/remora-b5e4c42/binding.json": "a9c3d9787761b86550caa7747a8e6083f26f6583f23ba90a27b2dbf7a829d7e5",
+      "controls/bindings/remora-b5e4c42/expected.json": "5f39e0f5f8a09c58dab0476d6454c58310f1bb509b3fce44cd04a93967a2f592",
+      "controls/bindings/remora-b5e4c42/probes/test_remora_probes.py": "73e671a71dc77571b8730137196c284801930ad16e6778890813ad3132a32ba6"
+    },
+    "aacp_revision": "561f74e45917729036c82e31ac8249e60cb1a0af",
+    "aacp_tree_clean": true
+  },
+  "environment": {
+    "python": "3.13.7",
+    "platform": "macOS-14.6.1-arm64-arm-64bit-Mach-O"
+  },
+  "setup": [
+    {
+      "runner": "command",
+      "argv": [
+        "{python}",
+        "-m",
+        "pip",
+        "install",
+        "-q",
+        "--disable-pip-version-check",
+        "-e",
+        ".[api,security,interop]",
+        "httpx",
+        "pytest"
+      ],
+      "exit": 0
+    }
+  ],
+  "probes": {
+    "P-A-01": {
+      "control": "AACP-A-01",
+      "kind": "command",
+      "relationship": "exact",
+      "origin": "aacp",
+      "mutation": null,
+      "argv": [
+        "{python}",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "-x",
+        "aacp_probes/test_remora_probes.py::test_a01_grant_reusable_after_restart"
+      ],
+      "result": "NOT_OBSERVED",
+      "baseline_exit": 1,
+      "discrimination": "NOT_RUN",
+      "sensitivity_exit": 0,
+      "sensitivity": "SENSITIVE"
+    },
+    "P-A-02": {
+      "control": "AACP-A-02",
+      "kind": "command",
+      "relationship": "partial",
+      "origin": "aacp",
+      "mutation": null,
+      "argv": [
+        "{python}",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "-x",
+        "aacp_probes/test_remora_probes.py::test_a02_revocation_unknown_admits"
+      ],
+      "result": "NOT_OBSERVED",
+      "baseline_exit": 1,
+      "discrimination": "NOT_RUN",
+      "sensitivity_exit": 0,
+      "sensitivity": "SENSITIVE"
+    },
+    "P-A-03": {
+      "control": "AACP-A-03",
+      "kind": "command",
+      "relationship": "exact",
+      "origin": "aacp",
+      "mutation": null,
+      "argv": [
+        "{python}",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "-x",
+        "aacp_probes/test_remora_probes.py::test_a03_grant_from_untrusted_key_accepted"
+      ],
+      "result": "NOT_OBSERVED",
+      "baseline_exit": 1,
+      "discrimination": "NOT_RUN",
+      "sensitivity_exit": 0,
+      "sensitivity": "SENSITIVE"
+    },
+    "P-A-04": {
+      "control": "AACP-A-04",
+      "kind": "command",
+      "relationship": "exact",
+      "origin": "aacp",
+      "mutation": null,
+      "argv": [
+        "{python}",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "-x",
+        "aacp_probes/test_remora_probes.py::test_a04_accept_token_replayable"
+      ],
+      "result": "NOT_OBSERVED",
+      "baseline_exit": 1,
+      "discrimination": "NOT_RUN",
+      "sensitivity_exit": 0,
+      "sensitivity": "SENSITIVE"
+    },
+    "P-B-01": {
+      "control": "AACP-B-01",
+      "kind": "command",
+      "relationship": "exact",
+      "origin": "aacp",
+      "mutation": null,
+      "argv": [
+        "{python}",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "-x",
+        "aacp_probes/test_remora_probes.py::test_b01_unauthenticated_principal_accepted"
+      ],
+      "result": "NOT_OBSERVED",
+      "baseline_exit": 1,
+      "discrimination": "NOT_RUN",
+      "sensitivity_exit": 0,
+      "sensitivity": "SENSITIVE"
+    },
+    "P-B-02": {
+      "control": "AACP-B-02",
+      "kind": "command",
+      "relationship": "exact",
+      "origin": "aacp",
+      "mutation": null,
+      "argv": [
+        "{python}",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "-x",
+        "aacp_probes/test_remora_probes.py::test_b02_unregistered_credential_accepted"
+      ],
+      "result": "NOT_OBSERVED",
+      "baseline_exit": 1,
+      "discrimination": "NOT_RUN",
+      "sensitivity_exit": 0,
+      "sensitivity": "SENSITIVE"
+    },
+    "P-B-03": {
+      "control": "AACP-B-03",
+      "kind": "command",
+      "relationship": "exact",
+      "origin": "aacp",
+      "mutation": null,
+      "argv": [
+        "{python}",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "-x",
+        "aacp_probes/test_remora_probes.py::test_b03_token_redeemable_by_other_principal"
+      ],
+      "result": "NOT_OBSERVED",
+      "baseline_exit": 1,
+      "discrimination": "NOT_RUN",
+      "sensitivity_exit": 0,
+      "sensitivity": "SENSITIVE"
+    },
+    "P-B-04": {
+      "control": "AACP-B-04",
+      "kind": "command",
+      "relationship": "exact",
+      "origin": "aacp",
+      "mutation": null,
+      "argv": [
+        "{python}",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "-x",
+        "aacp_probes/test_remora_probes.py::test_b04_proposer_approves_own_call"
+      ],
+      "result": "NOT_OBSERVED",
+      "baseline_exit": 1,
+      "discrimination": "NOT_RUN",
+      "sensitivity_exit": 0,
+      "sensitivity": "SENSITIVE"
+    },
+    "P-C-01": {
+      "control": "AACP-C-01",
+      "kind": "command",
+      "relationship": "exact",
+      "origin": "aacp",
+      "mutation": null,
+      "argv": [
+        "{python}",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "-x",
+        "aacp_probes/test_remora_probes.py::test_c01_token_authorizes_another_call"
+      ],
+      "result": "NOT_OBSERVED",
+      "baseline_exit": 1,
+      "discrimination": "NOT_RUN",
+      "sensitivity_exit": 0,
+      "sensitivity": "SENSITIVE"
+    },
+    "P-D-01": {
+      "control": "AACP-D-01",
+      "kind": "command",
+      "relationship": "exact",
+      "origin": "aacp",
+      "mutation": null,
+      "argv": [
+        "{python}",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "-x",
+        "aacp_probes/test_remora_probes.py::test_d01_value_limit_bypassed"
+      ],
+      "result": "NOT_OBSERVED",
+      "baseline_exit": 1,
+      "discrimination": "NOT_RUN",
+      "sensitivity_exit": 0,
+      "sensitivity": "SENSITIVE"
+    },
+    "P-D-02": {
+      "control": "AACP-D-02",
+      "kind": "command",
+      "relationship": "exact",
+      "origin": "aacp",
+      "mutation": null,
+      "argv": [
+        "{python}",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "-x",
+        "aacp_probes/test_remora_probes.py::test_d02_resource_restriction_escaped"
+      ],
+      "result": "NOT_OBSERVED",
+      "baseline_exit": 1,
+      "discrimination": "NOT_RUN",
+      "sensitivity_exit": 0,
+      "sensitivity": "SENSITIVE"
+    },
+    "P-D-03": {
+      "control": "AACP-D-03",
+      "kind": "command",
+      "relationship": "exact",
+      "origin": "aacp",
+      "mutation": null,
+      "argv": [
+        "{python}",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "-x",
+        "aacp_probes/test_remora_probes.py::test_d03_effect_before_policy"
+      ],
+      "result": "NOT_OBSERVED",
+      "baseline_exit": 1,
+      "discrimination": "NOT_RUN",
+      "sensitivity_exit": 0,
+      "sensitivity": "SENSITIVE"
+    },
+    "P-X-01": {
+      "control": "AACP-X-01",
+      "kind": "command",
+      "relationship": "no_mapping",
+      "origin": "aacp",
+      "mutation": null,
+      "argv": [
+        "{python}",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "-x",
+        "aacp_probes/test_remora_probes.py::test_x01_sqlite_chain_tail_truncation_undetected"
+      ],
+      "result": "NOT_OBSERVED",
+      "baseline_exit": 1,
+      "discrimination": "NOT_RUN",
+      "sensitivity_exit": 0,
+      "sensitivity": "SENSITIVE"
+    },
+    "P-X-02a": {
+      "control": "AACP-X-02",
+      "kind": "command",
+      "relationship": "no_mapping",
+      "origin": "chatgpt:remora-preprobe",
+      "mutation": null,
+      "argv": [
+        "{python}",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "-x",
+        "aacp_probes/test_remora_probes.py::test_x02_assurance_merkle_odd_duplication"
+      ],
+      "result": "NOT_OBSERVED",
+      "baseline_exit": 1,
+      "discrimination": "NOT_RUN",
+      "sensitivity_exit": 0,
+      "sensitivity": "SENSITIVE"
+    },
+    "P-X-02b": {
+      "control": "AACP-X-02",
+      "kind": "command",
+      "relationship": "no_mapping",
+      "origin": "aacp",
+      "mutation": null,
+      "argv": [
+        "{python}",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "-x",
+        "aacp_probes/test_remora_probes.py::test_x02_assurance_merkle_node_as_leaf"
+      ],
+      "result": "NOT_OBSERVED",
+      "baseline_exit": 1,
+      "discrimination": "NOT_RUN",
+      "sensitivity_exit": 0,
+      "sensitivity": "SENSITIVE"
+    },
+    "P-X-02c": {
+      "control": "AACP-X-02",
+      "kind": "command",
+      "relationship": "no_mapping",
+      "origin": "aacp",
+      "mutation": null,
+      "argv": [
+        "{python}",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "-x",
+        "aacp_probes/test_remora_probes.py::test_x02_audit_merkle_v2_odd_duplication"
+      ],
+      "result": "NOT_OBSERVED",
+      "baseline_exit": 1,
+      "discrimination": "NOT_RUN",
+      "sensitivity_exit": 0,
+      "sensitivity": "SENSITIVE"
+    },
+    "P-X-04": {
+      "control": "AACP-X-04",
+      "kind": "command",
+      "relationship": "no_mapping",
+      "origin": "aacp",
+      "mutation": null,
+      "argv": [
+        "{python}",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "-x",
+        "aacp_probes/test_remora_probes.py::test_x04_jsonl_audit_intact_log_fails_after_reload"
+      ],
+      "result": "NOT_OBSERVED",
+      "baseline_exit": 1,
+      "discrimination": "NOT_RUN",
+      "sensitivity_exit": 0,
+      "sensitivity": "SENSITIVE"
+    },
+    "S-EV-02": {
+      "control": "AACP-EV-02",
+      "kind": "source-check",
+      "relationship": "no_mapping",
+      "origin": "aacp",
+      "mutation": null,
+      "result": "NOT_OBSERVED",
+      "predicates": [
+        {
+          "op": "not_matches",
+          "file": ".github/workflows/attestation.yml",
+          "holds": false,
+          "detail": "line 90"
+        }
+      ],
+      "discrimination": "NOT_RUN",
+      "sensitivity": "SENSITIVE"
+    },
+    "S-EV-03": {
+      "control": "AACP-EV-03",
+      "kind": "source-check",
+      "relationship": "no_mapping",
+      "origin": "aacp",
+      "mutation": null,
+      "result": "NOT_OBSERVED",
+      "predicates": [
+        {
+          "op": "matches",
+          "file": "scripts/generate_test_attestation.py",
+          "holds": false,
+          "detail": "no match"
+        }
+      ],
+      "discrimination": "NOT_RUN",
+      "sensitivity": "SENSITIVE"
+    },
+    "S-EV-05": {
+      "control": "AACP-EV-05",
+      "kind": "source-check",
+      "relationship": "no_mapping",
+      "origin": "aacp",
+      "mutation": null,
+      "result": "NOT_OBSERVED",
+      "predicates": [
+        {
+          "op": "matches",
+          "file": "scripts/generate_test_attestation.py",
+          "holds": false,
+          "detail": "no match"
+        }
+      ],
+      "discrimination": "NOT_RUN",
+      "sensitivity": "SENSITIVE"
+    }
+  },
+  "not_applicable": [
+    {
+      "control": "AACP-X-03",
+      "reason": "REMORA implements no peer key exchange: no handshake or X25519 code exists in remora/ or servers/"
+    },
+    {
+      "control": "AACP-EV-01",
+      "reason": "REMORA's test attestation publishes no suite-transcript digest, so there is no digest that could be a constant"
+    },
+    {
+      "control": "AACP-EV-04",
+      "reason": "REMORA's test attestation ships no key. At this revision attestation.yml adds a sign job that gives it Sigstore build provenance, checked with gh attestation verify against GitHub's trust root, which is not shipped in the artifact. That signature names the producing workflow and commit; it is not an independent review. Not executed here: the workflow runs only on review tags and manual dispatch."
+    }
+  ],
+  "non_verdict_errors": [],
+  "expectations": {
+    "met": true,
+    "mismatches": {}
+  },
+  "verdict": "EXPECTATIONS_MET",
+  "finished_at_utc": "2026-11-08T14:09:06Z"
+}

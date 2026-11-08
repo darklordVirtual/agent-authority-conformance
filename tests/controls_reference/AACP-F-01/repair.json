@@ -1,0 +1,5 @@
+{
+  "repair": "re-evaluate the approved snapshot against the current state at dispatch",
+  "old": "    if record_id not in APPROVALS:\n",
+  "new": "    if APPROVALS.get(record_id) != snapshot(RECORDS[record_id]):\n"
+}

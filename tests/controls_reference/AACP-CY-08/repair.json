@@ -1,0 +1,5 @@
+{
+  "repair": "policy and connector use the same parser; userinfo is rejected",
+  "old": "    \"\"\"Naive: the text between the scheme and the first slash, before any '@'.\"\"\"\n    return url.split(\"://\", 1)[1].split(\"/\", 1)[0].split(\"@\", 1)[0]\n",
+  "new": "    \"\"\"The same parse the connector uses; URLs with userinfo are never allowed.\"\"\"\n    u = urlsplit(url)\n    if u.username is not None or u.password is not None:\n        return None\n    return f\"{u.hostname}:{u.port}\"\n"
+}

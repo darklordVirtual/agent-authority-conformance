@@ -1,0 +1,5 @@
+{
+  "repair": "include the tenant in the cache key",
+  "old": "    key = query\n",
+  "new": "    key = (tenant, query)\n"
+}

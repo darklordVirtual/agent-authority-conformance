@@ -1,0 +1,5 @@
+{
+  "repair": "the effect accepts only a per-request grant minted by the gate",
+  "old": "    return effect(request, _CREDENTIAL)\n\n\ndef effect(request, credential):\n    \"\"\"The protected side effect. Accepts the long-lived credential.\"\"\"\n    if credential != _CREDENTIAL:\n        return \"REFUSED\"\n",
+  "new": "    return effect(request, _mint(request))\n\n\ndef _mint(request):\n    return hmac.new(_GATE_KEY, repr(sorted(request.items())).encode(), hashlib.sha256).hexdigest()\n\n\ndef effect(request, grant):\n    \"\"\"The protected side effect. Accepts only a grant the gate minted for this request.\"\"\"\n    if not isinstance(grant, str) or not hmac.compare_digest(grant, _mint(request)):\n        return \"REFUSED\"\n"
+}

@@ -1,0 +1,5 @@
+{
+  "repair": "a display name may not be re-bound to a different immutable identity",
+  "old": "    REGISTRY[display_name] = {\"id\": tool_id, \"fn\": fn}\n",
+  "new": "    if display_name in REGISTRY and REGISTRY[display_name][\"id\"] != tool_id:\n        raise PermissionError(\"display name already bound to another tool identity\")\n    REGISTRY[display_name] = {\"id\": tool_id, \"fn\": fn}\n"
+}

@@ -1,0 +1,5 @@
+{
+  "repair": "evaluate expiry against the dispatch-time clock",
+  "old": "    if call_id not in APPROVALS:\n",
+  "new": "    if call_id not in APPROVALS or now >= APPROVALS[call_id]:\n"
+}

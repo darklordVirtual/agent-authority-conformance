@@ -1,0 +1,10 @@
+{
+  "schema": "aacp-control-expected-v1",
+  "note": "Write before the run. Never edit to match output.",
+  "probes": {
+    "P-B-01": {
+      "result": "OBSERVED",
+      "discrimination": "DISCRIMINATES"
+    }
+  }
+}

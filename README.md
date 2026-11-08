@@ -67,6 +67,7 @@ All checks run offline, are read-only and never regenerate committed expectation
 | Local C/F/G adversarial probes (`aacp adversarial`) | [Adversarial self-service](docs/ADVERSARIAL-SELF-SERVICE.md) |
 | Runs against another project's pinned artifacts | [Federation tracks](docs/FEDERATION-TRACKS.md), [RUN-PROTOCOL-v0.3.md](RUN-PROTOCOL-v0.3.md) |
 | Answering a public "verify our hashes" challenge, with runner findings kept apart from claims | [Challenge response](docs/CHALLENGE-RESPONSE.md), `python -m conformance.lab respond <run>` |
+| Repeatable security controls against a pinned project, with an A-G report | [AACP controls](docs/CONTROLS.md), example [REMORA report](reports/remora-b5e4c42/REPORT.md) |
 | Cross-implementation comparison | `python -m conformance.coverage <assessment.json> ...` |
 | Checking another implementation, in any language, against frozen reference vectors | [Reference vectors](docs/REFERENCE-VECTORS.md), `python -m conformance.vectors run --impl "<command>"` |
 

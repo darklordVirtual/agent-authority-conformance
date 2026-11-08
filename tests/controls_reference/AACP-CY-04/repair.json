@@ -1,0 +1,5 @@
+{
+  "repair": "deny protected-store reads for lower-trust origins",
+  "old": "    if \"config\" in query:\n",
+  "new": "    if \"config\" in query and origin == \"user\":\n"
+}

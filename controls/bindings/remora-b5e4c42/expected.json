@@ -1,0 +1,106 @@
+{
+  "schema": "aacp-control-expected-v1",
+  "note": "Authored before the recorded run from source reading of b5e4c42 and REMORA's own tests. Never edit to match output; a changed expectation is a new run.",
+  "probes": {
+    "P-A-01": {
+      "result": "NOT_OBSERVED",
+      "discrimination": "NOT_RUN",
+      "sensitivity": "SENSITIVE"
+    },
+    "P-A-02": {
+      "result": "NOT_OBSERVED",
+      "discrimination": "NOT_RUN",
+      "sensitivity": "SENSITIVE"
+    },
+    "P-A-03": {
+      "result": "NOT_OBSERVED",
+      "discrimination": "NOT_RUN",
+      "sensitivity": "SENSITIVE"
+    },
+    "P-A-04": {
+      "result": "NOT_OBSERVED",
+      "discrimination": "NOT_RUN",
+      "sensitivity": "SENSITIVE"
+    },
+    "P-B-01": {
+      "result": "NOT_OBSERVED",
+      "discrimination": "NOT_RUN",
+      "sensitivity": "SENSITIVE"
+    },
+    "P-B-02": {
+      "result": "NOT_OBSERVED",
+      "discrimination": "NOT_RUN",
+      "sensitivity": "SENSITIVE"
+    },
+    "P-B-03": {
+      "result": "NOT_OBSERVED",
+      "discrimination": "NOT_RUN",
+      "sensitivity": "SENSITIVE"
+    },
+    "P-B-04": {
+      "result": "NOT_OBSERVED",
+      "discrimination": "NOT_RUN",
+      "sensitivity": "SENSITIVE"
+    },
+    "P-C-01": {
+      "result": "NOT_OBSERVED",
+      "discrimination": "NOT_RUN",
+      "sensitivity": "SENSITIVE"
+    },
+    "P-D-01": {
+      "result": "NOT_OBSERVED",
+      "discrimination": "NOT_RUN",
+      "sensitivity": "SENSITIVE"
+    },
+    "P-D-02": {
+      "result": "NOT_OBSERVED",
+      "discrimination": "NOT_RUN",
+      "sensitivity": "SENSITIVE"
+    },
+    "P-D-03": {
+      "result": "NOT_OBSERVED",
+      "discrimination": "NOT_RUN",
+      "sensitivity": "SENSITIVE"
+    },
+    "P-X-01": {
+      "result": "NOT_OBSERVED",
+      "discrimination": "NOT_RUN",
+      "sensitivity": "SENSITIVE"
+    },
+    "P-X-02a": {
+      "result": "NOT_OBSERVED",
+      "discrimination": "NOT_RUN",
+      "sensitivity": "SENSITIVE"
+    },
+    "P-X-02b": {
+      "result": "NOT_OBSERVED",
+      "discrimination": "NOT_RUN",
+      "sensitivity": "SENSITIVE"
+    },
+    "P-X-02c": {
+      "result": "NOT_OBSERVED",
+      "discrimination": "NOT_RUN",
+      "sensitivity": "SENSITIVE"
+    },
+    "P-X-04": {
+      "result": "NOT_OBSERVED",
+      "discrimination": "NOT_RUN",
+      "sensitivity": "SENSITIVE"
+    },
+    "S-EV-02": {
+      "result": "NOT_OBSERVED",
+      "discrimination": "NOT_RUN",
+      "sensitivity": "SENSITIVE"
+    },
+    "S-EV-03": {
+      "result": "NOT_OBSERVED",
+      "discrimination": "NOT_RUN",
+      "sensitivity": "SENSITIVE"
+    },
+    "S-EV-05": {
+      "result": "NOT_OBSERVED",
+      "discrimination": "NOT_RUN",
+      "sensitivity": "SENSITIVE"
+    }
+  }
+}

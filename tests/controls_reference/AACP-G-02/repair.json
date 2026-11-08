@@ -1,0 +1,5 @@
+{
+  "repair": "report verifier failure as its own status",
+  "old": "    except Exception:  # noqa: BLE001\n        return {\"outcome\": \"verified\"}\n",
+  "new": "    except Exception:  # noqa: BLE001\n        return {\"outcome\": \"verifier_failure\"}\n"
+}

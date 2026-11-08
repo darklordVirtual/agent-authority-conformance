@@ -1,0 +1,5 @@
+{
+  "repair": "promote only entries of user or deployment provenance",
+  "old": "    return [m[\"text\"] for m in MEMORY if m[\"text\"].startswith(\"remember:\")]\n",
+  "new": "    return [m[\"text\"] for m in MEMORY\n            if m[\"text\"].startswith(\"remember:\") and m[\"provenance\"] in (\"user\", \"deployment\")]\n"
+}

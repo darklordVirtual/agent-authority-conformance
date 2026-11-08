@@ -1,0 +1,98 @@
+{
+  "spec_version": "0.1",
+  "system": "REMORA (remora-assurance)",
+  "system_version": "0.12.0",
+  "revision": "06c2f8f038d9d24668158ce24cbd444e89fd306a",
+  "assessed_at": "2026-11-08",
+  "assessor": "Agent Authority Conformance project (maintainer Stian Skogbrott, who also maintains REMORA; probes drafted and executed by an AI agent, reviewed by the maintainer)",
+  "scope": {
+    "process_model": "single-process; FastAPI TestClient against servers/api.py and servers/execution_api.py, plus in-process calls to EnforcementGate, PolicyDecisionToken, AtomicAdmission, LimitGuard, ToolConstraint, SQLiteTenantChain, JSONLAudit and both Merkle modules",
+    "deployment_model": "development environment with the research tool registry; production's distinct-approver rule emulated by patching _is_production_mode; durable state via SQLite where a probe needs it; Postgres, D1 and multi-node operation not exercised",
+    "external_effects": "mixed",
+    "trust_assumptions": [
+      "Limited to the pinned revision on the dev branch and the probes in controls/bindings/remora-06c2f8f",
+      "Probes P-A-04, P-B-03, P-C-01 and P-D-03 mint ACCEPT tokens through PolicyDecisionToken.issue, as REMORA's own execute-accepted tests do, because the research profile does not reach ACCEPT from /assess without server-side evidence",
+      "Probes replace authentication with a fixed principal except P-B-01 and P-B-02, which exercise the real _authenticate with a token table",
+      "P-C-01, P-D-03 and P-A-04 perform real file writes through store_artifact in a temporary directory",
+      "Every probe that did not observe its weakness is paired with a weakening; its NOT_OBSERVED counts only if the weakening makes it observe (SENSITIVE)",
+      "The assessor maintains REMORA; this is a self-assessment under the same catalog as the NTI binding, not an independent review"
+    ],
+    "explicit_non_claims": []
+  },
+  "properties": [
+    {
+      "id": "A",
+      "property": "Receipt Integrity",
+      "status": "UNTESTED",
+      "evidence_tier": "NONE",
+      "reasoning": "No executed, exact, discriminating probe observed a weakness for this property. Also: P-A-01 (AACP-A-01, exact, command): NOT_OBSERVED by a probe shown to be sensitive (it observes the weakness when the protection is removed); not a PASS; P-A-02 (AACP-A-02, partial, command): NOT_OBSERVED by a probe shown to be sensitive (it observes the weakness when the protection is removed); not a PASS; P-A-03 (AACP-A-03, exact, command): NOT_OBSERVED by a probe shown to be sensitive (it observes the weakness when the protection is removed); not a PASS; P-A-04 (AACP-A-04, exact, command): NOT_OBSERVED by a probe shown to be sensitive (it observes the weakness when the protection is removed); not a PASS.",
+      "caveat": "UNTESTED records absent evidence, not failure. AACP controls never yield PASS; a PASS needs an assessor's direct evidence (SPECIFICATION \u00a75).",
+      "evidence": []
+    },
+    {
+      "id": "B",
+      "property": "Authority Provenance",
+      "status": "UNTESTED",
+      "evidence_tier": "NONE",
+      "reasoning": "No executed, exact, discriminating probe observed a weakness for this property. Also: P-B-01 (AACP-B-01, exact, command): NOT_OBSERVED by a probe shown to be sensitive (it observes the weakness when the protection is removed); not a PASS; P-B-02 (AACP-B-02, exact, command): NOT_OBSERVED by a probe shown to be sensitive (it observes the weakness when the protection is removed); not a PASS; P-B-03 (AACP-B-03, exact, command): NOT_OBSERVED by a probe shown to be sensitive (it observes the weakness when the protection is removed); not a PASS; P-B-04 (AACP-B-04, exact, command): NOT_OBSERVED by a probe shown to be sensitive (it observes the weakness when the protection is removed); not a PASS.",
+      "caveat": "UNTESTED records absent evidence, not failure. AACP controls never yield PASS; a PASS needs an assessor's direct evidence (SPECIFICATION \u00a75).",
+      "evidence": []
+    },
+    {
+      "id": "C",
+      "property": "Exact-Call Integrity",
+      "status": "UNTESTED",
+      "evidence_tier": "NONE",
+      "reasoning": "No executed, exact, discriminating probe observed a weakness for this property. Also: P-C-01 (AACP-C-01, exact, command): NOT_OBSERVED by a probe shown to be sensitive (it observes the weakness when the protection is removed); not a PASS.",
+      "caveat": "UNTESTED records absent evidence, not failure. AACP controls never yield PASS; a PASS needs an assessor's direct evidence (SPECIFICATION \u00a75).",
+      "evidence": []
+    },
+    {
+      "id": "D",
+      "property": "Semantic Authority",
+      "status": "UNTESTED",
+      "evidence_tier": "NONE",
+      "reasoning": "No executed, exact, discriminating probe observed a weakness for this property. Also: P-D-01 (AACP-D-01, exact, command): NOT_OBSERVED by a probe shown to be sensitive (it observes the weakness when the protection is removed); not a PASS; P-D-02 (AACP-D-02, exact, command): NOT_OBSERVED by a probe shown to be sensitive (it observes the weakness when the protection is removed); not a PASS; P-D-03 (AACP-D-03, exact, command): NOT_OBSERVED by a probe shown to be sensitive (it observes the weakness when the protection is removed); not a PASS.",
+      "caveat": "UNTESTED records absent evidence, not failure. AACP controls never yield PASS; a PASS needs an assessor's direct evidence (SPECIFICATION \u00a75).",
+      "evidence": []
+    },
+    {
+      "id": "E",
+      "property": "Execution-Boundary Integrity",
+      "status": "UNTESTED",
+      "evidence_tier": "NONE",
+      "reasoning": "No executed, exact, discriminating probe observed a weakness for this property.",
+      "caveat": "UNTESTED records absent evidence, not failure. AACP controls never yield PASS; a PASS needs an assessor's direct evidence (SPECIFICATION \u00a75).",
+      "evidence": []
+    },
+    {
+      "id": "F",
+      "property": "TOCTOU Resistance",
+      "status": "UNTESTED",
+      "evidence_tier": "NONE",
+      "reasoning": "No executed, exact, discriminating probe observed a weakness for this property.",
+      "caveat": "UNTESTED records absent evidence, not failure. AACP controls never yield PASS; a PASS needs an assessor's direct evidence (SPECIFICATION \u00a75).",
+      "evidence": []
+    },
+    {
+      "id": "G",
+      "property": "Effect Verification",
+      "status": "UNTESTED",
+      "evidence_tier": "NONE",
+      "reasoning": "No executed, exact, discriminating probe observed a weakness for this property.",
+      "caveat": "UNTESTED records absent evidence, not failure. AACP controls never yield PASS; a PASS needs an assessor's direct evidence (SPECIFICATION \u00a75).",
+      "evidence": []
+    }
+  ],
+  "notes": [
+    "No aggregate is implied. Per SPECIFICATION \u00a77 the rows are not commensurable and must not be combined into a score or ranking.",
+    "Generated by `python -m conformance.controls report` from catalog controls/aacp-controls-v1/catalog.json v1.2.0 and binding controls/bindings/remora-06c2f8f. FAIL requires an executed probe with an exact relationship that is OBSERVED and DISCRIMINATES under its declared repair.",
+    "Controls outside A-G: AACP-X-01 Audit log tail truncation undetected via P-X-01 (command): OBSERVED, DISCRIMINATES; AACP-X-02 Merkle root ambiguous under odd-node duplication via P-X-02a (command): OBSERVED, DISCRIMINATES; AACP-X-02 Merkle root ambiguous under odd-node duplication via P-X-02b (command): OBSERVED, DISCRIMINATES; AACP-X-02 Merkle root ambiguous under odd-node duplication via P-X-02c (command): NOT_OBSERVED; AACP-X-04 Persisted audit log fails verification after reload via P-X-04 (command): OBSERVED, DISCRIMINATES; AACP-EV-02 Evidence package does not attest the code under assessment via S-EV-02 (source-check): NOT_OBSERVED; AACP-EV-03 Stale evidence re-sealable under a new commit via S-EV-03 (source-check): NOT_OBSERVED; AACP-EV-05 Evidence totals not derived from the run via S-EV-05 (source-check): NOT_OBSERVED.",
+    "Not a control finding, recorded for the maintainer: the Review Attestation workflow uploads an unsigned test-attestation.json. Its trust anchor is the GitHub Actions run; anyone can produce a file with gate PASS locally. release.yml already uses actions/attest-build-provenance; doing the same in attestation.yml would give the attestation a verifiable signer.",
+    "Not exercised: PostgresTenantChain (it keeps tenant_chain_head and checks it), the D1 state endpoint, the MCP server and the edge workers. The architecture document states that several workers are not uniformly fail-closed; that is outside these probes.",
+    "AACP-X-01 for the JSONL adapter cannot be assessed until AACP-X-04 is fixed: every reloaded JSONL log already fails verify(), so a truncated one is indistinguishable. AuditHashChain has no head anchor, so truncation would likely go undetected once reload works.",
+    "Probe origins: 'aacp' written for this binding from the catalog contracts; 'chatgpt:remora-preprobe' reproduces the X-02 observation a ChatGPT pre-probe reported on master 53b1f45, whose three Merkle and chain files are byte-identical to this revision.",
+    "Implementer review: the assessor is the implementer. A review by someone else is the evidence still missing.",
+    "Reproduce: python -m conformance.controls run --binding controls/bindings/remora-06c2f8f --subject <checkout at 06c2f8f038d9d24668158ce24cbd444e89fd306a> --out <result.json> --run-id <id>."
+  ]
+}
