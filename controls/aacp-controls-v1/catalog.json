@@ -1,0 +1,280 @@
+{
+  "schema": "aacp-control-catalog-v1",
+  "version": "1.0.0",
+  "description": "Project-neutral AACP controls. A control names one weakness, the A-G property it bears on, and a probe contract: the scenario any binding must implement for the result to be comparable across projects. A control observes a weakness; it never certifies its absence. See docs/CONTROLS.md.",
+  "result_vocabulary": {
+    "OBSERVED": "the probe reproduced the weakness on the pristine subject",
+    "NOT_OBSERVED": "the probe ran and did not reproduce the weakness; this is not a PASS",
+    "NOT_APPLICABLE": "the binding declares the subject has no such mechanism, with a reason",
+    "NON_VERDICT": "the probe could not reach a verdict (pin, bytes, build or harness failure)"
+  },
+  "discrimination_vocabulary": {
+    "DISCRIMINATES": "with the declared repair applied alone, the probe no longer observes the weakness",
+    "DOES_NOT_DISCRIMINATE": "the probe still observes the weakness with the repair applied, so it does not test that weakness",
+    "BUILD_ERROR": "the repaired subject did not build; not counted as discrimination",
+    "ANCHOR_ERROR": "the repair anchor is not unique in the pristine file",
+    "NOT_RUN": "no repair declared (static probes may omit it)"
+  },
+  "controls": [
+    {
+      "id": "AACP-A-01",
+      "property": "A",
+      "title": "Use-limited authorization survives a persistence boundary",
+      "question": "Does a single-use or count-limited authorization stay exhausted after the system batches, compacts, rotates or persists its usage state?",
+      "probe_contract": {
+        "setup": "Issue an authorization limited to N uses (N = 1 is sufficient).",
+        "stimulus": "Use it N times, confirm the next use is refused, then cause the usage state to cross the boundary (batch commit, log rotation, restart, compaction).",
+        "observation": "The weakness is OBSERVED if the authorization is accepted again after the boundary.",
+        "repair": "Count uses across all persisted state."
+      },
+      "origin": ["mythos:NTI-04"]
+    },
+    {
+      "id": "AACP-A-02",
+      "property": "A",
+      "title": "Revocation fails closed",
+      "question": "When a revocation record exists for an artifact but cannot be verified, does the system still treat the artifact as valid?",
+      "probe_contract": {
+        "setup": "A valid, verifiable artifact.",
+        "stimulus": "Attach a revocation record for it whose signature does not verify.",
+        "observation": "OBSERVED if the artifact is still accepted.",
+        "repair": "Treat the presence of an unverifiable revocation as invalidating, or reject the record loudly."
+      },
+      "origin": ["mythos:NTI-10"]
+    },
+    {
+      "id": "AACP-A-03",
+      "property": "A",
+      "title": "Signed artifact verified against a key it carries",
+      "question": "Is a signed artifact authenticated against a key embedded in the artifact itself rather than a trust anchor held by the verifier?",
+      "probe_contract": {
+        "setup": "A verifier with no trust relationship to an attacker key.",
+        "stimulus": "Present an artifact with forged content, signed by the attacker key, carrying that key.",
+        "observation": "OBSERVED if the verifier accepts it.",
+        "repair": "Verify against verifier-held trusted keys only."
+      },
+      "origin": ["mythos:NTI-03"]
+    },
+    {
+      "id": "AACP-A-04",
+      "property": "A",
+      "title": "Approval or vote has no freshness binding",
+      "question": "Does a signed approval or vote omit a nonce, epoch, height or expiry, so it remains valid for replay?",
+      "probe_contract": {
+        "setup": "One signed approval or vote.",
+        "stimulus": "Present it again later, or for a reused request identifier.",
+        "observation": "OBSERVED if it is accepted again.",
+        "repair": "Bind a nonce or epoch into the signed message and reject reuse."
+      },
+      "origin": ["mythos:NTI-02"]
+    },
+    {
+      "id": "AACP-B-01",
+      "property": "B",
+      "title": "Unauthenticated principal accepted",
+      "question": "Can a request obtain a principal's grants by naming the principal without any credential?",
+      "probe_contract": {
+        "setup": "Grant a capability to principal P.",
+        "stimulus": "Submit a request naming P with no signature or credential.",
+        "observation": "OBSERVED if the request is allowed.",
+        "repair": "Require a credential verified against a key registered for P."
+      },
+      "origin": ["mythos:NTI-01"]
+    },
+    {
+      "id": "AACP-B-02",
+      "property": "B",
+      "title": "Principal key is self-attested",
+      "question": "Is the verifying key taken from the request instead of from a registry binding keys to principals?",
+      "probe_contract": {
+        "setup": "Grant a capability to principal P.",
+        "stimulus": "Submit a request naming P, signed by a fresh key that the request itself supplies.",
+        "observation": "OBSERVED if the request is allowed.",
+        "repair": "Resolve P's key from a verifier-held registry."
+      },
+      "origin": ["mythos:NTI-01b"]
+    },
+    {
+      "id": "AACP-B-03",
+      "property": "B",
+      "title": "Bearer authorization not bound to a subject",
+      "question": "Can an authorization artifact issued for one purpose be used by any requesting principal?",
+      "probe_contract": {
+        "setup": "Issue a valid authorization artifact.",
+        "stimulus": "Present it under several different requesting principals.",
+        "observation": "OBSERVED if it is accepted for principals it was not issued to.",
+        "repair": "Bind a subject or audience into the signed artifact and check it against the requester."
+      },
+      "origin": ["mythos:NTI-08", "daybreak:token-actor-binding"]
+    },
+    {
+      "id": "AACP-B-04",
+      "property": "B",
+      "title": "Approver signs without evaluating authority",
+      "question": "Does an approval or voting endpoint sign a positive decision without evaluating the request against the approver's own policy?",
+      "probe_contract": {
+        "setup": "An approver endpoint with a policy that would deny the request.",
+        "stimulus": "Ask it to approve the request.",
+        "observation": "OBSERVED if it returns a signed approval.",
+        "repair": "Evaluate the request under the approver's policy and sign that decision."
+      },
+      "origin": ["mythos:NTI-02"]
+    },
+    {
+      "id": "AACP-C-01",
+      "property": "C",
+      "title": "Authorization not bound to the exact call",
+      "question": "Does one authorization artifact authorize calls with different call identities, targets or arguments?",
+      "probe_contract": {
+        "setup": "Issue one authorization artifact.",
+        "stimulus": "Use it for two calls differing in call identity, target and amount.",
+        "observation": "OBSERVED if both are allowed.",
+        "repair": "Bind the call identity or a canonical hash of the call into the artifact and recompute it at dispatch."
+      },
+      "origin": ["mythos:NTI-08b"]
+    },
+    {
+      "id": "AACP-D-01",
+      "property": "D",
+      "title": "Value constraint defeated by type confusion",
+      "question": "Can a numeric limit be bypassed by encoding the value as another JSON type, or by changing an unchecked unit such as currency?",
+      "probe_contract": {
+        "setup": "Authorize with a value limit L.",
+        "stimulus": "Submit values above L encoded as string, float, negative number and object, and under another unit.",
+        "observation": "OBSERVED if any is allowed.",
+        "repair": "Reject values that are not exactly the expected type and unit."
+      },
+      "origin": ["mythos:NTI-05"]
+    },
+    {
+      "id": "AACP-D-02",
+      "property": "D",
+      "title": "Resource constraint not canonicalised",
+      "question": "Can a resource or path restriction be escaped by traversal segments or a sibling sharing the prefix?",
+      "probe_contract": {
+        "setup": "Authorize with a restriction to resource prefix R.",
+        "stimulus": "Request R/../outside and R_sibling/x.",
+        "observation": "OBSERVED if either is allowed.",
+        "repair": "Canonicalise and compare component-wise."
+      },
+      "origin": ["mythos:NTI-06"]
+    },
+    {
+      "id": "AACP-D-03",
+      "property": "D",
+      "title": "Policy evaluated after the effect",
+      "question": "Is an intent or semantic policy evaluated only after the protected action has executed, so a violating action still takes effect?",
+      "probe_contract": {
+        "setup": "Configure a policy forbidding a specific effect, in the system's fail-closed mode.",
+        "stimulus": "Request that effect through the normal execution path.",
+        "observation": "OBSERVED if the effect occurs, even when a violation is reported afterwards.",
+        "repair": "Evaluate the policy before dispatch."
+      },
+      "origin": ["daybreak:intent-after-dispatch"]
+    },
+    {
+      "id": "AACP-X-01",
+      "property": null,
+      "title": "Audit log tail truncation undetected",
+      "question": "Can the most recent committed audit records be deleted from persisted state without the integrity check noticing?",
+      "probe_contract": {
+        "setup": "Produce several committed audit batches.",
+        "stimulus": "Delete the newest committed batch from persisted state; leave any stored head pointer alone.",
+        "observation": "OBSERVED if integrity verification still succeeds.",
+        "repair": "Compare the stored head with the recomputed chain head, and anchor it externally."
+      },
+      "origin": ["mythos:NTI-07"]
+    },
+    {
+      "id": "AACP-X-02",
+      "property": null,
+      "title": "Merkle root ambiguous under odd-node duplication",
+      "question": "Do two different leaf sets produce the same Merkle root because the odd node is duplicated or leaves and nodes share a hash domain?",
+      "probe_contract": {
+        "setup": "Leaves [h1, h2, h3].",
+        "stimulus": "Compute the root for [h1, h2, h3] and [h1, h2, h3, h3].",
+        "observation": "OBSERVED if the roots are equal.",
+        "repair": "Promote the odd node unchanged and domain-separate leaves and nodes (RFC 6962)."
+      },
+      "origin": ["mythos:NTI-11"]
+    },
+    {
+      "id": "AACP-X-03",
+      "property": null,
+      "title": "Key exchange with an unauthenticated peer",
+      "question": "Does a node complete a key exchange with a peer it has no registered identity for?",
+      "probe_contract": {
+        "setup": "A node with an empty or restricted peer registry.",
+        "stimulus": "Initiate a handshake from an unregistered peer.",
+        "observation": "OBSERVED if a shared secret is derived and a response returned.",
+        "repair": "Refuse unregistered peers and sign a transcript that includes both identities."
+      },
+      "origin": ["mythos:NTI-09"]
+    },
+    {
+      "id": "AACP-EV-01",
+      "property": null,
+      "title": "Bound evidence digest is a constant",
+      "question": "Is a digest presented as binding a suite run equal to the digest of a fixed string, so it binds nothing about the subject?",
+      "probe_contract": {
+        "setup": "A producer evidence package claiming bound suite digests.",
+        "stimulus": "Hash the canonical form the producer documents for a successful run of an arbitrary project.",
+        "observation": "OBSERVED if it equals the recorded digest.",
+        "repair": "Bind subject-specific facts (source tree, lockfile, test outcomes)."
+      },
+      "origin": ["mythos:P-01"]
+    },
+    {
+      "id": "AACP-EV-02",
+      "property": null,
+      "title": "Evidence package does not attest the code under assessment",
+      "question": "Does the producer's evidence omit the source being assessed, record a commit other than the assessed revision, and leave that unchecked by its verifier?",
+      "probe_contract": {
+        "setup": "The producer evidence package at the assessed revision.",
+        "stimulus": "Inspect which files are attested, which commit is recorded and whether the verifier compares it with the checkout.",
+        "observation": "OBSERVED if source is unattested, the commit differs and the verifier does not check it.",
+        "repair": "Attest the source tree hash and have the verifier enforce it."
+      },
+      "origin": ["mythos:P-02", "daybreak:witness-commit-vs-head"]
+    },
+    {
+      "id": "AACP-EV-03",
+      "property": null,
+      "title": "Stale evidence re-sealable under a new commit",
+      "question": "Can the producer re-sign earlier suite evidence while stamping the current commit, without recording where the evidence was produced?",
+      "probe_contract": {
+        "setup": "The producer's evidence generator.",
+        "stimulus": "Inspect whether a reuse mode exists and whether the producing commit is recorded separately.",
+        "observation": "OBSERVED if reuse is possible and only the current commit is stamped.",
+        "repair": "Record the evidence-producing commit and refuse reuse across commits."
+      },
+      "origin": ["mythos:P-03"]
+    },
+    {
+      "id": "AACP-EV-04",
+      "property": null,
+      "title": "Verifier trust anchor shipped inside the package",
+      "question": "Does the producer's verifier authenticate the package with a public key shipped inside the package, without using an out-of-band anchor?",
+      "probe_contract": {
+        "setup": "The producer's verifier.",
+        "stimulus": "Inspect which key file it verifies against and whether the declared out-of-band anchor is ever used.",
+        "observation": "OBSERVED if only the packaged key is used.",
+        "repair": "Verify against a key obtained out of band or cross-signed by the previous key."
+      },
+      "origin": ["mythos:P-04", "daybreak:packaged-trust-anchor"]
+    },
+    {
+      "id": "AACP-EV-05",
+      "property": null,
+      "title": "Evidence totals not derived from the run",
+      "question": "Are reported test totals hard-coded rather than parsed from the run transcript?",
+      "probe_contract": {
+        "setup": "The producer's evidence generator.",
+        "stimulus": "Inspect how totals are computed.",
+        "observation": "OBSERVED if a total is a literal conditioned only on overall success.",
+        "repair": "Parse totals from the transcript."
+      },
+      "origin": ["mythos:P-05"]
+    }
+  ]
+}

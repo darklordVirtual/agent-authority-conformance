@@ -62,6 +62,7 @@ All checks run offline, are read-only and never regenerate committed expectation
 | Project onboarding (`aacp init`, `validate`, `inspect`) | [CLI onboarding](docs/CLI-ONBOARDING.md) |
 | Local C/F/G adversarial probes (`aacp adversarial`) | [Adversarial self-service](docs/ADVERSARIAL-SELF-SERVICE.md) |
 | Runs against another project's pinned artifacts | [Federation tracks](docs/FEDERATION-TRACKS.md), [RUN-PROTOCOL-v0.3.md](RUN-PROTOCOL-v0.3.md) |
+| Repeatable security controls against a pinned project, with an A-G report | [AACP controls](docs/CONTROLS.md), example [NTI report](reports/nti-de08dbd/REPORT.md) |
 | Cross-implementation comparison | `python -m conformance.coverage <assessment.json> ...` |
 | Checking another implementation, in any language, against frozen reference vectors | [Reference vectors](docs/REFERENCE-VECTORS.md), `python -m conformance.vectors run --impl "<command>"` |
 

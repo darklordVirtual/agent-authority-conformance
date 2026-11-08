@@ -1,8 +1,7 @@
-//! Reproduction candidates for docs/NTI-SOURCE-INSPECTION.md.
-//! Subject: abisheakp197/Neutral-Trust-Infrastructure @ de08dbdcd27e01c27585d936091c69b59d173a97
-//! Each test PASSES when the weakness is present; mutations.json checks that each FAILS when
-//! the weakness is repaired. Harness: scripts/run_nti_inspection.py.
-//! Manual use: copy to ube-foundation/tests/ and run cargo test --locked --test reproduction_candidates
+//! AACP control probes for abisheakp197/Neutral-Trust-Infrastructure
+//! @ de08dbdcd27e01c27585d936091c69b59d173a97 (binding controls/bindings/nti-de08dbd).
+//! Each test PASSES when the weakness is present. The binding's mutations check that each
+//! FAILS when that weakness alone is repaired. Run via: python -m conformance.controls run
 use ed25519_dalek::{Signer, SigningKey};
 use ube_foundation::*;
 
@@ -271,4 +270,37 @@ fn nti_09_handshake_accepts_unknown_peer() {
     let (reqst, _) = mallory.initiate_handshake();
     assert!(node.peers.is_empty());
     assert!(node.respond_to_handshake(&reqst).is_ok(), "secret derived with unregistered peer");
+}
+
+/// (High) lib.rs:1591-1611 — AutonomousAgent::execute_task dispatches through the orchestrator
+/// first and evaluates intent policies afterwards. In FailSafe mode a violation is reported as
+/// an error, but the forbidden file write has already happened. Real local effect in a temp dir.
+#[test]
+fn nti_13_intent_policy_checked_after_effect() {
+    let dir = std::env::temp_dir().join(format!("aacp-nti-13-{}", std::process::id()));
+    std::fs::create_dir_all(&dir).unwrap();
+    let target = dir.join("forbidden.txt");
+    let _ = std::fs::remove_file(&target);
+    let path = target.to_str().unwrap().to_string();
+
+    let mut engine = TrustEngine::new();
+    engine.grant("agent", "file_management");
+    let mut orch = Orchestrator::new(engine);
+    orch.register_module(Box::new(SystemModule));
+    let mut agent = AutonomousAgent::new("agent".into(), orch);
+    assert_eq!(agent.safety_mode, SafetyMode::FailSafe);
+    agent.add_policy(IntentPolicy {
+        name: "no-forbidden-file".into(),
+        capability: "file_management".into(),
+        constraints: serde_json::json!({ "not_allowed_paths": [path.clone()] }),
+    });
+    let mut r = req("w1", "agent", "file_management", serde_json::json!({ "path": path, "content": "x" }));
+    r.action = "write_file".into();
+
+    let rt = tokio::runtime::Runtime::new().unwrap();
+    let res = rt.block_on(agent.execute_task(r));
+    let written = target.exists();
+    let _ = std::fs::remove_dir_all(&dir);
+    assert!(res.is_err(), "policy violation is reported");
+    assert!(written, "the forbidden effect happened before the policy was checked");
 }

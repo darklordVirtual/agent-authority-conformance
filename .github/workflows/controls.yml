@@ -1,0 +1,128 @@
+name: AACP controls
+
+# Runs each control binding against its pinned third-party subject and checks
+# that the findings and the generated report are identical to the committed
+# ones. Executable probes compile and run subject code: read-only token, no
+# secrets, disposable runner.
+on:
+  workflow_dispatch:
+    inputs:
+      binding:
+        description: "Binding directory name under controls/bindings (empty = all)"
+        required: false
+        default: ""
+  pull_request:
+    paths:
+      - controls/**
+      - reports/**
+      - conformance/controls.py
+      - .github/workflows/controls.yml
+
+permissions:
+  contents: read
+
+jobs:
+  list:
+    runs-on: ubuntu-latest
+    outputs:
+      bindings: ${{ steps.list.outputs.bindings }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: list
+        env:
+          ONLY: ${{ github.event.inputs.binding }}
+        run: |
+          python - <<'EOF' >> "$GITHUB_OUTPUT"
+          import json, os, pathlib
+          only = os.environ.get("ONLY", "").strip()
+          names = sorted(p.name for p in pathlib.Path("controls/bindings").iterdir()
+                         if (p / "binding.json").exists() and (not only or p.name == only))
+          if not names:
+              raise SystemExit(f"no binding matches {only!r}")
+          print("bindings=" + json.dumps(names))
+          EOF
+
+  run:
+    needs: list
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        binding: ${{ fromJSON(needs.list.outputs.bindings) }}
+    env:
+      BINDING: controls/bindings/${{ matrix.binding }}
+      REPORT_DIR: reports/${{ matrix.binding }}
+    steps:
+      - name: Check out AACP
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install AACP dependencies
+        run: python -m pip install --disable-pip-version-check -r requirements-dev.txt
+
+      - name: Read subject pin from the binding
+        id: pin
+        run: |
+          python - <<'EOF' >> "$GITHUB_OUTPUT"
+          import json, os
+          b = json.load(open(os.environ["BINDING"] + "/binding.json"))
+          repo = b["subject"]["repository"].removeprefix("https://github.com/").rstrip("/")
+          print(f"repository={repo}")
+          print(f"revision={b['subject']['revision']}")
+          print(f"rust={b.get('runners', {}).get('cargo', {}).get('rust_toolchain', '')}")
+          EOF
+
+      - name: Check out subject at the pinned revision
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ steps.pin.outputs.repository }}
+          ref: ${{ steps.pin.outputs.revision }}
+          path: subject
+          persist-credentials: false
+
+      - name: Install pinned Rust toolchain
+        if: steps.pin.outputs.rust != ''
+        run: |
+          rustup toolchain install "${{ steps.pin.outputs.rust }}" --profile minimal
+          rustup default "${{ steps.pin.outputs.rust }}"
+
+      - name: Run the controls
+        run: |
+          python -m conformance.controls run --binding "$BINDING" --subject subject \
+            --out out/result.json \
+            --run-id "${{ matrix.binding }}-gha-${{ github.run_id }}-${{ github.run_attempt }}" \
+            --operator "github-actions run ${{ github.run_id }} (${{ github.repository }})" \
+            --independence REPRODUCTION
+
+      - name: Findings equal the committed run
+        run: |
+          if [ ! -f "$REPORT_DIR/CURRENT" ]; then echo "no committed run to compare with"; exit 0; fi
+          python -m conformance.controls compare "$REPORT_DIR/results/$(cat "$REPORT_DIR/CURRENT")" out/result.json
+
+      - name: Report regenerates identically
+        run: |
+          if [ ! -f "$REPORT_DIR/CURRENT" ]; then exit 0; fi
+          python -m conformance.controls report --binding "$BINDING" --result out/result.json \
+            --result-ref "$REPORT_DIR/results/$(cat "$REPORT_DIR/CURRENT")" \
+            --assessment "examples/${{ matrix.binding }}.json" --markdown "$REPORT_DIR/REPORT.md" --check
+
+      - name: Generate the report from this run
+        if: always()
+        run: |
+          if [ -f out/result.json ]; then
+            python -m conformance.controls report --binding "$BINDING" --result out/result.json \
+              --result-ref out/result.json --assessment out/assessment.json --markdown out/REPORT.md \
+              && cat out/REPORT.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload run
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aacp-controls-${{ matrix.binding }}
+          path: out/

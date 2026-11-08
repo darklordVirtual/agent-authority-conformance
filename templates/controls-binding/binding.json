@@ -1,0 +1,72 @@
+{
+  "schema": "aacp-control-binding-v1",
+  "binding_id": "PROJECT-SHORTREV",
+  "catalog": "controls/aacp-controls-v1/catalog.json",
+  "assessor": "UNKNOWN",
+  "claimed_status": "not supplied by implementer",
+  "subject": {
+    "name": "UNKNOWN",
+    "version": "UNKNOWN",
+    "repository": "https://github.com/OWNER/REPO",
+    "revision": "FULL_40_CHAR_COMMIT",
+    "files": {
+      "path/to/authorizer.py": "SHA256_OF_PRISTINE_FILE"
+    }
+  },
+  "scope": {
+    "process_model": "UNKNOWN",
+    "deployment_model": "UNKNOWN",
+    "external_effects": "none",
+    "trust_assumptions": [
+      "Limited to the pinned revision and the probes in this binding"
+    ],
+    "explicit_non_claims": []
+  },
+  "runners": {
+    "command": {
+      "install": [
+        {
+          "from": "tests/test_b01.py",
+          "to": "aacp_probes/test_b01.py"
+        }
+      ]
+    }
+  },
+  "mutations": {
+    "M-B-01": {
+      "file": "path/to/authorizer.py",
+      "repair": "require a credential bound to the principal",
+      "old": "UNIQUE ANCHOR TEXT FROM THE PRISTINE FILE",
+      "new": "REPAIRED TEXT"
+    }
+  },
+  "probes": [
+    {
+      "id": "P-B-01",
+      "control": "AACP-B-01",
+      "relationship": "exact",
+      "origin": "WHO FOUND IT",
+      "kind": "command",
+      "argv": [
+        "python",
+        "-m",
+        "pytest",
+        "-q",
+        "aacp_probes/test_b01.py"
+      ],
+      "reference": "tests/test_b01.py",
+      "mutation": "M-B-01",
+      "description": "Follow the AACP-B-01 probe contract; state any deviation here.",
+      "code": "https://github.com/OWNER/REPO/blob/FULL_40_CHAR_COMMIT/path/to/authorizer.py#L1-L10"
+    }
+  ],
+  "not_applicable": [
+    {
+      "control": "AACP-X-02",
+      "reason": "the subject has no Merkle structure"
+    }
+  ],
+  "out_of_scope_properties": {},
+  "property_caveats": {},
+  "notes": []
+}
