@@ -1,0 +1,164 @@
+{
+  "schema": "aacp-nti-inspection-result-v1",
+  "run_id": "nti-de08dbd-2026-11-08-local-2",
+  "started_at_utc": "2026-11-08T12:22:43Z",
+  "operator": "Stian Skogbrott (maintainer); executed by Claude agent in a disposable cloud container",
+  "independence": "AUTHOR_RUN",
+  "subject": {
+    "repository": "https://github.com/abisheakp197/Neutral-Trust-Infrastructure",
+    "revision": "de08dbdcd27e01c27585d936091c69b59d173a97",
+    "file": "ube-foundation/src/lib.rs",
+    "file_sha256": "970a7bbda6568a3837e75562f59e5465aa6a6a0444bf9ddafea7608c76313466"
+  },
+  "procedure": {
+    "harness": "scripts/run_nti_inspection.py",
+    "harness_sha256": "0bac6a4734103a7da3e4263c0c3786266b5208f90aa92734fe56505d85cb2dc6",
+    "candidates_sha256": "fdea956cb7a8c4628c1164ace4922db6f487aa44a6b6c56d3f755e0e570ccd9d",
+    "mutations_sha256": "eb0015cd8566f1c44c5c60f495d8434d46726e773a8f31ba81df997c629fed7b",
+    "expected_sha256": "cbdbe9d88a8f45a2f9df9f0e8cd8e8ab28c32b9029681cb296182976a2ea5f08",
+    "aacp_revision": "e3d8c866ab86b30bdbe750a823dfa9076e79eb3a",
+    "procedure_committed": true
+  },
+  "environment": {
+    "rustc": "rustc 1.97.0 (2d8144b78 2026-07-07)",
+    "cargo": "cargo 1.97.0 (c980f4866 2026-06-30)",
+    "python": "3.13.18",
+    "platform": "Linux-6.18.44-fc-v310-x86_64-with-glibc2.39"
+  },
+  "baseline": {
+    "tests": {
+      "nti_01_actor_spoofing_no_signature_required": "ok",
+      "nti_01b_signature_is_self_attested": "ok",
+      "nti_03_airgap_bundle_self_signed_trust": "ok",
+      "nti_04_max_executions_resets_on_batch_commit": "ok",
+      "nti_05_value_limit_type_confusion": "ok",
+      "nti_06_path_prefix_escape": "ok",
+      "nti_07_audit_batch_truncation_undetected": "ok",
+      "nti_08_token_is_unbound_bearer": "ok",
+      "nti_08b_token_not_bound_to_call": "ok",
+      "nti_09_handshake_accepts_unknown_peer": "ok",
+      "nti_10_revocation_fail_open": "ok",
+      "nti_11_merkle_odd_node_duplication_collision": "ok"
+    },
+    "canonical_sha256": "daa0a7c30d2f9d986654c8f174f3c35c1a4ee5f8312aee4364706facb4cf0637",
+    "canonical_form": "sorted '<test> <status>' lines, newline-terminated",
+    "met": true,
+    "mismatches": {}
+  },
+  "discrimination": [
+    {
+      "id": "M-01",
+      "finding": "NTI-01",
+      "repair": "require a request signature by the key registered for the actor",
+      "tests": {
+        "nti_01_actor_spoofing_no_signature_required": "FAILED",
+        "nti_01b_signature_is_self_attested": "FAILED"
+      },
+      "status": "DISCRIMINATES",
+      "canonical_sha256": "693e40929658084095dbbdf5504505d2ca92d418c2a45441752ccdae9e5d4e2c"
+    },
+    {
+      "id": "M-03",
+      "finding": "NTI-03",
+      "repair": "accept an air-gap bundle only from a signer known to the registry",
+      "tests": {
+        "nti_03_airgap_bundle_self_signed_trust": "FAILED"
+      },
+      "status": "DISCRIMINATES",
+      "canonical_sha256": "86ca0f3bdf7772b9bce016f8d6da20ed503e39f0035d6e53ea12e4105e6f6e7d"
+    },
+    {
+      "id": "M-04",
+      "finding": "NTI-04",
+      "repair": "count token uses across committed batches as well as the pending buffer",
+      "tests": {
+        "nti_04_max_executions_resets_on_batch_commit": "FAILED"
+      },
+      "status": "DISCRIMINATES",
+      "canonical_sha256": "38365eef75061f5c8b1d15fc62838a37b0da17f9e22fd5c659476aea1d3ced15"
+    },
+    {
+      "id": "M-05",
+      "finding": "NTI-05",
+      "repair": "reject an amount that is not a non-negative integer",
+      "tests": {
+        "nti_05_value_limit_type_confusion": "FAILED"
+      },
+      "status": "DISCRIMINATES",
+      "canonical_sha256": "db11056a599760039538c557889470440806a1b9dfd78aee9229e0dc43c301fb"
+    },
+    {
+      "id": "M-06",
+      "finding": "NTI-06",
+      "repair": "component-wise prefix match and reject parent-directory components",
+      "tests": {
+        "nti_06_path_prefix_escape": "FAILED"
+      },
+      "status": "DISCRIMINATES",
+      "canonical_sha256": "cc3b545365f35ae1f72db9b2d83427a915b77e52af56bef6d0e47534606c4361"
+    },
+    {
+      "id": "M-07",
+      "finding": "NTI-07",
+      "repair": "compare the persisted last_batch_hash with the recomputed batch-chain head",
+      "tests": {
+        "nti_07_audit_batch_truncation_undetected": "FAILED"
+      },
+      "status": "DISCRIMINATES",
+      "canonical_sha256": "175700c389f5c774567f9c25f2f5245b1f6292a05f23461a2c386e747ea30f07"
+    },
+    {
+      "id": "M-08",
+      "finding": "NTI-08",
+      "repair": "bind the token to the requesting actor",
+      "tests": {
+        "nti_08_token_is_unbound_bearer": "FAILED"
+      },
+      "status": "DISCRIMINATES",
+      "canonical_sha256": "21cb1f37a62fdd8ad16f51f327a2f19ec7c7925fbe9e3b0aa7e2fd5cb12150b4"
+    },
+    {
+      "id": "M-08b",
+      "finding": "NTI-08b",
+      "repair": "bind the token to one call identity",
+      "tests": {
+        "nti_08b_token_not_bound_to_call": "FAILED"
+      },
+      "status": "DISCRIMINATES",
+      "canonical_sha256": "0cb25b1d40c07cee5cf76a56a7e6de0307a204a7c28cf8cf27ec575c3054afff"
+    },
+    {
+      "id": "M-09",
+      "finding": "NTI-09",
+      "repair": "respond only to registered peers",
+      "tests": {
+        "nti_09_handshake_accepts_unknown_peer": "FAILED"
+      },
+      "status": "DISCRIMINATES",
+      "canonical_sha256": "4e05602712a310669b615ab9c7c58e69146a0acf87a75da66a06e5452d57954d"
+    },
+    {
+      "id": "M-10",
+      "finding": "NTI-10",
+      "repair": "fail closed when a revocation notice exists, whatever its signature",
+      "tests": {
+        "nti_10_revocation_fail_open": "FAILED"
+      },
+      "status": "DISCRIMINATES",
+      "canonical_sha256": "4aec05500a72bf21cc5f5fb18e966dea87d23552d293696108cf5c19519956bf"
+    },
+    {
+      "id": "M-11",
+      "finding": "NTI-11",
+      "repair": "promote the odd node unchanged instead of duplicating it",
+      "tests": {
+        "nti_11_merkle_odd_node_duplication_collision": "FAILED"
+      },
+      "status": "DISCRIMINATES",
+      "canonical_sha256": "3ed3c7ac24e71bd27c58e38e8a98caae2c179f4dced61ca8d11e20af069979be"
+    }
+  ],
+  "non_verdict_errors": [],
+  "verdict": "EXPECTATIONS_MET",
+  "finished_at_utc": "2026-11-08T12:23:14Z"
+}

@@ -42,7 +42,7 @@
         },
         {
           "kind": "artifact",
-          "reference": "docs/nti-source-inspection/results/2026-11-08-local-author-run.json",
+          "reference": "docs/nti-source-inspection/results/2026-11-08-local-author-run-2.json",
           "description": "Result record: baseline ok, mutation M-04 DISCRIMINATES."
         }
       ]
@@ -79,7 +79,7 @@
         },
         {
           "kind": "artifact",
-          "reference": "docs/nti-source-inspection/results/2026-11-08-local-author-run.json",
+          "reference": "docs/nti-source-inspection/results/2026-11-08-local-author-run-2.json",
           "description": "Result record: baseline ok, mutations M-01 and M-08 DISCRIMINATE."
         }
       ]
@@ -106,7 +106,7 @@
         },
         {
           "kind": "artifact",
-          "reference": "docs/nti-source-inspection/results/2026-11-08-local-author-run.json",
+          "reference": "docs/nti-source-inspection/results/2026-11-08-local-author-run-2.json",
           "description": "Result record: baseline ok, mutation M-08b DISCRIMINATES."
         }
       ]
@@ -138,7 +138,7 @@
         },
         {
           "kind": "artifact",
-          "reference": "docs/nti-source-inspection/results/2026-11-08-local-author-run.json",
+          "reference": "docs/nti-source-inspection/results/2026-11-08-local-author-run-2.json",
           "description": "Result record: baseline ok, mutations M-05 and M-06 DISCRIMINATE."
         }
       ]

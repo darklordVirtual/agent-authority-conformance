@@ -58,8 +58,9 @@ The harness was checked negatively: a no-op mutation is reported
 
 | Run | Independence | Result |
 | :--- | :--- | :--- |
-| [`2026-11-08-local-author-run.json`](nti-source-inspection/results/2026-11-08-local-author-run.json) | `AUTHOR_RUN` (assessor wrote the tests and ran them) | `EXPECTATIONS_MET`: 12/12 baseline tests as expected, 11/11 mutations discriminate |
-| CI, [`nti-inspection.yml`](../.github/workflows/nti-inspection.yml) | `REPRODUCTION` (same procedure, separate host and toolchain install) | see the workflow run and its `nti-inspection-result` artifact |
+| [`2026-11-08-local-author-run-2.json`](nti-source-inspection/results/2026-11-08-local-author-run-2.json), procedure `e3d8c86` | `AUTHOR_RUN` (assessor wrote the tests and ran them) | `EXPECTATIONS_MET`: 12/12 baseline tests as expected, 11/11 mutations discriminate. **Current.** |
+| CI, [`nti-inspection.yml`](../.github/workflows/nti-inspection.yml) on procedure `e3d8c86` | `REPRODUCTION` (same procedure, separate host and toolchain install) | CI_RUN_PENDING |
+| [`2026-11-08-local-author-run.json`](nti-source-inspection/results/2026-11-08-local-author-run.json), procedure `9eaf002` | `AUTHOR_RUN` | `EXPECTATIONS_MET`, same baseline digest `daa0a7c3…`. Superseded: its harness crashed in the CI no-op self-test (fixed in `e3d8c86`). The CI reproduction of that procedure, [run 42479173368](https://github.com/darklordVirtual/agent-authority-conformance/actions/runs/42479173368), also reported `EXPECTATIONS_MET` before the self-test step failed. |
 
 Neither run is an independent implementation; both execute assessor-authored
 tests.
