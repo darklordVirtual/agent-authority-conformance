@@ -582,8 +582,7 @@ def build_markdown(binding, controls, result, assessment, binding_rel, result_re
            f"- Result record: [`{result_ref}`](../../{result_ref}), verdict `{result['verdict']}`",
            f"- Assessment (schema v0.1): [`examples/{binding['binding_id']}.json`](../../examples/{binding['binding_id']}.json)",
            "", "## Evidence provenance", "",
-           f"This report is generated from a run classified `{result['independence']}`. "
-           "`AUTHOR_RUN` means the assessor wrote the probes and repairs and ran them. A `REPRODUCTION` "
+           "The run's independence classification is on the Run line above. `AUTHOR_RUN` means the assessor wrote the probes and repairs and ran them. A `REPRODUCTION` "
            "reruns the same probes on another host; it confirms the result is repeatable, not that the probes "
            "are right. Neither is an independent security review, and none has been reviewed by the implementer "
            "unless the notes say so.",

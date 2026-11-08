@@ -343,5 +343,28 @@ class CommittedBindingTests(unittest.TestCase):
                 self.assertEqual(code, 0, "committed report differs from its result; regenerate it")
 
 
+    def test_reproduction_of_committed_run_regenerates_identically(self):
+        """A CI reproduction differs only in run id, operator, independence and time."""
+        for binding_dir in sorted((ROOT / "controls" / "bindings").iterdir()):
+            report_dir = ROOT / "reports" / binding_dir.name
+            pointer = report_dir / "CURRENT"
+            if not pointer.exists():
+                continue
+            with self.subTest(binding=binding_dir.name), tempfile.TemporaryDirectory() as tmp:
+                committed = report_dir / "results" / pointer.read_text().strip()
+                repro = json.loads(committed.read_text())
+                repro.update(run_id="repro-gha-1", operator="github-actions run 1", independence="REPRODUCTION",
+                             started_at_utc="2099-01-01T00:00:00Z", finished_at_utc="2099-01-01T00:01:00Z")
+                path = pathlib.Path(tmp) / "repro.json"
+                path.write_text(json.dumps(repro))
+                with contextlib.redirect_stdout(io.StringIO()):
+                    code = controls.main([
+                        "report", "--binding", str(binding_dir), "--result", str(path),
+                        "--result-ref", str(committed.relative_to(ROOT)),
+                        "--assessment", str(ROOT / "examples" / f"{binding_dir.name}.json"),
+                        "--markdown", str(report_dir / "REPORT.md"), "--check"])
+                self.assertEqual(code, 0, "a reproduction would not regenerate the committed report")
+
+
 if __name__ == "__main__":
     unittest.main()
