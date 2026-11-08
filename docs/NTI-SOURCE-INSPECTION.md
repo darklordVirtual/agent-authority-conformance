@@ -38,6 +38,39 @@ pinned revision and stops reproducing it when that weakness alone is repaired.
 Static probes and controls outside A-G are reported in
 [REPORT.md](../reports/nti-de08dbd/REPORT.md) without affecting a status.
 
+## Why these are A, B, C and D failures
+
+A weakness is not automatically a failure of a nearby property. Each counted
+control carries a normative basis in the catalog (SPECIFICATION §2 text,
+rationale and boundary), printed in the
+[report](../reports/nti-de08dbd/REPORT.md#normative-basis-of-counted-controls).
+For the two least obvious mappings:
+
+- **AACP-A-01 → A.** A's scope names *single-use semantics* and asks whether the
+  artifact is *currently valid*. NTI's `MaxExecutions` is a caveat inside the
+  signed token, so the limit belongs to the authorization artifact. A
+  `MaxExecutions(1)` token accepted a second time is not currently valid.
+  Quotas outside the artifact would not be A (rate limiting is outside the
+  model, §10).
+- **AACP-C-01 → C.** C asks whether the authorization is bound to the exact call
+  and names call identity, target and full argument binding. NTI accepts a
+  call authorized by the token alone: the request signature that would bind
+  the call is optional, and the probe sends none. Were call binding enforced
+  elsewhere on the mandatory path, or tokens declared as capabilities without
+  call binding, this would not be a C failure; the latter would make the row
+  `OUT_OF_SCOPE`.
+
+These mappings are the assessor's. The implementer may contest them, and the
+disagreement would be recorded (SPECIFICATION §8).
+
+## Provenance of the result
+
+The committed report comes from an `AUTHOR_RUN`: the assessor wrote the probes
+and repairs and ran them. The CI run is a `REPRODUCTION` with the same probes
+on a clean runner. It shows the result is repeatable, not that the probes are
+right. Neither is an independent security review, and the implementer has not
+reviewed either.
+
 ## Sweep to control mapping
 
 | Finding | Origin | Control | Probe(s) | Basis | AACP |
