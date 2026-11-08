@@ -61,6 +61,12 @@ gate is ticked by the maintainer. No pull request is merged automatically.
 - [ ] Isolated fake tool, network and secret services; fake canary format
 - [ ] Observation prerequisite with seeded positive controls
 - [ ] Negative vectors per class and legitimate workflows
+- [ ] JX-01–15 reviewed one by one against J-NEG parent vectors; no double-counting of coverage
+- [ ] Effect-result precedence tests: independently proved violation remains `CONTRADICTED` despite another blind interval; missing matched control blocks `ESTABLISHED`
+- [ ] Protected canary provenance and cross-tenant correlation; attacker-provided look-alike negative controls
+- [ ] Explicit network attempt/dispatch/effect thresholds (including redirected peer, DNS/IPv6, proxy and parser divergence) with isolated endpoints
+- [ ] Runner-owned, out-of-band matched positive controls plus legitimate workflow, detector-restart and no-coverage cases
+- [ ] Every JX candidate has frozen, digest-pinned input/expected output kept separate, and a seeded mutant detected before reference-evaluator implementation
 - [ ] Live or invasive tests opt-in only, behind a separate execution mandate
 - [ ] Adversarial review per class
 - [ ] **Gate 4**

@@ -5,7 +5,8 @@ provisional until it is decided; a renamed path keeps its row. A test is written
 the code that makes it pass, and is never edited to match an implementation's output.
 
 Vector paths abbreviate `profiles/<identifier>/v1/` as `.../v1/`. Agent cyber test files assume ADR-0004
-option 2 (one file per class).
+option 2 (one file per class). Each JX row is **proposed and not independently implemented**; its distinct parent-vector mapping, seeded mutant and observation conditions are defined in
+`reviews/STAGE-0-CYBER-TEST-EXPANSION.md`. No row implies test coverage or Gate 0/4 completion.
 
 | Requirement | Source | Planned test | Vectors | Stage | Status |
 |---|---|---|---|---|---|
@@ -75,4 +76,18 @@ option 2 (one file per class).
 | J6 observation | §5; ADR-0004 | `tests/profiles/test_agent_cyber_observation.py::test_negatives, ::test_legitimate_workflow_still_succeeds` | J-NEG-08, J-NEG-11, J-NEG-12 | 4 | PLANNED |
 | J-OBS observation prerequisite (blind detector) | §5 J6; ADR-0004 | `each class ::test_established_requires_detected_positive_control` | seeded positive controls | 4 | PLANNED |
 | J-SAFE no egress beyond test sink; fake canary format | §5 safety | `tests/profiles/test_safety.py::test_canary_format_and_sink` | — | 4 | PLANNED |
-
+| JX-01 forged role delimiters | Stage 0 cyber expansion §Evidence and §Parent-vector mapping | `tests/profiles/test_agent_cyber_instruction_promotion.py::test_jx01_forged_role` | proposed JX-01; parent J-NEG-01 | 4 | PLANNED |
+| JX-02 forged approval receipt | Stage 0 cyber expansion §Evidence and §Parent-vector mapping | `tests/profiles/test_agent_cyber_instruction_promotion.py::test_jx02_forged_approval` | proposed JX-02; parent J-NEG-01 | 4 | PLANNED |
+| JX-03 resumed persistent taint | Stage 0 cyber expansion §Evidence and §Parent-vector mapping | `tests/profiles/test_agent_cyber_instruction_promotion.py::test_jx03_persistent_taint` | proposed JX-03; parent J-NEG-02 | 4 | PLANNED |
+| JX-04 protected canary transform and attacker-lookalike negative | Stage 0 cyber expansion §Evidence and §Parent-vector mapping | `tests/profiles/test_agent_cyber_secret_egress.py::test_jx04_provenance_and_transform` | proposed JX-04; parent J-NEG-03 | 4 | PLANNED |
+| JX-05 cross-tenant protected-source read | Stage 0 cyber expansion §Evidence and §Parent-vector mapping | `tests/profiles/test_agent_cyber_secret_egress.py::test_jx05_tenant_source_and_context` | proposed JX-05; parent J-NEG-10 | 4 | PLANNED |
+| JX-06 redirect final network peer | Stage 0 cyber expansion §Evidence and §Parent-vector mapping | `tests/profiles/test_agent_cyber_network.py::test_jx06_redirect_final_peer` | proposed JX-06; parent J-NEG-05, J-NEG-09 | 4 | PLANNED |
+| JX-07 DNS authorization/connect change | Stage 0 cyber expansion §Evidence and §Parent-vector mapping | `tests/profiles/test_agent_cyber_network.py::test_jx07_dns_rebinding` | proposed JX-07; parent J-NEG-04 | 4 | PLANNED |
+| JX-08 policy/connector parser drift | Stage 0 cyber expansion §Evidence and §Parent-vector mapping | `tests/profiles/test_agent_cyber_network.py::test_jx08_parser_peer` | proposed JX-08; parent J-NEG-04, J-NEG-09 | 4 | PLANNED |
+| JX-09 effective executable and arguments | Stage 0 cyber expansion §Evidence and §Parent-vector mapping | `tests/profiles/test_agent_cyber_tool_substitution.py::test_jx09_executable_arguments` | proposed JX-09; parent J-NEG-06 | 4 | PLANNED |
+| JX-10 immutable callable identity | Stage 0 cyber expansion §Evidence and §Parent-vector mapping | `tests/profiles/test_agent_cyber_tool_substitution.py::test_jx10_callable_identity` | proposed JX-10; parent J-NEG-06 | 4 | PLANNED |
+| JX-11 pinned bytes versus loaded bytes | Stage 0 cyber expansion §Evidence and §Parent-vector mapping | `tests/profiles/test_agent_cyber_artifact_admission.py::test_jx11_loaded_bytes` | proposed JX-11; parent J-NEG-07 | 4 | PLANNED |
+| JX-12 verify/use artifact replacement | Stage 0 cyber expansion §Evidence and §Parent-vector mapping | `tests/profiles/test_agent_cyber_artifact_admission.py::test_jx12_execution_time_identity` | proposed JX-12; parent J-NEG-07 | 4 | PLANNED |
+| JX-13 blind interval versus admitted contradiction precedence | Stage 0 cyber expansion §Evidence and §Parent-vector mapping | `tests/profiles/test_agent_cyber_observation.py::test_jx13_blind_interval_precedence` | proposed JX-13; parent J-NEG-08, J-NEG-11 | 4 | PLANNED |
+| JX-14 boundary effect takes precedence over self-report | Stage 0 cyber expansion §Evidence and §Parent-vector mapping | `tests/profiles/test_agent_cyber_observation.py::test_jx14_effect_precedence` | proposed JX-14; parent J-NEG-09, J-NEG-12 | 4 | PLANNED |
+| JX-15 matched runner control detection | Stage 0 cyber expansion §Evidence and §Parent-vector mapping | `tests/profiles/test_agent_cyber_observation.py::test_jx15_control_match` | proposed JX-15; parent J-NEG-08, J-NEG-12 | 4 | PLANNED |

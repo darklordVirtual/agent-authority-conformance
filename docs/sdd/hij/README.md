@@ -33,6 +33,7 @@ was decided.
 | [CHECKLIST.md](CHECKLIST.md) | Implementation checklist with gates per stage |
 | [RESEARCH-QUESTIONS.md](RESEARCH-QUESTIONS.md) | Unresolved research questions, kept non-normative |
 | [reviews/STAGE-0-ADVERSARIAL-REVIEW.md](reviews/STAGE-0-ADVERSARIAL-REVIEW.md) | Adversarial review of the proposal against CHARTER, METHOD, TERMINOLOGY, GOVERNANCE and v0.2 |
+| [reviews/STAGE-0-CYBER-TEST-EXPANSION.md](reviews/STAGE-0-CYBER-TEST-EXPANSION.md) | Supplemental AI-drafted cyber review; 15 PLANNED candidate vectors with effect precedence, source provenance, observation controls and mutation mapping (not an independent Gate 0 sign-off) |
 
 ## Ground rules carried into every later stage
 
