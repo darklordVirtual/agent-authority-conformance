@@ -1,0 +1,745 @@
+{
+  "schema": "aacp-control-binding-v1",
+  "binding_id": "remora-b5e4c42",
+  "catalog": "controls/aacp-controls-v1/catalog.json",
+  "assessor": "Agent Authority Conformance project (maintainer Stian Skogbrott, who also maintains REMORA; probes drafted and executed by an AI agent, reviewed by the maintainer)",
+  "claimed_status": "not supplied as an AACP scope declaration",
+  "subject": {
+    "name": "REMORA (remora-assurance)",
+    "version": "0.12.0",
+    "repository": "https://github.com/darklordVirtual/REMORA-research",
+    "revision": "b5e4c42509c856c297d6a79210394ecbe90a05a4",
+    "files": {
+      "remora/enforcement/gate.py": "d34a94ab376ffbfac0f2c0153805ee7e101533ddf588530e47126f61019d0eb7",
+      "remora/enforcement/token.py": "91f4171073a473f45c2710608da6c5edf8dbf8c38b253bf960c36680fd8f0c81",
+      "remora/execution/admission.py": "7bd9442b5ea4368b5f89f938f42ab3fdc4efc83399914618428c7171d15793e1",
+      "servers/api.py": "cb1c8987c588f9ebbe75a0192ab1c5e8b9c623cdb9bd46a8cb384bd590ea8808",
+      "remora/execution/review_service.py": "83502e35e4dd77287a00b704f427693f2d96e409cd54532fb3a685600328c3cb",
+      "remora/execution/service.py": "37511ace915b9fbf0865d30e4540e3cae82c0bdbebff7348aba03ff8571d8bbf",
+      "remora/enforcement/cumulative_limits.py": "2f5c09f1755ec4eb211fb4e53021878758cc34ae81b49d2e7aa6a480c0b80c88",
+      "remora/capabilities/resource.py": "2bb7b0cfb442c20c1dee1b0500b89849c1f6a950cd4c9f71343e1b19e7e9d138",
+      "remora/governance/tenant_chain.py": "8cc3a270974579ad7f2c15fb71fb5f57189b4c23772f7114b3e3d02c812d859c",
+      "remora/assurance/merkle.py": "b73d0407cad2b05e611e5c3d6a2eeda943d82d14378e73820d8b9141b28ae8fd",
+      "remora/audit/merkle.py": "1619416202054824c1563ac2972ad1293f0e537d12932ea7d775d05bebee5d0b",
+      "remora/adapters/audit/jsonl.py": "e5f3b3100aab240458e77e4911e715d1aaf51b118d41b4687a0daff259919b3e",
+      "scripts/generate_test_attestation.py": "c69fbb7aa71c1a59afc8854554134dcb7fce807175b9a710fc5b61f80154c454",
+      ".github/workflows/attestation.yml": "a123c8b9a75acd60a274b5c95bb3904b790681dd6d030a2ea71f25153b2a18f9",
+      "remora/enforcement/outbox.py": "a82d9abf460a49a539909a612dc097f37140c7bca7e22cb11ff88ec4acdb52d4"
+    }
+  },
+  "scope": {
+    "process_model": "single-process; FastAPI TestClient against servers/api.py and servers/execution_api.py, plus in-process calls to EnforcementGate, PolicyDecisionToken, AtomicAdmission, LimitGuard, ToolConstraint, SQLiteTenantChain, JSONLAudit and both Merkle modules",
+    "deployment_model": "development environment with the research tool registry; production's distinct-approver rule emulated by patching _is_production_mode; durable state via SQLite where a probe needs it; Postgres, D1 and multi-node operation not exercised",
+    "external_effects": "mixed",
+    "trust_assumptions": [
+      "Limited to the pinned revision, branch fix/aacp-x01-x02-x04 on dev 06c2f8f (REMORA's fix for AACP-X-01, X-02 and X-04), and the probes in controls/bindings/remora-b5e4c42, copied byte for byte from remora-06c2f8f",
+      "Probes P-A-04, P-B-03, P-C-01 and P-D-03 mint ACCEPT tokens through PolicyDecisionToken.issue, as REMORA's own execute-accepted tests do, because the research profile does not reach ACCEPT from /assess without server-side evidence",
+      "Probes replace authentication with a fixed principal except P-B-01 and P-B-02, which exercise the real _authenticate with a token table",
+      "P-C-01, P-D-03 and P-A-04 perform real file writes through store_artifact in a temporary directory",
+      "Every probe that did not observe its weakness is paired with a weakening; its NOT_OBSERVED counts only if the weakening makes it observe (SENSITIVE)",
+      "The assessor maintains REMORA; this is a self-assessment under the same catalog as the NTI binding, not an independent review",
+      "The X probes were reproduced on 06c2f8f with binding remora-06c2f8f before this run; that binding and its results are unchanged"
+    ],
+    "explicit_non_claims": []
+  },
+  "runners": {
+    "command": {
+      "setup": [
+        [
+          "{python}",
+          "-m",
+          "pip",
+          "install",
+          "-q",
+          "--disable-pip-version-check",
+          "-e",
+          ".[api,security,interop]",
+          "httpx",
+          "pytest"
+        ]
+      ],
+      "install": [
+        {
+          "from": "probes/test_remora_probes.py",
+          "to": "aacp_probes/test_remora_probes.py"
+        }
+      ]
+    }
+  },
+  "mutations": {
+    "W-A-01": {
+      "file": "remora/enforcement/gate.py",
+      "old": "        self._db_path = db_path\n",
+      "new": "        self._db_path = \"\"\n",
+      "repair": "drop the durable ledger so consumed grants live only in process memory"
+    },
+    "W-A-02": {
+      "file": "remora/execution/admission.py",
+      "old": "            except Exception as exc:\n                raise AdmissionRefused(\"revocation_store_unavailable\") from exc\n            if revoked:",
+      "new": "            except Exception as exc:\n                revoked = False\n            if revoked:",
+      "repair": "treat an unreadable revocation store as 'not revoked'"
+    },
+    "W-A-03": {
+      "file": "remora/enforcement/token.py",
+      "old": "        if result.ok:\n            return None\n        reason = {\"key_revoked\"",
+      "new": "        return None\n        reason = {\"key_revoked\"",
+      "repair": "accept a v3 grant without checking it against the configured verify keys"
+    },
+    "W-A-04": {
+      "repair": "remove both replay barriers on the ACCEPT path: the gate's consumed-jti record and the outbox's refusal to re-claim a settled dispatch",
+      "edits": [
+        {
+          "file": "remora/enforcement/gate.py",
+          "old": "                    if allowed and consume:\n                        self._consumed.add(token.jti)",
+          "new": "                    if allowed and consume:\n                        pass"
+        },
+        {
+          "file": "remora/enforcement/outbox.py",
+          "old": "def _check_claimable(row: OutboxRow) -> None:\n    if row.is_terminal:",
+          "new": "def _check_claimable(row: OutboxRow) -> None:\n    if False:"
+        }
+      ]
+    },
+    "W-B-01": {
+      "file": "servers/api.py",
+      "old": "    if not auth.startswith(\"Bearer \"):\n        raise HTTPException(status_code=401, detail=\"missing bearer token\")",
+      "new": "    if not auth.startswith(\"Bearer \"):\n        return (request.headers.get(\"X-Remora-Tenant\", \"default\"), request.headers.get(\"X-Remora-Role\", \"operator\"))",
+      "repair": "take tenant and role from headers when no credential is presented"
+    },
+    "W-B-02": {
+      "file": "servers/api.py",
+      "old": "        raise HTTPException(status_code=401, detail=\"invalid bearer token\")\n\n    # Single-token mode",
+      "new": "        return (request.headers.get(\"X-Remora-Tenant\", \"default\"), \"operator\")\n\n    # Single-token mode",
+      "repair": "accept an unprovisioned credential and take the tenant from headers"
+    },
+    "W-B-03": {
+      "file": "remora/enforcement/token.py",
+      "old": "            if self.context_hash != context.hash():",
+      "new": "            if False:",
+      "repair": "stop comparing the grant's signed authorization context (which names the principal)"
+    },
+    "W-B-04": {
+      "file": "remora/execution/review_service.py",
+      "old": "        if proposer == principal:\n            raise SeparationOfDutiesRefused(\n                \"the approver proposed this call\", reason=\"approver_is_proposer\")\n    if getattr(item, \"required_approvers\", 1) > 1:",
+      "new": "        if False:\n            raise SeparationOfDutiesRefused(\n                \"the approver proposed this call\", reason=\"approver_is_proposer\")\n    if getattr(item, \"required_approvers\", 1) > 1:",
+      "repair": "drop the distinct-approver check"
+    },
+    "W-C-01": {
+      "edits": [
+        {
+          "file": "remora/execution/service.py",
+          "old": "    if token.observation_hash != observation_binding(obs):",
+          "new": "    if False:"
+        },
+        {
+          "file": "remora/enforcement/token.py",
+          "old": "        if observation_hash is not None and observation_hash != self.observation_hash:",
+          "new": "        if False:"
+        },
+        {
+          "file": "remora/enforcement/token.py",
+          "old": "            if self.context_hash != context.hash():",
+          "new": "            if False:"
+        }
+      ],
+      "repair": "remove the call binding at all three layers that enforce it: the service's binding check, the token's observation-hash check and its signed-context check"
+    },
+    "W-D-01": {
+      "file": "remora/enforcement/cumulative_limits.py",
+      "old": "    if isinstance(value, bool) or not isinstance(value, int | float):\n        return None",
+      "new": "    if isinstance(value, bool) or not isinstance(value, int | float):\n        value = 1",
+      "repair": "read a non-numeric amount as the smallest charge instead of refusing it"
+    },
+    "W-D-02": {
+      "file": "remora/capabilities/resource.py",
+      "old": "            if canonical.startswith(pattern[:-1]):",
+      "new": "            if canonical.startswith(pattern[:-2]):",
+      "repair": "match the subtree pattern as a string prefix without its segment boundary"
+    },
+    "W-D-03": {
+      "edits": [
+        {
+          "file": "remora/execution/service.py",
+          "old": "    if str(token.action).lower() != \"accept\":",
+          "new": "    if False:"
+        },
+        {
+          "file": "remora/enforcement/gate.py",
+          "old": "    ACCEPT_ACTIONS = frozenset({\"accept\"})",
+          "new": "    ACCEPT_ACTIONS = frozenset({\"accept\", \"escalate\"})"
+        }
+      ],
+      "repair": "honour a non-ACCEPT decision at both layers that refuse it: the service and the gate"
+    },
+    "W-X-02c": {
+      "file": "remora/audit/merkle.py",
+      "old": "            paired.append(level[-1])  # RFC 6962: promote the odd node unchanged",
+      "new": "            paired.append(_combine_v2(level[-1], level[-1]))",
+      "repair": "duplicate the odd node instead of promoting it"
+    },
+    "W-EV-02": {
+      "file": ".github/workflows/attestation.yml",
+      "old": "          if a.get(\"current_system_commit\") != sha:",
+      "new": "          if False:",
+      "repair": "stop comparing the attested commit with the workflow's commit"
+    },
+    "W-EV-03": {
+      "file": "scripts/generate_test_attestation.py",
+      "old": "        \"--require-clean\",",
+      "new": "        \"--skip-suite-runs\", action=\"store_true\")\n    parser.add_argument(\n        \"--require-clean\",",
+      "repair": "add a mode that reuses earlier suite results"
+    },
+    "W-EV-05": {
+      "file": "scripts/generate_test_attestation.py",
+      "old": "        \"tests_passed\": _count(\"passed\"),",
+      "new": "        \"tests_passed\": 3700,",
+      "repair": "hard-code the passed-test total"
+    },
+    "W-X-01": {
+      "file": "remora/governance/tenant_chain.py",
+      "old": "        return (int(head[0]), str(head[1])) if status == \"ok\" else None\n",
+      "new": "        return None\n",
+      "repair": "stop exposing the SQLite head row to verify(), so it has nothing to compare the last entry with"
+    },
+    "W-X-02a": {
+      "file": "remora/assurance/merkle.py",
+      "old": "            nxt.append(level[-1])  # promote the odd node unchanged",
+      "new": "            nxt.append(_node_v2(level[-1], level[-1]))",
+      "repair": "duplicate the odd node in the v2 tree instead of promoting it"
+    },
+    "W-X-02b": {
+      "file": "remora/assurance/merkle.py",
+      "old": "DEFAULT_MERKLE_VERSION = MERKLE_V2",
+      "new": "DEFAULT_MERKLE_VERSION = MERKLE_V1",
+      "repair": "make the legacy v1 construction the default again. The probe presents a hex-concatenation preimage with a proof that has no leaf_count; v2 refuses it by three layers (0x00/0x01 domain prefixes, raw-digest node input, mandatory leaf_count), so only removing all three, which reverting the default does, lets it observe"
+    },
+    "W-X-04": {
+      "file": "remora/adapters/audit/jsonl.py",
+      "old": "            metadata=hashed_metadata(\n                metadata,\n                oracle_count=record[\"oracle_count\"],\n                verdict=record[\"verdict\"],\n                policy_version=record[\"policy_version\"],\n            ),\n        )",
+      "new": "            metadata=metadata or {},\n        )",
+      "repair": "rebuild reloaded entries from the written metadata alone, as before the fix"
+    }
+  },
+  "probes": [
+    {
+      "id": "P-A-01",
+      "control": "AACP-A-01",
+      "relationship": "exact",
+      "origin": "aacp",
+      "kind": "command",
+      "argv": [
+        "{python}",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "-x",
+        "aacp_probes/test_remora_probes.py::test_a01_grant_reusable_after_restart"
+      ],
+      "not_observed_exit": [
+        1
+      ],
+      "reference": "probes/test_remora_probes.py#test_a01_grant_reusable_after_restart",
+      "description": "A one-time ACCEPT grant is spent and refused on a PEP with a SQLite ledger, then presented to a second PEP on the same ledger (a restart).",
+      "code": "https://github.com/darklordVirtual/REMORA-research/blob/b5e4c42509c856c297d6a79210394ecbe90a05a4/remora/enforcement/gate.py#L86-L107",
+      "sensitivity": "W-A-01"
+    },
+    {
+      "id": "P-A-02",
+      "control": "AACP-A-02",
+      "relationship": "partial",
+      "origin": "aacp",
+      "kind": "command",
+      "argv": [
+        "{python}",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "-x",
+        "aacp_probes/test_remora_probes.py::test_a02_revocation_unknown_admits"
+      ],
+      "not_observed_exit": [
+        1
+      ],
+      "reference": "probes/test_remora_probes.py#test_a02_revocation_unknown_admits",
+      "description": "Atomic admission is asked whether a principal is revoked while the revocation store cannot answer. Partial: REMORA keeps revocation state in a store rather than signed revocation records, so the probe tests 'state unknown', not 'record unverifiable'.",
+      "code": "https://github.com/darklordVirtual/REMORA-research/blob/b5e4c42509c856c297d6a79210394ecbe90a05a4/remora/execution/admission.py#L360-L373",
+      "sensitivity": "W-A-02"
+    },
+    {
+      "id": "P-A-03",
+      "control": "AACP-A-03",
+      "relationship": "exact",
+      "origin": "aacp",
+      "kind": "command",
+      "argv": [
+        "{python}",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "-x",
+        "aacp_probes/test_remora_probes.py::test_a03_grant_from_untrusted_key_accepted"
+      ],
+      "not_observed_exit": [
+        1
+      ],
+      "reference": "probes/test_remora_probes.py#test_a03_grant_from_untrusted_key_accepted",
+      "description": "A v3 (Ed25519) grant minted with a forger's key is presented to a verify-only PEP that trusts only the PDP's public key.",
+      "code": "https://github.com/darklordVirtual/REMORA-research/blob/b5e4c42509c856c297d6a79210394ecbe90a05a4/remora/enforcement/token.py#L692-L722",
+      "sensitivity": "W-A-03"
+    },
+    {
+      "id": "P-A-04",
+      "control": "AACP-A-04",
+      "relationship": "exact",
+      "origin": "aacp",
+      "kind": "command",
+      "argv": [
+        "{python}",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "-x",
+        "aacp_probes/test_remora_probes.py::test_a04_accept_token_replayable"
+      ],
+      "not_observed_exit": [
+        1
+      ],
+      "reference": "probes/test_remora_probes.py#test_a04_accept_token_replayable",
+      "description": "An ACCEPT token is redeemed on /v1/execution/execute-accepted, then presented again for the same call. Replay is barred twice: by the gate's consumed-jti ledger and by the outbox, which never re-claims a settled dispatch; the weakening removes both.",
+      "code": "https://github.com/darklordVirtual/REMORA-research/blob/b5e4c42509c856c297d6a79210394ecbe90a05a4/remora/enforcement/gate.py#L555-L575",
+      "sensitivity": "W-A-04"
+    },
+    {
+      "id": "P-B-01",
+      "control": "AACP-B-01",
+      "relationship": "exact",
+      "origin": "aacp",
+      "kind": "command",
+      "argv": [
+        "{python}",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "-x",
+        "aacp_probes/test_remora_probes.py::test_b01_unauthenticated_principal_accepted"
+      ],
+      "not_observed_exit": [
+        1
+      ],
+      "reference": "probes/test_remora_probes.py#test_b01_unauthenticated_principal_accepted",
+      "description": "With a token table configured, /v1/execution/assess is called with no credential and headers naming tenant, actor and role admin.",
+      "code": "https://github.com/darklordVirtual/REMORA-research/blob/b5e4c42509c856c297d6a79210394ecbe90a05a4/servers/api.py#L2328-L2333",
+      "sensitivity": "W-B-01"
+    },
+    {
+      "id": "P-B-02",
+      "control": "AACP-B-02",
+      "relationship": "exact",
+      "origin": "aacp",
+      "kind": "command",
+      "argv": [
+        "{python}",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "-x",
+        "aacp_probes/test_remora_probes.py::test_b02_unregistered_credential_accepted"
+      ],
+      "not_observed_exit": [
+        1
+      ],
+      "reference": "probes/test_remora_probes.py#test_b02_unregistered_credential_accepted",
+      "description": "A bearer credential the deployment never provisioned is presented with a header naming actor admin. REMORA has no request-supplied verifying key; the credential table is its principal-to-credential registry.",
+      "code": "https://github.com/darklordVirtual/REMORA-research/blob/b5e4c42509c856c297d6a79210394ecbe90a05a4/servers/api.py#L2335-L2350",
+      "sensitivity": "W-B-02"
+    },
+    {
+      "id": "P-B-03",
+      "control": "AACP-B-03",
+      "relationship": "exact",
+      "origin": "aacp",
+      "kind": "command",
+      "argv": [
+        "{python}",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "-x",
+        "aacp_probes/test_remora_probes.py::test_b03_token_redeemable_by_other_principal"
+      ],
+      "not_observed_exit": [
+        1
+      ],
+      "reference": "probes/test_remora_probes.py#test_b03_token_redeemable_by_other_principal",
+      "description": "A token issued for agent-1's call is redeemed by agent-2 on /execute-accepted.",
+      "code": "https://github.com/darklordVirtual/REMORA-research/blob/b5e4c42509c856c297d6a79210394ecbe90a05a4/remora/enforcement/token.py#L745-L757",
+      "sensitivity": "W-B-03"
+    },
+    {
+      "id": "P-B-04",
+      "control": "AACP-B-04",
+      "relationship": "exact",
+      "origin": "aacp",
+      "kind": "command",
+      "argv": [
+        "{python}",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "-x",
+        "aacp_probes/test_remora_probes.py::test_b04_proposer_approves_own_call"
+      ],
+      "not_observed_exit": [
+        1
+      ],
+      "reference": "probes/test_remora_probes.py#test_b04_proposer_approves_own_call",
+      "description": "Under production's rule (_is_production_mode true), the principal that proposed an escalated prod write approves it.",
+      "code": "https://github.com/darklordVirtual/REMORA-research/blob/b5e4c42509c856c297d6a79210394ecbe90a05a4/remora/execution/review_service.py#L170-L190",
+      "sensitivity": "W-B-04"
+    },
+    {
+      "id": "P-C-01",
+      "control": "AACP-C-01",
+      "relationship": "exact",
+      "origin": "aacp",
+      "kind": "command",
+      "argv": [
+        "{python}",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "-x",
+        "aacp_probes/test_remora_probes.py::test_c01_token_authorizes_another_call"
+      ],
+      "not_observed_exit": [
+        1
+      ],
+      "reference": "probes/test_remora_probes.py#test_c01_token_authorizes_another_call",
+      "description": "A token minted for store_artifact 'aacp-c01-approved' is redeemed with a different artifact id and content; observed if it dispatches or the substituted file is written.",
+      "code": "https://github.com/darklordVirtual/REMORA-research/blob/b5e4c42509c856c297d6a79210394ecbe90a05a4/remora/execution/service.py#L2384-L2396",
+      "sensitivity": "W-C-01"
+    },
+    {
+      "id": "P-D-01",
+      "control": "AACP-D-01",
+      "relationship": "exact",
+      "origin": "aacp",
+      "kind": "command",
+      "argv": [
+        "{python}",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "-x",
+        "aacp_probes/test_remora_probes.py::test_d01_value_limit_bypassed"
+      ],
+      "not_observed_exit": [
+        1
+      ],
+      "reference": "probes/test_remora_probes.py#test_d01_value_limit_bypassed",
+      "description": "A cumulative limit of 100 NOK is reserved against 1000000 encoded as string, float, negative, object, bool, in USD and in lower-case 'nok'.",
+      "code": "https://github.com/darklordVirtual/REMORA-research/blob/b5e4c42509c856c297d6a79210394ecbe90a05a4/remora/enforcement/cumulative_limits.py#L225-L235",
+      "sensitivity": "W-D-01"
+    },
+    {
+      "id": "P-D-02",
+      "control": "AACP-D-02",
+      "relationship": "exact",
+      "origin": "aacp",
+      "kind": "command",
+      "argv": [
+        "{python}",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "-x",
+        "aacp_probes/test_remora_probes.py::test_d02_resource_restriction_escaped"
+      ],
+      "not_observed_exit": [
+        1
+      ],
+      "reference": "probes/test_remora_probes.py#test_d02_resource_restriction_escaped",
+      "description": "A 'within workspace://reports/*' constraint is evaluated for traversal, sibling-prefix, percent-encoded, backslash, empty-segment and out-of-tree resources.",
+      "code": "https://github.com/darklordVirtual/REMORA-research/blob/b5e4c42509c856c297d6a79210394ecbe90a05a4/remora/capabilities/resource.py#L74-L84",
+      "sensitivity": "W-D-02"
+    },
+    {
+      "id": "P-D-03",
+      "control": "AACP-D-03",
+      "relationship": "exact",
+      "origin": "aacp",
+      "kind": "command",
+      "argv": [
+        "{python}",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "-x",
+        "aacp_probes/test_remora_probes.py::test_d03_effect_before_policy"
+      ],
+      "not_observed_exit": [
+        1
+      ],
+      "reference": "probes/test_remora_probes.py#test_d03_effect_before_policy",
+      "description": "A token carrying the PDP decision ESCALATE is presented on /execute-accepted for a store_artifact call; observed if the file is written (real write in a temporary directory).",
+      "code": "https://github.com/darklordVirtual/REMORA-research/blob/b5e4c42509c856c297d6a79210394ecbe90a05a4/remora/execution/service.py#L2398-L2403",
+      "sensitivity": "W-D-03"
+    },
+    {
+      "id": "P-X-01",
+      "control": "AACP-X-01",
+      "relationship": "no_mapping",
+      "origin": "aacp",
+      "kind": "command",
+      "argv": [
+        "{python}",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "-x",
+        "aacp_probes/test_remora_probes.py::test_x01_sqlite_chain_tail_truncation_undetected"
+      ],
+      "not_observed_exit": [
+        1
+      ],
+      "reference": "probes/test_remora_probes.py#test_x01_sqlite_chain_tail_truncation_undetected",
+      "description": "Three entries are appended to SQLiteTenantChain (REMORA_CHAIN_DB, the single-node durable backend); the newest row is deleted and verify() is called.",
+      "code": "https://github.com/darklordVirtual/REMORA-research/blob/b5e4c42509c856c297d6a79210394ecbe90a05a4/remora/governance/tenant_chain.py#L476-L753",
+      "sensitivity": "W-X-01"
+    },
+    {
+      "id": "P-X-02a",
+      "control": "AACP-X-02",
+      "relationship": "no_mapping",
+      "origin": "chatgpt:remora-preprobe",
+      "kind": "command",
+      "argv": [
+        "{python}",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "-x",
+        "aacp_probes/test_remora_probes.py::test_x02_assurance_merkle_odd_duplication"
+      ],
+      "not_observed_exit": [
+        1
+      ],
+      "reference": "probes/test_remora_probes.py#test_x02_assurance_merkle_odd_duplication",
+      "description": "remora/assurance/merkle.py roots for [a,b,c] and [a,b,c,c] are compared.",
+      "code": "https://github.com/darklordVirtual/REMORA-research/blob/b5e4c42509c856c297d6a79210394ecbe90a05a4/remora/assurance/merkle.py#L136-L145",
+      "sensitivity": "W-X-02a"
+    },
+    {
+      "id": "P-X-02b",
+      "control": "AACP-X-02",
+      "relationship": "no_mapping",
+      "origin": "aacp",
+      "kind": "command",
+      "argv": [
+        "{python}",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "-x",
+        "aacp_probes/test_remora_probes.py::test_x02_assurance_merkle_node_as_leaf"
+      ],
+      "not_observed_exit": [
+        1
+      ],
+      "reference": "probes/test_remora_probes.py#test_x02_assurance_merkle_node_as_leaf",
+      "description": "An internal node's preimage is presented as a leaf with a one-step proof to remora/assurance/merkle.py verify_inclusion.",
+      "code": "https://github.com/darklordVirtual/REMORA-research/blob/b5e4c42509c856c297d6a79210394ecbe90a05a4/remora/assurance/merkle.py#L170-L214",
+      "sensitivity": "W-X-02b"
+    },
+    {
+      "id": "P-X-02c",
+      "control": "AACP-X-02",
+      "relationship": "no_mapping",
+      "origin": "aacp",
+      "kind": "command",
+      "argv": [
+        "{python}",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "-x",
+        "aacp_probes/test_remora_probes.py::test_x02_audit_merkle_v2_odd_duplication"
+      ],
+      "not_observed_exit": [
+        1
+      ],
+      "reference": "probes/test_remora_probes.py#test_x02_audit_merkle_v2_odd_duplication",
+      "description": "remora/audit/merkle.py compute_merkle_root (version 2, the default) is compared for [e1,e2,e3] and [e1,e2,e3,e3].",
+      "code": "https://github.com/darklordVirtual/REMORA-research/blob/b5e4c42509c856c297d6a79210394ecbe90a05a4/remora/audit/merkle.py#L93-L106",
+      "sensitivity": "W-X-02c"
+    },
+    {
+      "id": "P-X-04",
+      "control": "AACP-X-04",
+      "relationship": "no_mapping",
+      "origin": "aacp",
+      "kind": "command",
+      "argv": [
+        "{python}",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "-x",
+        "aacp_probes/test_remora_probes.py::test_x04_jsonl_audit_intact_log_fails_after_reload"
+      ],
+      "not_observed_exit": [
+        1
+      ],
+      "reference": "probes/test_remora_probes.py#test_x04_jsonl_audit_intact_log_fails_after_reload",
+      "description": "Three records are written through JSONLAudit, the file is reloaded untouched and verify() is called.",
+      "code": "https://github.com/darklordVirtual/REMORA-research/blob/b5e4c42509c856c297d6a79210394ecbe90a05a4/remora/adapters/audit/jsonl.py#L87-L142",
+      "sensitivity": "W-X-04"
+    },
+    {
+      "id": "S-EV-02",
+      "control": "AACP-EV-02",
+      "relationship": "no_mapping",
+      "origin": "aacp",
+      "kind": "source-check",
+      "reference": "binding.json#S-EV-02",
+      "description": "The Review Attestation workflow compares the attested commit with the workflow's own commit.",
+      "predicates": [
+        {
+          "op": "not_matches",
+          "file": ".github/workflows/attestation.yml",
+          "pattern": "a\\.get\\(\\\"current_system_commit\\\"\\) != sha"
+        }
+      ],
+      "code": "https://github.com/darklordVirtual/REMORA-research/blob/b5e4c42509c856c297d6a79210394ecbe90a05a4/.github/workflows/attestation.yml",
+      "sensitivity": "W-EV-02"
+    },
+    {
+      "id": "S-EV-03",
+      "control": "AACP-EV-03",
+      "relationship": "no_mapping",
+      "origin": "aacp",
+      "kind": "source-check",
+      "reference": "binding.json#S-EV-03",
+      "description": "The attestation generator has no mode that reuses earlier suite results.",
+      "predicates": [
+        {
+          "op": "matches",
+          "file": "scripts/generate_test_attestation.py",
+          "pattern": "--skip|--reuse|reuse_existing|--no-run"
+        }
+      ],
+      "code": "https://github.com/darklordVirtual/REMORA-research/blob/b5e4c42509c856c297d6a79210394ecbe90a05a4/scripts/generate_test_attestation.py",
+      "sensitivity": "W-EV-03"
+    },
+    {
+      "id": "S-EV-05",
+      "control": "AACP-EV-05",
+      "relationship": "no_mapping",
+      "origin": "aacp",
+      "kind": "source-check",
+      "reference": "binding.json#S-EV-05",
+      "description": "Test totals are parsed from the pytest summary line, not written as literals.",
+      "predicates": [
+        {
+          "op": "matches",
+          "file": "scripts/generate_test_attestation.py",
+          "pattern": "\\\"tests_(passed|failed)\\\": \\d"
+        }
+      ],
+      "code": "https://github.com/darklordVirtual/REMORA-research/blob/b5e4c42509c856c297d6a79210394ecbe90a05a4/scripts/generate_test_attestation.py",
+      "sensitivity": "W-EV-05"
+    }
+  ],
+  "not_applicable": [
+    {
+      "control": "AACP-X-03",
+      "reason": "REMORA implements no peer key exchange: no handshake or X25519 code exists in remora/ or servers/"
+    },
+    {
+      "control": "AACP-EV-01",
+      "reason": "REMORA's test attestation publishes no suite-transcript digest, so there is no digest that could be a constant"
+    },
+    {
+      "control": "AACP-EV-04",
+      "reason": "REMORA's test attestation ships no key. At this revision attestation.yml adds a sign job that gives it Sigstore build provenance, checked with gh attestation verify against GitHub's trust root, which is not shipped in the artifact. That signature names the producing workflow and commit; it is not an independent review. Not executed here: the workflow runs only on review tags and manual dispatch."
+    }
+  ],
+  "property_caveats": {},
+  "notes": [
+    "Repaired subject: REMORA branch fix/aacp-x01-x02-x04 at b5e4c42 (dev 06c2f8f plus the fix and a register update). The four X probes that observed on 06c2f8f must now not observe, and each must be sensitive: with its new protection removed (W-X-01, W-X-02a, W-X-02b, W-X-04) it observes again. That is the before/after change; NOT_OBSERVED is not PASS.",
+    "AACP-X-01 here covers SQLiteTenantChain's stored head. Per the catalog contract the probe leaves the head alone; an attacker who rewrites entries and head together is not detected without an external expected_head (REMORA SDD R1, asserted in tests/security/test_aacp_x01_sqlite_chain_head.py).",
+    "AACP-X-01 for the JSONL adapter is now assessable (X-04 fixed) and is not repaired: JSONLAudit keeps no stored head, so a removed last line still verifies unless verify(expected_head=...) is used. No probe is bound for it in this binding.",
+    "The v1 assurance Merkle construction is still in the code for historical traces and is still ambiguous when named explicitly; the probes exercise the default (v2).",
+    "Not exercised: PostgresTenantChain (it keeps tenant_chain_head and checks it), the D1 state endpoint, the MCP server and the edge workers.",
+    "Probe origins: 'aacp' written for remora-06c2f8f from the catalog contracts; 'chatgpt:remora-preprobe' reproduces the X-02 observation a ChatGPT pre-probe reported on master 53b1f45. The probes are copied unchanged; at this revision they run against the repaired jsonl.py, tenant_chain.py and assurance/merkle.py.",
+    "Implementer review: the assessor is the implementer and wrote the fix. A review by someone else is the evidence still missing."
+  ]
+}
