@@ -63,6 +63,17 @@ repaired subject that does not build is `BUILD_ERROR`, never discrimination.
 The runner restores every pinned file and removes installed probes, then
 re-verifies the pins.
 
+## Normative basis
+
+A weakness is not automatically a failure of every nearby property. Every A-G
+control therefore carries a `normative_basis`: the SPECIFICATION §2 text it
+relies on, the rationale for why the weakness defeats that property, and a
+**boundary** stating when the control does not establish a failure (for
+example, call binding enforced elsewhere on the mandatory path, or a
+declared bearer design). A control without one is rejected. The report
+prints the basis for every counted control and puts the boundary in the
+row's caveat, so an implementer can contest the mapping, not just the probe.
+
 ## Probe contracts
 
 Each catalog control has a `probe_contract`: setup, stimulus, observation and

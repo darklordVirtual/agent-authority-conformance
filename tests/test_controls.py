@@ -290,6 +290,29 @@ class CommittedBindingTests(unittest.TestCase):
             self.assertTrue(c["id"].startswith(f"AACP-{c['property']}-") if c["property"]
                             else c["id"].split("-")[1] in ("X", "EV"), c["id"])
             self.assertEqual(set(c["probe_contract"]), {"setup", "stimulus", "observation", "repair"})
+            if c["property"]:
+                nb = c["normative_basis"]
+                self.assertTrue(nb["specification"].startswith(f"SPECIFICATION.md §2 {c['property']}"), c["id"])
+                self.assertTrue(nb["rationale"] and nb["boundary"], c["id"])
+
+    def test_ag_control_without_normative_basis_is_rejected(self):
+        import shutil
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp = pathlib.Path(tmp)
+            cat = json.loads((ROOT / CATALOG).read_text())
+            del cat["controls"][0]["normative_basis"]
+            catalog = ROOT / "controls" / "_test_catalog.json"
+            catalog.write_text(json.dumps(cat))
+            try:
+                fx = Fixture(tmp)
+                fx.write([command_probe()], {"M-1": REPAIR})
+                b = json.loads((fx.binding / "binding.json").read_text())
+                b["catalog"] = "controls/_test_catalog.json"
+                (fx.binding / "binding.json").write_text(json.dumps(b))
+                with self.assertRaises(controls.BindingError):
+                    controls.load_binding(fx.binding)
+            finally:
+                catalog.unlink()
 
     def test_bindings_load_and_expectations_cover_probes(self):
         for binding_dir in sorted((ROOT / "controls" / "bindings").iterdir()):

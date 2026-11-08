@@ -79,6 +79,12 @@ def load_binding(binding_dir: pathlib.Path):
     catalog_path = (ROOT / binding["catalog"]).resolve()
     catalog = load_json(catalog_path)
     controls = {c["id"]: c for c in catalog["controls"]}
+    for c in catalog["controls"]:
+        nb = c.get("normative_basis")
+        if c["property"] is not None and not (
+                nb and all(nb.get(k) for k in ("specification", "rationale", "boundary"))):
+            raise BindingError(f"{c['id']}: an A-G control needs a normative_basis "
+                               "(specification, rationale, boundary)")
     mutations = binding.get("mutations", {})
     seen = set()
     for probe in binding["probes"]:
@@ -481,16 +487,19 @@ def build_assessment(binding, controls, result, result_ref, binding_rel):
                    "caveat": "OUT_OF_SCOPE records the implementer's stated claim boundary and is not negative credit.",
                    "evidence": []}
         elif fails:
-            parts = []
+            parts, bounds = [], []
             for pid, e in sorted(fails.items()):
                 c = controls[e["control"]]
                 m = mutations[e["mutation"]]
                 parts.append(f"{e['control']} ({c['title']}) is OBSERVED by probe {pid} and discriminates "
-                             f"under repair {e['mutation']} ({m['repair']}).")
+                             f"under repair {e['mutation']} ({m['repair']}). Why this is {prop}: "
+                             f"{c['normative_basis']['rationale']}")
+                bounds.append(f"{e['control']} boundary: {c['normative_basis']['boundary']}")
             row = {"id": prop, "property": name, "status": "FAIL", "evidence_tier": "RESOLVED",
                    "claimed_status": binding.get("claimed_status", "not supplied by implementer"),
                    "reasoning": " ".join(parts),
-                   "caveat": caveats.get(prop, "A FAIL row establishes only the observed weaknesses under the probed conditions."),
+                   "caveat": " ".join([caveats.get(prop, "A FAIL row establishes only the observed weaknesses "
+                                                       "under the probed conditions."), *sorted(set(bounds))]),
                    "evidence": []}
             for pid, e in sorted(fails.items()):
                 d = defs[pid]
@@ -572,6 +581,12 @@ def build_markdown(binding, controls, result, assessment, binding_rel, result_re
            f"- Run: `{result['run_id']}`, independence `{result['independence']}`, operator {result['operator']}",
            f"- Result record: [`{result_ref}`](../../{result_ref}), verdict `{result['verdict']}`",
            f"- Assessment (schema v0.1): [`examples/{binding['binding_id']}.json`](../../examples/{binding['binding_id']}.json)",
+           "", "## Evidence provenance", "",
+           f"This report is generated from a run classified `{result['independence']}`. "
+           "`AUTHOR_RUN` means the assessor wrote the probes and repairs and ran them. A `REPRODUCTION` "
+           "reruns the same probes on another host; it confirms the result is repeatable, not that the probes "
+           "are right. Neither is an independent security review, and none has been reviewed by the implementer "
+           "unless the notes say so.",
            "", "## A-G", "", "| Property | Status | Controls counted |", "| :--- | :--- | :--- |"]
     for row in assessment["properties"]:
         ids = sorted({e["control"] for pid, e in result["probes"].items() if counted(e, controls, row["id"])})
@@ -587,6 +602,15 @@ def build_markdown(binding, controls, result, assessment, binding_rel, result_re
     if result.get("not_applicable"):
         out += ["", "## Not applicable", ""]
         out += [f"- {n['control']}: {n['reason']}" for n in result["not_applicable"]]
+    counted_ids = sorted({e["control"] for e in result["probes"].values()
+                          if any(counted(e, controls, p) for p in PROPERTY_NAMES)})
+    if counted_ids:
+        out += ["", "## Normative basis of counted controls", "",
+                "Why each counted control bears on its property, and where it would not.", ""]
+        for cid in counted_ids:
+            c, nb = controls[cid], controls[cid]["normative_basis"]
+            out += [f"### {cid} {c['title']} ({c['property']})", "", f"- Specification: {nb['specification']}",
+                    f"- Rationale: {nb['rationale']}", f"- Boundary: {nb['boundary']}", ""]
     out += ["", "## Assessment detail", ""]
     for row in assessment["properties"]:
         out += [f"### {row['id']} {row['property']}: {row['status']}", "", row["reasoning"], "",

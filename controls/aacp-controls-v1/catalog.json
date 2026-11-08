@@ -1,6 +1,6 @@
 {
   "schema": "aacp-control-catalog-v1",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Project-neutral AACP controls. A control names one weakness, the A-G property it bears on, and a probe contract: the scenario any binding must implement for the result to be comparable across projects. A control observes a weakness; it never certifies its absence. See docs/CONTROLS.md.",
   "result_vocabulary": {
     "OBSERVED": "the probe reproduced the weakness on the pristine subject",
@@ -27,7 +27,14 @@
         "observation": "The weakness is OBSERVED if the authorization is accepted again after the boundary.",
         "repair": "Count uses across all persisted state."
       },
-      "origin": ["mythos:NTI-04"]
+      "origin": [
+        "mythos:NTI-04"
+      ],
+      "normative_basis": {
+        "specification": "SPECIFICATION.md \u00a72 A: question 'verified as authentic, unmodified and currently valid?'; in scope 'signatures or MACs, tamper detection, expiry, not-before, maximum age, replay semantics, single-use semantics, and binding to an identity or proposal'",
+        "rationale": "A use limit carried by the authorization artifact is part of what makes it currently valid. For N = 1 the limit is single-use semantics, named verbatim in A's scope; an artifact accepted on use N + 1 is not currently valid.",
+        "boundary": "Applies only when the limit is part of the authorization artifact itself (for example a signed caveat). Quotas or rate limits enforced outside the artifact are not A; rate limiting is outside the model (SPECIFICATION \u00a710)."
+      }
     },
     {
       "id": "AACP-A-02",
@@ -40,7 +47,14 @@
         "observation": "OBSERVED if the artifact is still accepted.",
         "repair": "Treat the presence of an unverifiable revocation as invalidating, or reject the record loudly."
       },
-      "origin": ["mythos:NTI-10"]
+      "origin": [
+        "mythos:NTI-10"
+      ],
+      "normative_basis": {
+        "specification": "SPECIFICATION.md \u00a72 A: question 'verified as authentic, unmodified and currently valid?'; in scope 'signatures or MACs, tamper detection, expiry, not-before, maximum age, replay semantics, single-use semantics, and binding to an identity or proposal'",
+        "rationale": "Revocation determines whether an artifact is currently valid. Accepting an artifact while an unverifiable revocation record exists treats validity as established when it is not.",
+        "boundary": "Applies to artifacts that authorize actions. When the revoked artifact gates something else (such as provider selection), the relationship is partial, not exact."
+      }
     },
     {
       "id": "AACP-A-03",
@@ -53,7 +67,14 @@
         "observation": "OBSERVED if the verifier accepts it.",
         "repair": "Verify against verifier-held trusted keys only."
       },
-      "origin": ["mythos:NTI-03"]
+      "origin": [
+        "mythos:NTI-03"
+      ],
+      "normative_basis": {
+        "specification": "SPECIFICATION.md \u00a72 A: question 'verified as authentic, unmodified and currently valid?'; in scope 'signatures or MACs, tamper detection, expiry, not-before, maximum age, replay semantics, single-use semantics, and binding to an identity or proposal'",
+        "rationale": "Authenticity means verification against a key the verifier trusts. A signature checked against a key the artifact supplies proves only internal consistency, so the artifact is not shown to be authentic.",
+        "boundary": "Exact only for authorization artifacts. For state-synchronisation or other artifacts the relationship is structural."
+      }
     },
     {
       "id": "AACP-A-04",
@@ -66,7 +87,14 @@
         "observation": "OBSERVED if it is accepted again.",
         "repair": "Bind a nonce or epoch into the signed message and reject reuse."
       },
-      "origin": ["mythos:NTI-02"]
+      "origin": [
+        "mythos:NTI-02"
+      ],
+      "normative_basis": {
+        "specification": "SPECIFICATION.md \u00a72 A: question 'verified as authentic, unmodified and currently valid?'; in scope 'signatures or MACs, tamper detection, expiry, not-before, maximum age, replay semantics, single-use semantics, and binding to an identity or proposal'",
+        "rationale": "Replay semantics are in A's scope. An approval with no freshness binding cannot be distinguished from a replay of itself.",
+        "boundary": "Not a failure where replay is prevented by a mandatory mechanism outside the signed message, such as a single-use registry checked at dispatch; the probe must show the replay is accepted."
+      }
     },
     {
       "id": "AACP-B-01",
@@ -79,7 +107,14 @@
         "observation": "OBSERVED if the request is allowed.",
         "repair": "Require a credential verified against a key registered for P."
       },
-      "origin": ["mythos:NTI-01"]
+      "origin": [
+        "mythos:NTI-01"
+      ],
+      "normative_basis": {
+        "specification": "SPECIFICATION.md \u00a72 B: question 'who or what held authority to authorize the action?'; in scope 'actor identity, policy authority, reviewer or approver role enforcement, delegation chains and attenuation, tenant scope, and provenance of approved intent'",
+        "rationale": "Actor identity is in B's scope. If the actor is taken from an unauthenticated field, the system cannot establish who held authority.",
+        "boundary": "Not a failure if the actor is established by an authenticated channel on the mandatory path (for example mTLS identity mapped by the enforcement point); the probe must show the request is allowed with the actor field alone."
+      }
     },
     {
       "id": "AACP-B-02",
@@ -92,7 +127,14 @@
         "observation": "OBSERVED if the request is allowed.",
         "repair": "Resolve P's key from a verifier-held registry."
       },
-      "origin": ["mythos:NTI-01b"]
+      "origin": [
+        "mythos:NTI-01b"
+      ],
+      "normative_basis": {
+        "specification": "SPECIFICATION.md \u00a72 B: question 'who or what held authority to authorize the action?'; in scope 'actor identity, policy authority, reviewer or approver role enforcement, delegation chains and attenuation, tenant scope, and provenance of approved intent'",
+        "rationale": "A key supplied by the request is bound to the request, not to the principal. Without a verifier-held principal-to-key binding, a valid signature does not establish who held authority.",
+        "boundary": "Not a failure when the request-supplied key is itself certified to the principal by a trusted issuer that the verifier checks."
+      }
     },
     {
       "id": "AACP-B-03",
@@ -105,7 +147,15 @@
         "observation": "OBSERVED if it is accepted for principals it was not issued to.",
         "repair": "Bind a subject or audience into the signed artifact and check it against the requester."
       },
-      "origin": ["mythos:NTI-08", "daybreak:token-actor-binding"]
+      "origin": [
+        "mythos:NTI-08",
+        "daybreak:token-actor-binding"
+      ],
+      "normative_basis": {
+        "specification": "SPECIFICATION.md \u00a72 B: question 'who or what held authority to authorize the action?'; in scope 'actor identity, policy authority, reviewer or approver role enforcement, delegation chains and attenuation, tenant scope, and provenance of approved intent'",
+        "rationale": "Provenance of approved intent includes to whom authority was granted. An artifact usable by any requester carries no record of the principal it was issued to.",
+        "boundary": "A deliberately bearer design is a claim boundary. If the implementer states bearer semantics as a non-claim, the row is OUT_OF_SCOPE for that path, not FAIL."
+      }
     },
     {
       "id": "AACP-B-04",
@@ -118,7 +168,14 @@
         "observation": "OBSERVED if it returns a signed approval.",
         "repair": "Evaluate the request under the approver's policy and sign that decision."
       },
-      "origin": ["mythos:NTI-02"]
+      "origin": [
+        "mythos:NTI-02"
+      ],
+      "normative_basis": {
+        "specification": "SPECIFICATION.md \u00a72 B: question 'who or what held authority to authorize the action?'; in scope 'actor identity, policy authority, reviewer or approver role enforcement, delegation chains and attenuation, tenant scope, and provenance of approved intent'",
+        "rationale": "Approver role enforcement is in B's scope. An approver that signs without evaluating policy lends its authority without exercising it.",
+        "boundary": "Static evidence alone does not establish this for an A-G status; it needs an executed probe against the endpoint."
+      }
     },
     {
       "id": "AACP-C-01",
@@ -131,7 +188,14 @@
         "observation": "OBSERVED if both are allowed.",
         "repair": "Bind the call identity or a canonical hash of the call into the artifact and recompute it at dispatch."
       },
-      "origin": ["mythos:NTI-08b"]
+      "origin": [
+        "mythos:NTI-08b"
+      ],
+      "normative_basis": {
+        "specification": "SPECIFICATION.md \u00a72 C: question 'Is the authorization bound to the exact call that is executed?'; in scope 'tool identity, full argument binding, target, tenant, proposal identity, call identity, immutable binding such as a canonical hash recomputed at dispatch, and resistance to argument substitution under a replayed or reused call identity'",
+        "rationale": "Call identity, target and full argument binding are in C's scope. If the artifact the system accepts as sufficient to authorize execution binds none of them, the authorization is not bound to the exact call executed.",
+        "boundary": "Not a failure when exact-call binding is enforced elsewhere on the mandatory path, for example a required request signature over the call recomputed at dispatch; the probe must show the call is allowed with the unbound artifact alone. A capability design that does not claim call binding is a non-claim (OUT_OF_SCOPE), not FAIL."
+      }
     },
     {
       "id": "AACP-D-01",
@@ -144,7 +208,14 @@
         "observation": "OBSERVED if any is allowed.",
         "repair": "Reject values that are not exactly the expected type and unit."
       },
-      "origin": ["mythos:NTI-05"]
+      "origin": [
+        "mythos:NTI-05"
+      ],
+      "normative_basis": {
+        "specification": "SPECIFICATION.md \u00a72 D: question 'Was the action permitted in its real operational meaning?'; in scope 'subject, resource, tenant, time window, target system, business intent, expected effect, and the provenance of the meaning used to authorize the action'",
+        "rationale": "A value limit expresses what the authorized action may do in operational terms. Reading a disallowed value as zero, or ignoring its unit, permits an action outside that meaning.",
+        "boundary": "Not D when the limit is a syntactic schema check unrelated to the authorization; the limit must be part of what authorized the action."
+      }
     },
     {
       "id": "AACP-D-02",
@@ -157,7 +228,14 @@
         "observation": "OBSERVED if either is allowed.",
         "repair": "Canonicalise and compare component-wise."
       },
-      "origin": ["mythos:NTI-06"]
+      "origin": [
+        "mythos:NTI-06"
+      ],
+      "normative_basis": {
+        "specification": "SPECIFICATION.md \u00a72 D: question 'Was the action permitted in its real operational meaning?'; in scope 'subject, resource, tenant, time window, target system, business intent, expected effect, and the provenance of the meaning used to authorize the action'",
+        "rationale": "A resource restriction is in D's scope. Matching the string rather than the resource it names permits actions on resources outside the authorized one.",
+        "boundary": "Not D when the restriction is not part of the authorization (for example a UI filter)."
+      }
     },
     {
       "id": "AACP-D-03",
@@ -170,7 +248,14 @@
         "observation": "OBSERVED if the effect occurs, even when a violation is reported afterwards.",
         "repair": "Evaluate the policy before dispatch."
       },
-      "origin": ["daybreak:intent-after-dispatch"]
+      "origin": [
+        "daybreak:intent-after-dispatch"
+      ],
+      "normative_basis": {
+        "specification": "SPECIFICATION.md \u00a72 D: question 'Was the action permitted in its real operational meaning?'; in scope 'subject, resource, tenant, time window, target system, business intent, expected effect, and the provenance of the meaning used to authorize the action'",
+        "rationale": "Expected effect and business intent are in D's scope. A policy on meaning that is evaluated only after the effect does not decide whether the action was permitted; it reports afterwards that it was not.",
+        "boundary": "Not a failure where the post-check is declared as detection only and a separate pre-dispatch check enforces the same policy; the probe must show the effect occurs in the system's fail-closed mode."
+      }
     },
     {
       "id": "AACP-X-01",
@@ -183,7 +268,9 @@
         "observation": "OBSERVED if integrity verification still succeeds.",
         "repair": "Compare the stored head with the recomputed chain head, and anchor it externally."
       },
-      "origin": ["mythos:NTI-07"]
+      "origin": [
+        "mythos:NTI-07"
+      ]
     },
     {
       "id": "AACP-X-02",
@@ -196,7 +283,9 @@
         "observation": "OBSERVED if the roots are equal.",
         "repair": "Promote the odd node unchanged and domain-separate leaves and nodes (RFC 6962)."
       },
-      "origin": ["mythos:NTI-11"]
+      "origin": [
+        "mythos:NTI-11"
+      ]
     },
     {
       "id": "AACP-X-03",
@@ -209,7 +298,9 @@
         "observation": "OBSERVED if a shared secret is derived and a response returned.",
         "repair": "Refuse unregistered peers and sign a transcript that includes both identities."
       },
-      "origin": ["mythos:NTI-09"]
+      "origin": [
+        "mythos:NTI-09"
+      ]
     },
     {
       "id": "AACP-EV-01",
@@ -222,7 +313,9 @@
         "observation": "OBSERVED if it equals the recorded digest.",
         "repair": "Bind subject-specific facts (source tree, lockfile, test outcomes)."
       },
-      "origin": ["mythos:P-01"]
+      "origin": [
+        "mythos:P-01"
+      ]
     },
     {
       "id": "AACP-EV-02",
@@ -235,7 +328,10 @@
         "observation": "OBSERVED if source is unattested, the commit differs and the verifier does not check it.",
         "repair": "Attest the source tree hash and have the verifier enforce it."
       },
-      "origin": ["mythos:P-02", "daybreak:witness-commit-vs-head"]
+      "origin": [
+        "mythos:P-02",
+        "daybreak:witness-commit-vs-head"
+      ]
     },
     {
       "id": "AACP-EV-03",
@@ -248,7 +344,9 @@
         "observation": "OBSERVED if reuse is possible and only the current commit is stamped.",
         "repair": "Record the evidence-producing commit and refuse reuse across commits."
       },
-      "origin": ["mythos:P-03"]
+      "origin": [
+        "mythos:P-03"
+      ]
     },
     {
       "id": "AACP-EV-04",
@@ -261,7 +359,10 @@
         "observation": "OBSERVED if only the packaged key is used.",
         "repair": "Verify against a key obtained out of band or cross-signed by the previous key."
       },
-      "origin": ["mythos:P-04", "daybreak:packaged-trust-anchor"]
+      "origin": [
+        "mythos:P-04",
+        "daybreak:packaged-trust-anchor"
+      ]
     },
     {
       "id": "AACP-EV-05",
@@ -274,7 +375,12 @@
         "observation": "OBSERVED if a total is a literal conditioned only on overall success.",
         "repair": "Parse totals from the transcript."
       },
-      "origin": ["mythos:P-05"]
+      "origin": [
+        "mythos:P-05"
+      ]
     }
+  ],
+  "changes": [
+    "1.1.0: add normative_basis (specification text, rationale, boundary) to every A-G control; no control meaning changed."
   ]
 }
