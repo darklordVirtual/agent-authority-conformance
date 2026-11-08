@@ -2,6 +2,8 @@
 
 ## 0.3.0a1 — alpha
 
+- Release fix: `cyclonedx-py --output-reproducible` omits the SBOM's `serialNumber`, and `actions/attest` refuses a CycloneDX document without one, so the first `v0.3.0a1` run failed at "Attest SBOM for the wheel" before anything was published. `scripts/release.py sbom-serial` now sets a deterministic serial, a UUIDv5 of the version and the wheel's SHA-256, so the build stays reproducible. Tests: `tests/test_release.py` `SbomSerialTest`.
+
 - Distribute AACP as versioned GitHub Release assets: wheel, source archive, CycloneDX SBOM and `SHA256SUMS.txt`, with Sigstore-signed build-provenance and SBOM attestations. `.github/workflows/release.yml` runs on a `v*` tag: it checks that the tag matches `pyproject.toml`, has a changelog section and sits on `main`, reruns the conformance checks, builds the wheel twice to prove it is byte-reproducible, installs the wheel on Linux, macOS and Windows (Python 3.12 and 3.13) and the sdist on Linux and exercises the installed `aacp` outside a checkout, and publishes only after approval in the `release` environment. Pull requests that touch release inputs rehearse every step except publication. `scripts/release.py` holds the gates and `scripts/smoke_installed_cli.py` the installed-CLI check, which the CLI package job now shares. See [docs/INSTALL.md](docs/INSTALL.md) and [docs/RELEASING.md](docs/RELEASING.md). No PyPI publication; runtime dependencies are still resolved from the configured package index.
 
 - Lab: answer public verification challenges ([docs/CHALLENGE-RESPONSE.md](docs/CHALLENGE-RESPONSE.md)).
