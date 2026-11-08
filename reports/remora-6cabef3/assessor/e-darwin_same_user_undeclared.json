@@ -1,0 +1,13 @@
+{
+  "agent_reached_effect": false,
+  "agent_uids": "",
+  "executor_start": {
+    "refused_to_start": "custody split violated for role 'executor': the process holding the effect credentials must set REMORA_EXECUTION_ISOLATION to one of 'os_user', 'container', 'host', 'same_user'; another process of the same OS user reads its launch environment, credential included"
+  },
+  "isolation": "",
+  "platform": "darwin",
+  "profile": "controlled_pilot",
+  "runner_observed_effects": [],
+  "scenario": "darwin_same_user_undeclared",
+  "schema_version": 2
+}

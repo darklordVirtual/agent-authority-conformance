@@ -1,0 +1,63 @@
+{
+  "agent_reached_effect": true,
+  "agent_uids": "",
+  "attempts": {
+    "1_dispatch_without_authorization": {
+      "executed": false,
+      "refusal_reason": "CustodyViolation: the execution domain must not mint leases: it verifies authority it did not issue. A lease minted here would be a lease the executor authorized for itself."
+    },
+    "2_unregistered_tool": {
+      "executed": false,
+      "refusal_reason": "unknown_tool"
+    },
+    "3_extract_guarded_callable": {
+      "dispatchers_in_agent_process": 0
+    },
+    "4_read_credential_from_another_process": {
+      "credential_in_agent_environment": false,
+      "credential_via_ps_eww": true,
+      "effect_with_harvested_credential": {
+        "accepted": true
+      },
+      "effect_without_credential": {
+        "accepted": false
+      },
+      "proc_environ": true
+    },
+    "5_subprocess_or_authenticated_client": {
+      "subprocess_inherits_credential": false
+    },
+    "agent_uid": 1001,
+    "control_replay": {
+      "executed": false,
+      "refusal_reason": "nonce_already_consumed"
+    },
+    "control_valid_lease": {
+      "executed": true,
+      "refusal_reason": null
+    }
+  },
+  "executor_start": {
+    "ready": true,
+    "uid": 1001
+  },
+  "isolation": "same_user",
+  "platform": "linux",
+  "profile": "review",
+  "runner_observed_effects": [
+    {
+      "arguments": {
+        "value": 9
+      },
+      "via": "agent"
+    },
+    {
+      "arguments": {
+        "value": 1
+      },
+      "via": "executor"
+    }
+  ],
+  "scenario": "linux_same_uid_declared_review",
+  "schema_version": 2
+}

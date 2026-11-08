@@ -1,0 +1,466 @@
+{
+ "spec_version": "0.1",
+ "system": "REMORA (remora-assurance)",
+ "system_version": "0.12.0",
+ "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+ "assessed_at": "2026-11-08",
+ "assessor": "Agent Authority Conformance project (maintainer Stian Skogbrott, who also maintains REMORA; evidence gathered and assessment drafted by an AI agent, at the maintainer's request)",
+ "scope": {
+  "process_model": "single-process; FastAPI TestClient against servers/api.py and servers/execution_api.py, plus in-process calls to EnforcementGate, PolicyDecisionToken, AtomicAdmission, LimitGuard, ToolConstraint, SQLiteTenantChain, JSONLAudit and both Merkle modules; P-E-01s: three local processes (executor, agent, runner-owned effect service); REMORA's own test files per property; for E, the assessor harness as three local processes, same user on macOS and Linux, and separate uids in a Linux container",
+  "deployment_model": "development environment with the research tool registry; production's distinct-approver rule emulated by patching _is_production_mode; durable state via SQLite where a probe needs it; Postgres, D1 and multi-node operation not exercised",
+  "external_effects": "simulated",
+  "trust_assumptions": [
+   "Limited to REMORA branch fix/aacp-cy11-f01b at 6cabef3 (eed92c8 plus custody rule 4 and a register update) and the probes in controls/bindings/remora-6cabef3: test_remora_probes.py and test_remora_probes_v13.py byte-identical to remora-eed92c8; e_split_bypass.py new",
+   "Probes P-A-04, P-B-03, P-C-01 and P-D-03 mint ACCEPT tokens through PolicyDecisionToken.issue, as REMORA's own execute-accepted tests do, because the research profile does not reach ACCEPT from /assess without server-side evidence",
+   "Probes replace authentication with a fixed principal except P-B-01 and P-B-02, which exercise the real _authenticate with a token table",
+   "P-C-01, P-D-03 and P-A-04 perform real file writes through store_artifact in a temporary directory",
+   "Every probe that did not observe its weakness is paired with a weakening; its NOT_OBSERVED counts only if the weakening makes it observe (SENSITIVE)",
+   "The assessor maintains REMORA; this is a self-assessment under the same catalog as the NTI binding, not an independent review",
+   "The X probes were reproduced on 06c2f8f with binding remora-06c2f8f before this run; that binding and its results are unchanged",
+   "P-CY-01 and P-CY-04 run with REMORA's opt-in flow control (REMORA_FLOW_CONTROL=1) and import REMORA's own test helpers (tests/test_execute_accepted_toolspec.py, tests/test_toolspec_execution_wiring.py), pinned above",
+   "Network probes (G, CY-08, CY-14) use runner-owned loopback endpoints whose records take precedence over REMORA's own report",
+   "P-E-01s runs three local processes as one OS user with a synthetic credential; it exercises the custody guard's refusal of that layout, not OS-user, container or host isolation",
+   "Every PASS row rests on probes shown SENSITIVE in the control run plus REMORA test files run at the same revision; the JUnit records are committed beside this file",
+   "The E container image is python:3.13.7-slim with procps and cryptography 50.0.1 (Dockerfile.e-split, image id in docker-image-id.txt)"
+  ],
+  "explicit_non_claims": [
+   "REMORA claims no custody for a single-process deployment or outside the strict profiles (research and library use); P-E-01 records that configuration",
+   "REMORA_EXECUTION_ISOLATION=same_user makes no custody claim; it is accepted only under review",
+   "Custody covers declared environment credentials only; instance metadata, IAM roles, workload identity, mounted secret files and network-reachable credentials are not seen by the guard (custody.py, RMR-CR-009)"
+  ]
+ },
+ "properties": [
+  {
+   "id": "A",
+   "property": "Receipt Integrity",
+   "status": "PASS",
+   "evidence_tier": "RESOLVED",
+   "claimed_status": "claimed by REMORA for its strict profiles (review, controlled_pilot)",
+   "supported_scope": "single-use grants and leases across a persistence boundary, revocation that fails closed, signed artifacts verified against a configured key rather than one they carry, approvals bound to freshness; the SQLite tenant chain with its stored head, the JSONL audit log after reload, and v2 Merkle roots",
+   "untested_remainder": "Postgres and D1 chains; the external head anchor's storage placement (append-only is a deployment duty); receipts produced outside REMORA",
+   "reasoning": "P-A-01 to P-A-04 exercise each receipt mechanism through REMORA's own API and are sensitive. REMORA's tests (239) cover lease and token verification vectors, nonce durability, revocation durability, the chain head guard, JSONL reload, the signed chain anchor and Merkle v2.",
+   "caveat": "PASS covers the named mechanisms in one process with SQLite or files; it is not evidence for every receipt mechanism a deployment may add. This is a self-assessment: the assessor maintains REMORA and wrote the probes, and the run is AUTHOR_RUN; nothing here is an independent review.",
+   "evidence": [
+    {
+     "kind": "artifact",
+     "reference": "reports/remora-6cabef3/results/remora-6cabef3-2026-11-08-author-1.json",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+     "command": "python -m conformance.controls run --binding controls/bindings/remora-6cabef3 --subject <REMORA checkout at 6cabef3a6d14d8e61813e1467aa1b25086545b74> --out result.json --run-id <id>",
+     "description": "AACP control run remora-6cabef3-2026-11-08-author-1 (AUTHOR_RUN, EXPECTATIONS_MET): probes P-A-01, P-A-02, P-A-03, P-A-04 did not observe their weakness, and each observes it again when its protection alone is removed (SENSITIVE), so these results would not survive removal of the property."
+    },
+    {
+     "kind": "test",
+     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/tests/test_execution_lease.py",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+     "description": "REMORA test file, part of the A evidence run"
+    },
+    {
+     "kind": "test",
+     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/tests/test_token_golden_vectors.py",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+     "description": "REMORA test file, part of the A evidence run"
+    },
+    {
+     "kind": "test",
+     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/tests/test_lease_nonce_durability.py",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+     "description": "REMORA test file, part of the A evidence run"
+    },
+    {
+     "kind": "test",
+     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/tests/test_revocation_durability.py",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+     "description": "REMORA test file, part of the A evidence run"
+    },
+    {
+     "kind": "test",
+     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/tests/test_tenant_chain_head_guard.py",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+     "description": "REMORA test file, part of the A evidence run"
+    },
+    {
+     "kind": "test",
+     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/tests/security/test_aacp_x04_jsonl_reload.py",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+     "description": "REMORA test file, part of the A evidence run"
+    },
+    {
+     "kind": "test",
+     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/tests/test_jsonl_audit_hash_chain.py",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+     "description": "REMORA test file, part of the A evidence run"
+    },
+    {
+     "kind": "test",
+     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/tests/security/test_audit_chain_anchor.py",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+     "description": "REMORA test file, part of the A evidence run"
+    },
+    {
+     "kind": "test",
+     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/tests/security/test_aacp_x02_assurance_merkle_v2.py",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+     "description": "REMORA test file, part of the A evidence run"
+    },
+    {
+     "kind": "test",
+     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/tests/test_assurance_merkle.py",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+     "description": "REMORA test file, part of the A evidence run"
+    },
+    {
+     "kind": "artifact",
+     "reference": "reports/remora-6cabef3/assessor/junit-A.xml",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+     "command": "python -m pytest -q -o addopts= tests/test_execution_lease.py tests/test_token_golden_vectors.py tests/test_lease_nonce_durability.py tests/test_revocation_durability.py tests/test_tenant_chain_head_guard.py tests/security/test_aacp_x04_jsonl_reload.py tests/test_jsonl_audit_hash_chain.py tests/security/test_audit_chain_anchor.py tests/security/test_aacp_x02_assurance_merkle_v2.py tests/test_assurance_merkle.py",
+     "description": "JUnit record of that run at 6cabef3a: 239 tests, 0 failed, 0 skipped"
+    }
+   ]
+  },
+  {
+   "id": "B",
+   "property": "Authority Provenance",
+   "status": "PASS",
+   "evidence_tier": "RESOLVED",
+   "claimed_status": "claimed by REMORA for its strict profiles (review, controlled_pilot)",
+   "supported_scope": "authenticated principals through the real _authenticate with a token table, principal keys from configuration not self-attestation, bearer grants bound to a subject, approvers that evaluate authority; production's distinct-approver rule; capability revocation",
+   "untested_remainder": "identity providers in front of REMORA; key distribution; multi-node revocation",
+   "reasoning": "P-B-01 to P-B-04 are sensitive. REMORA's separation-of-duties and capability-revocation tests (32) pass at this revision.",
+   "caveat": "The production distinct-approver rule is exercised by patching _is_production_mode, not by a production deployment. This is a self-assessment: the assessor maintains REMORA and wrote the probes, and the run is AUTHOR_RUN; nothing here is an independent review.",
+   "evidence": [
+    {
+     "kind": "artifact",
+     "reference": "reports/remora-6cabef3/results/remora-6cabef3-2026-11-08-author-1.json",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+     "command": "python -m conformance.controls run --binding controls/bindings/remora-6cabef3 --subject <REMORA checkout at 6cabef3a6d14d8e61813e1467aa1b25086545b74> --out result.json --run-id <id>",
+     "description": "AACP control run remora-6cabef3-2026-11-08-author-1 (AUTHOR_RUN, EXPECTATIONS_MET): probes P-B-01, P-B-02, P-B-03, P-B-04 did not observe their weakness, and each observes it again when its protection alone is removed (SENSITIVE), so these results would not survive removal of the property."
+    },
+    {
+     "kind": "test",
+     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/tests/test_separation_of_duties.py",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+     "description": "REMORA test file, part of the B evidence run"
+    },
+    {
+     "kind": "test",
+     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/tests/capabilities/test_capability_revocation.py",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+     "description": "REMORA test file, part of the B evidence run"
+    },
+    {
+     "kind": "artifact",
+     "reference": "reports/remora-6cabef3/assessor/junit-B.xml",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+     "command": "python -m pytest -q -o addopts= tests/test_separation_of_duties.py tests/capabilities/test_capability_revocation.py",
+     "description": "JUnit record of that run at 6cabef3a: 32 tests, 0 failed, 0 skipped"
+    }
+   ]
+  },
+  {
+   "id": "C",
+   "property": "Exact-Call Integrity",
+   "status": "PASS",
+   "evidence_tier": "RESOLVED",
+   "claimed_status": "claimed by REMORA for its strict profiles (review, controlled_pilot)",
+   "supported_scope": "grants and leases bound to tool, canonical arguments, tenant, target and proposal, recomputed at dispatch; substituted arguments under a reused call identity are refused",
+   "untested_remainder": "argument canonicalisation of tools outside the research and reference registries",
+   "reasoning": "P-C-01 and P-C-02 are sensitive. REMORA's property-based enforcement and lease-completeness tests (72) pass.",
+   "caveat": "Exact-call binding is shown for REMORA's canonical JSON; a tool whose meaning depends on fields outside the arguments is not covered. This is a self-assessment: the assessor maintains REMORA and wrote the probes, and the run is AUTHOR_RUN; nothing here is an independent review.",
+   "evidence": [
+    {
+     "kind": "artifact",
+     "reference": "reports/remora-6cabef3/results/remora-6cabef3-2026-11-08-author-1.json",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+     "command": "python -m conformance.controls run --binding controls/bindings/remora-6cabef3 --subject <REMORA checkout at 6cabef3a6d14d8e61813e1467aa1b25086545b74> --out result.json --run-id <id>",
+     "description": "AACP control run remora-6cabef3-2026-11-08-author-1 (AUTHOR_RUN, EXPECTATIONS_MET): probes P-C-01, P-C-02 did not observe their weakness, and each observes it again when its protection alone is removed (SENSITIVE), so these results would not survive removal of the property."
+    },
+    {
+     "kind": "test",
+     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/tests/test_enforcement_properties.py",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+     "description": "REMORA test file, part of the C evidence run"
+    },
+    {
+     "kind": "test",
+     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/tests/test_lease_verification_completeness.py",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+     "description": "REMORA test file, part of the C evidence run"
+    },
+    {
+     "kind": "artifact",
+     "reference": "reports/remora-6cabef3/assessor/junit-C.xml",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+     "command": "python -m pytest -q -o addopts= tests/test_enforcement_properties.py tests/test_lease_verification_completeness.py",
+     "description": "JUnit record of that run at 6cabef3a: 72 tests, 0 failed, 0 skipped"
+    }
+   ]
+  },
+  {
+   "id": "D",
+   "property": "Semantic Authority",
+   "status": "PASS",
+   "evidence_tier": "RESOLVED",
+   "claimed_status": "claimed by REMORA for its strict profiles (review, controlled_pilot)",
+   "supported_scope": "value constraints that survive type confusion, canonicalised resource constraints, policy evaluated before the effect, and work-order intent scope enforced as a hard guard",
+   "untested_remainder": "semantic bundles other than the research bundle; whether a work order is the right one stays a human decision",
+   "reasoning": "P-D-01 to P-D-03 are sensitive. REMORA's intent-scope tests (70) pass.",
+   "caveat": "Semantic authority is only as strong as the deployment's intent source and resolver. This is a self-assessment: the assessor maintains REMORA and wrote the probes, and the run is AUTHOR_RUN; nothing here is an independent review.",
+   "evidence": [
+    {
+     "kind": "artifact",
+     "reference": "reports/remora-6cabef3/results/remora-6cabef3-2026-11-08-author-1.json",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+     "command": "python -m conformance.controls run --binding controls/bindings/remora-6cabef3 --subject <REMORA checkout at 6cabef3a6d14d8e61813e1467aa1b25086545b74> --out result.json --run-id <id>",
+     "description": "AACP control run remora-6cabef3-2026-11-08-author-1 (AUTHOR_RUN, EXPECTATIONS_MET): probes P-D-01, P-D-02, P-D-03 did not observe their weakness, and each observes it again when its protection alone is removed (SENSITIVE), so these results would not survive removal of the property."
+    },
+    {
+     "kind": "test",
+     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/tests/test_intent_scope.py",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+     "description": "REMORA test file, part of the D evidence run"
+    },
+    {
+     "kind": "artifact",
+     "reference": "reports/remora-6cabef3/assessor/junit-D.xml",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+     "command": "python -m pytest -q -o addopts= tests/test_intent_scope.py",
+     "description": "JUnit record of that run at 6cabef3a: 70 tests, 0 failed, 0 skipped"
+    }
+   ]
+  },
+  {
+   "id": "E",
+   "property": "Execution-Boundary Integrity",
+   "status": "PASS",
+   "evidence_tier": "RESOLVED",
+   "claimed_status": "claimed by REMORA for its strict profiles (review, controlled_pilot)",
+   "supported_scope": "no demonstrable alternative path to the protected effect within the declared agent zone and the attempted classes, when the process holding the effect credential runs as a separate OS user checked by custody rule 4 (REMORA_EXECUTION_ISOLATION=os_user) under controlled_pilot; three local processes in one Linux container with a synthetic credential and a runner-owned effect service",
+   "untested_remainder": "container and host isolation (declared, not observable by the guard); whether REMORA_AGENT_OS_UIDS names the agent's real uid; an agent running as root; shared volumes, the network and credentials the deployment did not declare (instance metadata, IAM roles, mounted files); the deployed gateway; classes beyond the five attempted",
+   "reasoning": "Both halves of §12 are present. §12.1: the credential register is checked against the code and passes. §12.2: the five minimum classes were attempted from the agent process and recorded. With separate uids every attempt failed and the effect service saw only the leased write. Successful bypasses are kept, not deleted. P-E-01 still reaches the research tool in a single-process development deployment, and the same-user split still leaks the credential under review. §12.3 holds for both. Each bypass still succeeds where permitted, and each is recorded. Rule 4 refuses the same-user layout by name under controlled_pilot, and refuses an executor without a declaration, or one running as a declared agent uid or as root. What the refusal cannot observe is stated in the untested remainder. Those configurations are REMORA non-claims (OUT_OF_SCOPE), not part of this PASS. P-E-01s is sensitive: removing rule 4 lets the same-user split start and the agent reach the effect.",
+   "caveat": "A PASS for E means no demonstrable alternative path within the declared zone and the attempted classes (SPECIFICATION §12.4). It does not prove absence. The procedure is asymmetric: §12.1 needed source access. This is a self-assessment: the assessor maintains REMORA and wrote the probes, and the run is AUTHOR_RUN; nothing here is an independent review.",
+   "evidence": [
+    {
+     "kind": "artifact",
+     "reference": "reports/remora-6cabef3/results/remora-6cabef3-2026-11-08-author-1.json",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+     "command": "python -m conformance.controls run --binding controls/bindings/remora-6cabef3 --subject <REMORA checkout at 6cabef3a6d14d8e61813e1467aa1b25086545b74> --out result.json --run-id <id>",
+     "description": "AACP control run remora-6cabef3-2026-11-08-author-1 (AUTHOR_RUN, EXPECTATIONS_MET): probes P-E-01s did not observe their weakness, and each observes it again when its protection alone is removed (SENSITIVE), so these results would not survive removal of the property."
+    },
+    {
+     "kind": "test",
+     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/tests/conformance/test_execution_boundary.py",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+     "description": "REMORA test file, part of the E evidence run"
+    },
+    {
+     "kind": "test",
+     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/tests/conformance/test_custody_guard.py",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+     "description": "REMORA test file, part of the E evidence run"
+    },
+    {
+     "kind": "test",
+     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/tests/test_check_credential_topology.py",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+     "description": "REMORA test file, part of the E evidence run"
+    },
+    {
+     "kind": "test",
+     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/tests/test_custody_split_dispatch.py",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+     "description": "REMORA test file, part of the E evidence run"
+    },
+    {
+     "kind": "artifact",
+     "reference": "reports/remora-6cabef3/assessor/junit-E.xml",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+     "command": "python -m pytest -q -o addopts= tests/conformance/test_execution_boundary.py tests/conformance/test_custody_guard.py tests/test_check_credential_topology.py tests/test_custody_split_dispatch.py",
+     "description": "JUnit record of that run at 6cabef3a: 80 tests, 0 failed, 0 skipped"
+    },
+    {
+     "kind": "code",
+     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/docs/assurance/credential_topology.yaml",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+     "description": "§12.1 declared topology: 43 credentials, agent zone roots remora/sdk and remora/agent_hook, limits L1 to L5"
+    },
+    {
+     "kind": "artifact",
+     "reference": "reports/remora-6cabef3/assessor/credential-topology.txt",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+     "command": "python scripts/check_credential_topology.py",
+     "description": "§12.1 drift check at this revision: PASS (fails on an undeclared read, a stale entry and a changed reader set; tests/test_check_credential_topology.py)"
+    },
+    {
+     "kind": "artifact",
+     "reference": "reports/remora-6cabef3/assessor/e-linux_separate_uids_controlled_pilot.json",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+     "command": "python e_split_bypass.py --subject <checkout> --scenario linux_separate_uids_controlled_pilot --profile controlled_pilot --isolation os_user --agent-uids 1002 --executor-user 1001 --agent-user 1002 (as root in the container of Dockerfile.e-split)",
+     "description": "§12.2 five classes from the agent process (uid 1002) against an executor as uid 1001: no lease refused, unregistered tool refused, no dispatcher in the agent process, ps eww empty and /proc/<pid>/environ PermissionError, subprocess without the credential; the runner-owned effect service saw only the one leased write"
+    },
+    {
+     "kind": "artifact",
+     "reference": "reports/remora-6cabef3/assessor/e-linux_same_uid_declared_review.json",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+     "description": "§12.3(1): the bypass still succeeds where the configuration is permitted. Same uid under review with same_user: /proc environ and ps eww give the credential and the agent writes to the effect without a lease"
+    },
+    {
+     "kind": "artifact",
+     "reference": "reports/remora-6cabef3/assessor/e-darwin_same_user_declared_review.json",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+     "description": "§12.3(1) on macOS: ps eww gives the credential and the agent reaches the effect"
+    },
+    {
+     "kind": "artifact",
+     "reference": "reports/remora-6cabef3/assessor/e-darwin_same_user_undeclared.json",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+     "description": "§12.3(2): refused at startup without REMORA_EXECUTION_ISOLATION (controlled_pilot)"
+    },
+    {
+     "kind": "artifact",
+     "reference": "reports/remora-6cabef3/assessor/e-darwin_same_user_declared_controlled_pilot.json",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+     "description": "§12.3(2): same_user refused under controlled_pilot"
+    },
+    {
+     "kind": "artifact",
+     "reference": "reports/remora-6cabef3/assessor/e-darwin_os_user_naming_own_uid.json",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+     "description": "§12.3(2): os_user refused when the executor runs as a declared agent uid"
+    },
+    {
+     "kind": "artifact",
+     "reference": "reports/remora-6cabef3/assessor/e-linux_os_user_naming_its_own_uid.json",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+     "description": "the same refusal on Linux"
+    },
+    {
+     "kind": "artifact",
+     "reference": "reports/remora-6cabef3/assessor/custody-reproduction.json",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+     "command": "python scripts/reproduce_custody.py --output custody-reproduction.json",
+     "description": "REMORA's separate-process custody reproduction: the executor verifies authority-signed leases, refuses its own, tampered, expired and mismatched leases, and keeps one effect per nonce across restart and concurrency"
+    },
+    {
+     "kind": "code",
+     "reference": "controls/bindings/remora-6cabef3/probes/e_split_bypass.py",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+     "description": "assessor harness used for every e-*.json record and for probe P-E-01s"
+    }
+   ]
+  },
+  {
+   "id": "F",
+   "property": "TOCTOU Resistance",
+   "status": "PASS",
+   "evidence_tier": "RESOLVED",
+   "claimed_status": "claimed by REMORA for its strict profiles (review, controlled_pilot)",
+   "supported_scope": "approved state changed before dispatch is re-evaluated (review and ACCEPT paths, plan-bound tokens), single-use authorization consumed once under concurrency, expiry checked at dispatch",
+   "untested_remainder": "multi-node concurrency over Postgres; clock skew between hosts",
+   "reasoning": "P-F-01, P-F-01b, P-F-02 and P-F-03 are sensitive. REMORA's CY-11/F-01b, plan-binding and TOCTOU adversarial tests (33) pass.",
+   "caveat": "Concurrency is exercised in one process and, for the nonce, across local processes; not across hosts. This is a self-assessment: the assessor maintains REMORA and wrote the probes, and the run is AUTHOR_RUN; nothing here is an independent review.",
+   "evidence": [
+    {
+     "kind": "artifact",
+     "reference": "reports/remora-6cabef3/results/remora-6cabef3-2026-11-08-author-1.json",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+     "command": "python -m conformance.controls run --binding controls/bindings/remora-6cabef3 --subject <REMORA checkout at 6cabef3a6d14d8e61813e1467aa1b25086545b74> --out result.json --run-id <id>",
+     "description": "AACP control run remora-6cabef3-2026-11-08-author-1 (AUTHOR_RUN, EXPECTATIONS_MET): probes P-F-01, P-F-01b, P-F-02, P-F-03 did not observe their weakness, and each observes it again when its protection alone is removed (SENSITIVE), so these results would not survive removal of the property."
+    },
+    {
+     "kind": "test",
+     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/tests/security/test_aacp_cy11_f01b.py",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+     "description": "REMORA test file, part of the F evidence run"
+    },
+    {
+     "kind": "test",
+     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/tests/test_plan_binding.py",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+     "description": "REMORA test file, part of the F evidence run"
+    },
+    {
+     "kind": "test",
+     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/tests/test_pre_federation_toctou_adversarial.py",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+     "description": "REMORA test file, part of the F evidence run"
+    },
+    {
+     "kind": "artifact",
+     "reference": "reports/remora-6cabef3/assessor/junit-F.xml",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+     "command": "python -m pytest -q -o addopts= tests/security/test_aacp_cy11_f01b.py tests/test_plan_binding.py tests/test_pre_federation_toctou_adversarial.py",
+     "description": "JUnit record of that run at 6cabef3a: 33 tests, 0 failed, 0 skipped"
+    }
+   ]
+  },
+  {
+   "id": "G",
+   "property": "Effect Verification",
+   "status": "PASS",
+   "evidence_tier": "RESOLVED",
+   "claimed_status": "claimed by REMORA for its strict profiles (review, controlled_pilot)",
+   "supported_scope": "effects verified by a read-back against runner-owned endpoints rather than from the response status; a verifier failure is never reported as verified; read-back refuses redirects",
+   "untested_remainder": "effects whose state cannot be read back; verifiers other than http_readback and the reference verifiers",
+   "reasoning": "P-G-01, P-G-02a and P-G-02b are sensitive, with runner-owned loopback endpoints whose records take precedence over REMORA's report. REMORA's effect-verification and read-back tests (130) pass.",
+   "caveat": "Verification proves what the read-back endpoint reports; a compromised endpoint is outside this evidence. This is a self-assessment: the assessor maintains REMORA and wrote the probes, and the run is AUTHOR_RUN; nothing here is an independent review.",
+   "evidence": [
+    {
+     "kind": "artifact",
+     "reference": "reports/remora-6cabef3/results/remora-6cabef3-2026-11-08-author-1.json",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+     "command": "python -m conformance.controls run --binding controls/bindings/remora-6cabef3 --subject <REMORA checkout at 6cabef3a6d14d8e61813e1467aa1b25086545b74> --out result.json --run-id <id>",
+     "description": "AACP control run remora-6cabef3-2026-11-08-author-1 (AUTHOR_RUN, EXPECTATIONS_MET): probes P-G-01, P-G-02a, P-G-02b did not observe their weakness, and each observes it again when its protection alone is removed (SENSITIVE), so these results would not survive removal of the property."
+    },
+    {
+     "kind": "test",
+     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/tests/test_effect_verification.py",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+     "description": "REMORA test file, part of the G evidence run"
+    },
+    {
+     "kind": "test",
+     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/tests/test_effect_verification_wiring.py",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+     "description": "REMORA test file, part of the G evidence run"
+    },
+    {
+     "kind": "test",
+     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/tests/test_effect_verification_attribution_limit.py",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+     "description": "REMORA test file, part of the G evidence run"
+    },
+    {
+     "kind": "test",
+     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/tests/test_bounded_readback.py",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+     "description": "REMORA test file, part of the G evidence run"
+    },
+    {
+     "kind": "test",
+     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/tests/test_review_http_readback_redirects.py",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+     "description": "REMORA test file, part of the G evidence run"
+    },
+    {
+     "kind": "test",
+     "reference": "https://github.com/darklordVirtual/REMORA-research/blob/6cabef3a6d14d8e61813e1467aa1b25086545b74/tests/test_effect_receipt_endpoint_signed.py",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+     "description": "REMORA test file, part of the G evidence run"
+    },
+    {
+     "kind": "artifact",
+     "reference": "reports/remora-6cabef3/assessor/junit-G.xml",
+     "revision": "6cabef3a6d14d8e61813e1467aa1b25086545b74",
+     "command": "python -m pytest -q -o addopts= tests/test_effect_verification.py tests/test_effect_verification_wiring.py tests/test_effect_verification_attribution_limit.py tests/test_bounded_readback.py tests/test_review_http_readback_redirects.py tests/test_effect_receipt_endpoint_signed.py",
+     "description": "JUnit record of that run at 6cabef3a: 130 tests, 0 failed, 0 skipped"
+    }
+   ]
+  }
+ ],
+ "notes": [
+  "This is an assessor's assessment under SPECIFICATION §5, separate from the control report reports/remora-6cabef3/REPORT.md, whose rows stay UNTESTED because AACP controls never yield PASS. The two must be read together, and neither replaces the other.",
+  "Rows are not commensurable and are not combined (SPECIFICATION §7).",
+  "Independence: AUTHOR_RUN. The assessor is the implementer. Owner decision 2026-11-08: no second-person review for these runs. A REPRODUCTION in CI reruns the control probes, not this assessment's REMORA test runs or E scenarios.",
+  "E finding during this assessment: at eed92c8 a same-user custody split let the agent read the executor's credential (ps eww) and reach the effect; REMORA 63615f5 adds custody rule 4 (REM-073). The eed92c8 records are unchanged."
+ ]
+}
