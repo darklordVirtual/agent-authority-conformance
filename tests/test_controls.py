@@ -462,6 +462,9 @@ class CommittedBindingTests(unittest.TestCase):
                 repro = json.loads(committed.read_text())
                 repro.update(run_id="repro-gha-1", operator="github-actions run 1", independence="REPRODUCTION",
                              started_at_utc="2099-01-01T00:00:00Z", finished_at_utc="2099-01-01T00:01:00Z")
+                # A reproduction runs under the catalog committed now, not the one the run used.
+                catalog = json.loads((ROOT / CATALOG).read_text())
+                repro["procedure"] = dict(repro["procedure"], catalog_version=catalog["version"])
                 path = pathlib.Path(tmp) / "repro.json"
                 path.write_text(json.dumps(repro))
                 with contextlib.redirect_stdout(io.StringIO()):

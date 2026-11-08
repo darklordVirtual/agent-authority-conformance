@@ -127,6 +127,13 @@
       "repair": "evaluate intent policies before dispatch",
       "old": "        let result = self.orchestrator.run_task(request.clone()).await?;\n        for policy in &self.policies {",
       "new": "        for policy in &self.policies {\n            if policy.capability == request.capability {\n                if let OutcomeVerdict::Invalid(reason) =\n                    IntentVerifier::verify(&request, &serde_json::Value::Null, policy)\n                {\n                    return Err(format!(\"mutation: pre-dispatch policy violation ({}): {}\", policy.name, reason));\n                }\n            }\n        }\n        let result = self.orchestrator.run_task(request.clone()).await?;\n        for policy in &self.policies {"
+    },
+    "W-X-04": {
+      "file": "ube-foundation/src/lib.rs",
+      "finding": "NTI-14",
+      "repair": "persist event decisions that differ from the hashed ones (the JSONL defect found in REMORA)",
+      "old": "            events: self.events.clone(),\n            batches: self.batches.clone(),\n            last_batch_hash: self.last_batch_hash.clone(),\n        }\n    }",
+      "new": "            events: self.events.iter().cloned().map(|mut ev| { ev.decision.reason.push('~'); ev }).collect(),\n            batches: self.batches.clone(),\n            last_batch_hash: self.last_batch_hash.clone(),\n        }\n    }"
     }
   },
   "probes": [
@@ -545,6 +552,18 @@
         }
       ],
       "code": "https://github.com/abisheakp197/Neutral-Trust-Infrastructure/blob/de08dbdcd27e01c27585d936091c69b59d173a97/conformance/witness_generator/generate_seals.py#L493"
+    },
+    {
+      "id": "P-X-04",
+      "control": "AACP-X-04",
+      "relationship": "no_mapping",
+      "origin": "aacp:remora-binding",
+      "kind": "cargo-test",
+      "test": "nti_14_persisted_state_fails_after_reload",
+      "reference": "tests/reproduction_candidates.rs#nti_14_persisted_state_fails_after_reload",
+      "sensitivity": "W-X-04",
+      "description": "25 records (two committed batches, five pending, unsorted JSON input keys) are saved with save_to_file and reloaded with load_from_file, which runs verify_history.",
+      "code": "https://github.com/abisheakp197/Neutral-Trust-Infrastructure/blob/de08dbdcd27e01c27585d936091c69b59d173a97/ube-foundation/src/lib.rs#L480-L522"
     }
   ],
   "not_applicable": [],

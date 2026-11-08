@@ -304,3 +304,19 @@ fn nti_13_intent_policy_checked_after_effect() {
     assert!(res.is_err(), "policy violation is reported");
     assert!(written, "the forbidden effect happened before the policy was checked");
 }
+
+/// AACP-X-04 — persisted state (save_to_file) is reloaded (load_from_file, which runs
+/// verify_history). PASSES when an untouched state file fails to load.
+#[test]
+fn nti_14_persisted_state_fails_after_reload() {
+    let mut e = TrustEngine::new();
+    e.grant("a", "c");
+    for i in 0..25 {
+        e.record(req(&format!("r{i}"), "a", "c", serde_json::json!({ "n": i, "z": "last", "a": "first" })));
+    }
+    let path = std::env::temp_dir().join(format!("aacp-nti-14-{}.json", std::process::id()));
+    e.save_to_file(&path).unwrap();
+    let loaded = TrustEngine::load_from_file(&path);
+    let _ = std::fs::remove_file(&path);
+    assert!(loaded.is_err(), "the untouched state file reloaded and verified");
+}
