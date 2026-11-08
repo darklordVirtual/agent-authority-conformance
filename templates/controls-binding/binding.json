@@ -1,7 +1,7 @@
 {
   "schema": "aacp-control-binding-v1",
   "binding_id": "PROJECT-SHORTREV",
-  "catalog": "controls/aacp-controls-v1/catalog.json",
+  "catalog": "controls/aacp-controls-v1.3.0/catalog.json",
   "assessor": "UNKNOWN",
   "claimed_status": "not supplied by implementer",
   "subject": {

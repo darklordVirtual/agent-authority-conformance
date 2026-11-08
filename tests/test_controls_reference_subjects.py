@@ -21,7 +21,7 @@ import unittest
 from conformance import controls
 from conformance.validation import ROOT, validate_assessment
 
-CATALOG = "controls/aacp-controls-v1/catalog.json"
+CATALOG = "controls/aacp-controls-v1.3.0/catalog.json"
 REFERENCE = ROOT / "tests" / "controls_reference"
 REFERENCE_DIRS = sorted(d for d in REFERENCE.iterdir() if d.is_dir() and (d / "weak.py").is_file())
 PYTHON_ONLY_ORIGIN = "aacp:reference-subject"
@@ -220,6 +220,17 @@ for _name in list(globals()):
                 else:
                     self.assertEqual(set(statuses.values()), {"UNTESTED"})
                     self.assertTrue(any(control["id"] in n for n in a["notes"]), "outside-A-G control not noted")
+
+    def test_new_catalog_is_a_strict_superset_of_the_frozen_one(self):
+        """1.3.0 adds controls; every 1.2.0 control is byte-for-byte the same object."""
+        frozen = json.loads((ROOT / "controls/aacp-controls-v1/catalog.json").read_text(encoding="utf-8"))
+        old = {c["id"]: c for c in frozen["controls"]}
+        for cid, c in old.items():
+            with self.subTest(control=cid):
+                self.assertEqual(self.controls.get(cid), c, "a published control changed meaning")
+        self.assertGreater(len(self.controls), len(old))
+        self.assertEqual([k for k in frozen if k != "controls"],
+                         [k for k in json.loads((ROOT / CATALOG).read_text()) if k != "controls"])
 
     def test_probe_file_convention(self):
         """Probes are self-contained scripts: stdlib only, documented exit codes, legitimate control first."""

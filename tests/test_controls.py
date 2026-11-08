@@ -450,6 +450,33 @@ class CommittedBindingTests(unittest.TestCase):
                 self.assertEqual(code, 0, "committed report differs from its result; regenerate it")
 
 
+    def test_current_result_pins_the_catalog_bytes_its_binding_names(self):
+        """A published catalog is frozen: a reproduction must run the same catalog bytes.
+
+        Editing a catalog that a CURRENT result references changes every regenerated
+        report even when no finding changed. A new catalog version is a new file.
+        """
+        for binding_dir in sorted((ROOT / "controls" / "bindings").iterdir()):
+            pointer = ROOT / "reports" / binding_dir.name / "CURRENT"
+            if not pointer.exists():
+                continue
+            with self.subTest(binding=binding_dir.name):
+                binding = json.loads((binding_dir / "binding.json").read_text())
+                result = json.loads((pointer.parent / "results" / pointer.read_text().strip()).read_text())
+                proc = result["procedure"]
+                self.assertEqual(proc["catalog"], binding["catalog"], "binding moved to another catalog file")
+                data = (ROOT / binding["catalog"]).read_bytes()
+                self.assertEqual(controls.sha256_bytes(data), proc["catalog_sha256"],
+                                 f"{binding['catalog']} changed after a result pinned it; add a new catalog file")
+                self.assertEqual(json.loads(data)["version"], proc["catalog_version"])
+
+    def test_every_catalog_file_version_is_unique(self):
+        versions = {}
+        for path in sorted((ROOT / "controls").glob("aacp-controls-*/catalog.json")):
+            v = json.loads(path.read_text())["version"]
+            self.assertNotIn(v, versions, f"{path} reuses version {v} of {versions.get(v)}")
+            versions[v] = path
+
     def test_reproduction_of_committed_run_regenerates_identically(self):
         """A CI reproduction differs only in run id, operator, independence and time."""
         for binding_dir in sorted((ROOT / "controls" / "bindings").iterdir()):

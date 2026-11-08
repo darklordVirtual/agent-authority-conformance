@@ -7,7 +7,7 @@ executes the binding, and a **report** derives an A-G assessment from the run.
 The same catalog applies to every project; only the binding is project-specific.
 
 ```text
-controls/aacp-controls-v1/catalog.json      project-neutral controls and probe contracts
+controls/aacp-controls-v<version>/catalog.json  project-neutral controls and probe contracts (frozen once published)
 controls/bindings/<id>/binding.json         subject pin, probes, repairs, scope (implementation)
 controls/bindings/<id>/expected.json        expected outcome per probe, written before the run
 controls/bindings/<id>/tests/...            probe code installed into the subject
@@ -105,8 +105,8 @@ held, and under a repair as discrimination
 (`tests/test_controls_adversarial.py` pins both cases). Every probe exercises a
 legitimate workflow before the attack and exits `3` if it is broken.
 
-`tests/controls_reference/` holds one minimal subject per control added since
-catalog v1.3.0 (E, F, G, C-02 and the `AACP-CY` cyber-boundary family): a weak
+`tests/controls_reference/` holds one minimal subject per control added in
+catalog v1.3.0 (`controls/aacp-controls-v1.3.0/catalog.json`) (E, F, G, C-02 and the `AACP-CY` cyber-boundary family): a weak
 module, a single-edit repair and a probe in this convention.
 `tests/test_controls_reference_subjects.py` runs each through the real runner
 and requires `OBSERVED` + `DISCRIMINATES` on the weak subject, `NOT_OBSERVED` +
@@ -173,9 +173,19 @@ committed one.
 5. Run, commit the result under `reports/<id>/results/`, set `CURRENT`,
    generate the report, and send the draft to the implementer (SPECIFICATION §8).
 
-A new control needs a catalog entry with a probe contract and at least one
-binding whose probe discriminates. Changing a control's meaning is a new
-catalog version.
+A new control needs a catalog entry with a probe contract and a reference
+subject under `tests/controls_reference/` whose probe discriminates and is
+sensitive. Changing a control's meaning is a new catalog version.
+
+A catalog file is frozen once any committed result names it: the result pins
+its SHA-256, and the `controls` workflow regenerates the report from a fresh
+run, so editing the file in place changes every published report even when no
+finding changed. A new version is a new directory
+(`controls/aacp-controls-v1.3.0/`) that repeats the earlier controls
+unchanged; existing bindings keep their catalog, and a binding moves to a new
+one only with a new run. `tests/test_controls.py` checks the pins, and
+`tests/test_controls_reference_subjects.py` checks that the newest catalog is
+a superset of the frozen one.
 
 ## Limits
 
