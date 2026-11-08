@@ -1,0 +1,5 @@
+{
+  "repair": "tool authority comes from the user channel only; role markers in retrieved content are data",
+  "old": "            if line.startswith(\"SYSTEM:\") or message[\"channel\"] == \"user\":\n",
+  "new": "            if message[\"channel\"] == \"user\":\n"
+}

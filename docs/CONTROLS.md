@@ -94,6 +94,37 @@ repaired subject that does not build is `BUILD_ERROR`, never discrimination.
 The runner restores every pinned file and removes installed probes, then
 re-verifies the pins.
 
+## Probe exit convention and reference subjects
+
+A `command` probe written as a plain script should exit `0` when it observes
+the weakness, `1` when it ran and did not, and `3` (or any code outside
+`not_observed_exit`) when it could not reach the code: a failed import, a
+refused legitimate workflow, a fixture that never came up. A crash that exits
+`1` is indistinguishable from a refusal, so it would read as a protection that
+held, and under a repair as discrimination
+(`tests/test_controls_adversarial.py` pins both cases). Every probe exercises a
+legitimate workflow before the attack and exits `3` if it is broken.
+
+`tests/controls_reference/` holds one minimal subject per control added since
+catalog v1.3.0 (E, F, G, C-02 and the `AACP-CY` cyber-boundary family): a weak
+module, a single-edit repair and a probe in this convention.
+`tests/test_controls_reference_subjects.py` runs each through the real runner
+and requires `OBSERVED` + `DISCRIMINATES` on the weak subject, `NOT_OBSERVED` +
+`SENSITIVE` on the repaired one, `NON_VERDICT` on a broken one, and a report
+that fails exactly the control's property (never `PASS`). They are templates
+for binding a project, not findings about one; a new control is accepted with
+a reference subject, which shows its contract is probe-able before any project
+is bound. Network subjects use runner-owned loopback endpoints whose records
+take precedence over the subject's own log, and canaries carry the
+`AACP-TEST-CANARY-` prefix.
+
+Controls outside A-G with the `AACP-CY-` prefix cover the agent cyber boundary
+(instruction promotion, approval injection, memory taint, secret egress,
+tenant isolation, network policy, tool substitution, artifact admission and
+observer precedence). They map to the Stage 0 JX candidates in
+`docs/sdd/hij/` where those exist, are reported but never counted, and do not
+constitute a cyber verdict or profile result.
+
 ## Normative basis
 
 A weakness is not automatically a failure of every nearby property. Every A-G

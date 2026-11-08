@@ -1,0 +1,5 @@
+{
+  "repair": "the policy decision gates the connector",
+  "old": "    response = _transmit(url)\n    decision = \"allowed\" if policy(urlsplit(url)) else \"blocked\"\n    LOG.append(f\"{decision} {url}\")\n    return \"BLOCKED\" if decision == \"blocked\" else response\n",
+  "new": "    decision = \"allowed\" if policy(urlsplit(url)) else \"blocked\"\n    LOG.append(f\"{decision} {url}\")\n    if decision == \"blocked\":\n        return \"BLOCKED\"\n    return _transmit(url)\n"
+}

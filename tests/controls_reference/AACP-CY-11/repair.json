@@ -1,0 +1,5 @@
+{
+  "repair": "verify and execute the same bytes",
+  "old": "    if hashlib.sha256(read()).hexdigest() != pinned_digest:\n        return \"REJECTED\"\n    return execute(read())\n",
+  "new": "    data = read()\n    if hashlib.sha256(data).hexdigest() != pinned_digest:\n        return \"REJECTED\"\n    return execute(data)\n"
+}

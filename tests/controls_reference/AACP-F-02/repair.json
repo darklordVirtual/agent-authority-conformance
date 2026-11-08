@@ -1,0 +1,5 @@
+{
+  "repair": "make check-and-consume atomic under the store lock",
+  "old": "    if token in USED:\n        return \"REFUSED\"\n    time.sleep(0.02)  # models the round trip to the use-state store\n    USED.add(token)\n    return \"EXECUTED\"\n",
+  "new": "    with _LOCK:\n        if token in USED:\n            return \"REFUSED\"\n        time.sleep(0.02)  # models the round trip to the use-state store\n        USED.add(token)\n        return \"EXECUTED\"\n"
+}

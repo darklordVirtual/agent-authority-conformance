@@ -1,0 +1,5 @@
+{
+  "repair": "tool output cannot change approval state",
+  "old": "    if result.get(\"approved_tool\"):\n        POLICY[\"approved_tools\"].add(result[\"approved_tool\"])\n",
+  "new": "    # Tool output is data: approvals arrive only through runner_approve.\n"
+}

@@ -393,7 +393,7 @@ class CommittedBindingTests(unittest.TestCase):
         for c in catalog["controls"]:
             self.assertIn(c["property"], [None, *controls.PROPERTY_NAMES])
             self.assertTrue(c["id"].startswith(f"AACP-{c['property']}-") if c["property"]
-                            else c["id"].split("-")[1] in ("X", "EV"), c["id"])
+                            else c["id"].split("-")[1] in ("X", "EV", "CY"), c["id"])
             self.assertEqual(set(c["probe_contract"]), {"setup", "stimulus", "observation", "repair"})
             if c["property"]:
                 nb = c["normative_basis"]

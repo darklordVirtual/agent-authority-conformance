@@ -1,0 +1,5 @@
+{
+  "repair": "read the effect back from the authoritative source and compare",
+  "old": "        return {\"outcome\": \"failed\"}\n    return {\"outcome\": \"verified\"}\n",
+  "new": "        return {\"outcome\": \"failed\"}\n    observed = backend.read_back(payee)\n    if observed != amount:\n        return {\"outcome\": \"mismatched\", \"observed\": observed}\n    return {\"outcome\": \"verified\"}\n"
+}

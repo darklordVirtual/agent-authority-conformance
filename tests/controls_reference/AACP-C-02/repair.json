@@ -1,0 +1,5 @@
+{
+  "repair": "recompute the canonical binding of the full call at dispatch",
+  "old": "    if approved is None:\n",
+  "new": "    if approved is None or approved != canonical(call):\n"
+}

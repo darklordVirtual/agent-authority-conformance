@@ -1,0 +1,5 @@
+{
+  "repair": "evaluate policy on every redirect hop before connecting",
+  "old": "    with urllib.request.urlopen(url, timeout=5) as response:\n        return response.read().decode()\n",
+  "new": "    opener = urllib.request.build_opener(_HopPolicy(policy))\n    try:\n        with opener.open(url, timeout=5) as response:\n            return response.read().decode()\n    except urllib.error.HTTPError:\n        return \"DENIED\"\n"
+}
