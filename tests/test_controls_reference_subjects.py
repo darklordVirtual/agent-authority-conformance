@@ -25,6 +25,15 @@ CATALOG = "controls/aacp-controls-v1.3.0/catalog.json"
 REFERENCE = ROOT / "tests" / "controls_reference"
 REFERENCE_DIRS = sorted(d for d in REFERENCE.iterdir() if d.is_dir() and (d / "weak.py").is_file())
 PYTHON_ONLY_ORIGIN = "aacp:reference-subject"
+#: Catalog 1.2.0's controls, as of 2026-11-10. This list may only shrink.
+CONTROLS_WITHOUT_A_REFERENCE_SUBJECT = (
+    "AACP-A-01", "AACP-A-02", "AACP-A-03", "AACP-A-04",
+    "AACP-B-01", "AACP-B-02", "AACP-B-03", "AACP-B-04",
+    "AACP-C-01",
+    "AACP-D-01", "AACP-D-02", "AACP-D-03",
+    "AACP-EV-01", "AACP-EV-02", "AACP-EV-03", "AACP-EV-04", "AACP-EV-05",
+    "AACP-X-01", "AACP-X-02", "AACP-X-03", "AACP-X-04",
+)
 
 
 def git(cwd, *args):
@@ -123,6 +132,17 @@ class ReferenceSubjectTests(unittest.TestCase):
             with self.subTest(control=cid):
                 if PYTHON_ONLY_ORIGIN in c["origin"]:
                     self.assertIn(cid, have, f"{cid} cites {PYTHON_ONLY_ORIGIN} but has no directory")
+
+    def test_the_controls_without_a_reference_subject_are_these_and_no_more(self):
+        """A ratchet. The 21 controls carried over from catalog 1.2.0 were bound
+        to projects before reference subjects existed, and have none. A control
+        that gains one is removed from this list; nothing may be added to it,
+        so a new control cannot ship without showing it can be probed."""
+        have = {d.name for d in REFERENCE_DIRS}
+        without = sorted(cid for cid in self.controls if cid not in have)
+        self.assertEqual(without, sorted(CONTROLS_WITHOUT_A_REFERENCE_SUBJECT))
+        for cid in without:
+            self.assertNotIn(PYTHON_ONLY_ORIGIN, self.controls[cid]["origin"], cid)
 
     def test_e_f_g_and_cy_controls_are_covered(self):
         """The families added in catalog 1.3.0 each have at least one reference subject."""
