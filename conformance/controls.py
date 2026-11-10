@@ -46,6 +46,14 @@ CARGO_LINE = re.compile(r"^test (\S+) \.\.\. (ok|FAILED|ignored)$")
 REGEX_FLAGS = re.MULTILINE | re.DOTALL
 
 
+#: Every op eval_predicate knows. load_binding checks a binding against it, so
+#: a misspelt op is a BindingError before any probe runs, and not a verdict
+#: read off whatever branch the typo happens to reach.
+REGEX_OPS = frozenset({"matches", "not_matches", "order"})
+JSON_OPS = frozenset({"json_exists", "json_equals", "json_lacks", "json_ne_head"})
+PREDICATE_OPS = REGEX_OPS | JSON_OPS
+
+
 class NonVerdict(Exception):
     """The run, or one probe, could not reach a verdict."""
 
@@ -104,6 +112,10 @@ def load_binding(binding_dir: pathlib.Path):
             ref = probe.get(field)
             if ref is not None and ref not in mutations:
                 raise BindingError(f"{pid}: unknown {field} {ref}")
+        for pred in probe.get("predicates") or []:
+            if pred.get("op") not in PREDICATE_OPS:
+                raise BindingError(f"{pid}: unknown predicate op {pred.get('op')!r}; "
+                                   f"known: {sorted(PREDICATE_OPS)}")
     for na in binding.get("not_applicable", []):
         if na["control"] not in controls or not na.get("reason"):
             raise BindingError(f"not_applicable entry needs a known control and a reason: {na}")
@@ -224,7 +236,9 @@ def eval_predicate(pred: dict, read, head: str):
     """Return (holds: bool, detail: str). `read(rel)` returns the text of a subject file."""
     op = pred["op"]
     text = read(pred["file"])
-    if op in ("matches", "not_matches", "order"):
+    if op not in PREDICATE_OPS:
+        raise BindingError(f"unknown predicate op {op}")
+    if op in REGEX_OPS:
         body, base = region_of(text, pred.get("region"))
         if op == "order":
             a = re.search(pred["first"], body, REGEX_FLAGS)
@@ -236,7 +250,13 @@ def eval_predicate(pred: dict, read, head: str):
         m = re.search(pred["pattern"], body, REGEX_FLAGS)
         where = f"line {line_of(text, base + m.start())}" if m else "no match"
         return (bool(m), where) if op == "matches" else (not m, where)
-    doc = json.loads(text)
+    try:
+        doc = json.loads(text)
+    except json.JSONDecodeError as exc:
+        # A file that is not JSON is something the probe could not read, like a
+        # missing file or region. It says nothing about the subject's behaviour.
+        raise NonVerdict(f"{pred['file']} is not JSON: {exc.msg} "
+                         f"(line {exc.lineno}, column {exc.colno})") from exc
     try:
         value = get_path(doc, pred["path"])
     except KeyError:

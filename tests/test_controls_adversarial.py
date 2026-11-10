@@ -415,15 +415,10 @@ class SourceCheckEdges(unittest.TestCase):
                              "value_sha256_of": "finished=True\nerror_lines=1\n"}], "NOT_OBSERVED")
         self.assertEqual(e["result"], "NOT_OBSERVED")
 
-    @unittest.expectedFailure
     def test_malformed_json_is_a_probe_non_verdict_not_a_crash(self):
-        """GAP: a JSON predicate over a file that is not JSON raises out of the run.
-
-        Expected: the probe is NON_VERDICT with a detail, like a missing file or
-        region, and the other probes still run. Today the whole run aborts with a
-        traceback and no result record is written. Runner change needed in
-        eval_predicate (catch json.JSONDecodeError -> NonVerdict).
-        """
+        """A JSON predicate over a file that is not JSON is NON_VERDICT with a
+        detail, like a missing file or region, and the other probes still run.
+        It used to raise out of the run, with no result record written."""
         _, e = self.static([{"op": "json_exists", "file": "authz.py", "path": "x"}], "NON_VERDICT")
         self.assertEqual(e["result"], "NON_VERDICT")
         self.assertIn("JSON", e["detail"])
@@ -440,14 +435,11 @@ class SourceCheckEdges(unittest.TestCase):
     def test_unknown_predicate_op_on_a_present_path_is_a_binding_error(self):
         self.assertEqual(self.unknown_op_run("digest"), 2)
 
-    @unittest.expectedFailure
     def test_unknown_predicate_op_is_rejected_when_the_binding_loads(self):
-        """GAP: predicate ops are only checked when evaluated, after the path lookup.
-
-        An unknown op over an absent path is read as NOT_OBSERVED ('path absent')
-        and the run completes. Expected: load_binding rejects an unknown op, so a
-        typo in a binding is a BindingError (exit 2) before anything runs.
-        """
+        """load_binding rejects an unknown op, so a typo in a binding is a
+        BindingError (exit 2) before anything runs. Ops used to be checked only
+        when evaluated, after the path lookup, and an unknown op over an absent
+        path was read as NOT_OBSERVED ('path absent')."""
         self.assertEqual(self.unknown_op_run("absent"), 2)
 
 

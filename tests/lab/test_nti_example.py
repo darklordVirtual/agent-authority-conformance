@@ -124,7 +124,9 @@ class NtiFlowTest(LabTest):
         outcome, details = rerun(run)
         self.assertEqual(outcome, "REPRODUCED", details)
         path = respond.write(run, drafted_by="agent:test", ai_assisted=True)
-        self.assertEqual(path, run / respond.DEFAULT_OUT)
+        # Resolved on both sides: on macOS a temporary directory is reached
+        # through /var, a symlink to /private/var.
+        self.assertEqual(path.resolve(), (run / respond.DEFAULT_OUT).resolve())
         text = path.read_text(encoding="utf-8")
         root = read_json(run / "results" / "probes.json")["records"][2]["witness"]["s5_root_after_relabel"]
         self.assertIn(root, text)

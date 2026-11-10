@@ -2,6 +2,12 @@
 
 ## 0.3.0a1 — alpha
 
+- Controls runner: two recorded gaps closed. A JSON predicate over a file that is not JSON now makes that probe `NON_VERDICT` with the parse position, and the other probes run; it used to raise out of the run with no result written. `load_binding` rejects an unknown predicate op, so a misspelt op is a binding error (exit 2) before anything runs; an unknown op over an absent path used to be read as `NOT_OBSERVED`. The two expected-failure tests in `tests/test_controls_adversarial.py` are ordinary tests now.
+
+- Reference subjects: the README said every control ships with one. The 17 controls added in catalog 1.3.0 do; the 21 carried over from 1.2.0 do not. The README says so, and `tests/test_controls_reference_subjects.py` lists the 21 and lets the list only shrink.
+
+- Tests on macOS: `tests/lab/test_nti_example.py` compared an unresolved temporary path with a resolved one and failed there. Fixed, and `validate-assessments.yml` runs both test suites on `macos-latest`.
+
 - Release fix: `cyclonedx-py --output-reproducible` omits the SBOM's `serialNumber`, and `actions/attest` refuses a CycloneDX document without one, so the first `v0.3.0a1` run failed at "Attest SBOM for the wheel" before anything was published. `scripts/release.py sbom-serial` now sets a deterministic serial, a UUIDv5 of the version and the wheel's SHA-256, so the build stays reproducible. Tests: `tests/test_release.py` `SbomSerialTest`.
 
 - Distribute AACP as versioned GitHub Release assets: wheel, source archive, CycloneDX SBOM and `SHA256SUMS.txt`, with Sigstore-signed build-provenance and SBOM attestations. `.github/workflows/release.yml` runs on a `v*` tag: it checks that the tag matches `pyproject.toml`, has a changelog section and sits on `main`, reruns the conformance checks, builds the wheel twice to prove it is byte-reproducible, installs the wheel on Linux, macOS and Windows (Python 3.12 and 3.13) and the sdist on Linux and exercises the installed `aacp` outside a checkout, and publishes only after approval in the `release` environment. Pull requests that touch release inputs rehearse every step except publication. `scripts/release.py` holds the gates and `scripts/smoke_installed_cli.py` the installed-CLI check, which the CLI package job now shares. See [docs/INSTALL.md](docs/INSTALL.md) and [docs/RELEASING.md](docs/RELEASING.md). No PyPI publication; runtime dependencies are still resolved from the configured package index.
