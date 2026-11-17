@@ -2,6 +2,8 @@
 
 ## 0.3.0a1 — alpha
 
+- Crosswalk: the nine invariants of Agentic-Datacenter, a simulated data center for testing gates over AI-driven control, recorded as native claims with their A–G relationships, and how a breach found there becomes an AACP control ([docs/CROSSWALK-AGENTIC-DATACENTER.md](docs/CROSSWALK-AGENTIC-DATACENTER.md)). Crosswalk metadata only; no A–G result is inferred.
+
 - Controls runner: two recorded gaps closed. A JSON predicate over a file that is not JSON now makes that probe `NON_VERDICT` with the parse position, and the other probes run; it used to raise out of the run with no result written. `load_binding` rejects an unknown predicate op, so a misspelt op is a binding error (exit 2) before anything runs; an unknown op over an absent path used to be read as `NOT_OBSERVED`. The two expected-failure tests in `tests/test_controls_adversarial.py` are ordinary tests now.
 
 - Reference subjects: the README said every control ships with one. The 17 controls added in catalog 1.3.0 do; the 21 carried over from 1.2.0 do not. The README says so, and `tests/test_controls_reference_subjects.py` lists the 21 and lets the list only shrink.
