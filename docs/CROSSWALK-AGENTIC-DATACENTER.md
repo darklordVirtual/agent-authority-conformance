@@ -6,7 +6,7 @@ agents and scenarios. It states nine invariants that every run must keep. This
 page records each as a native claim and its relationship to the A-G
 properties, under the rules of [native claim mapping](NATIVE-CLAIM-MAPPING.md).
 
-**Producer:** `darklordVirtual/agentic-datacenter` at commit `PUBLIC_COMMIT`. The
+**Producer:** `agentic-datacenter/agentic-datacenter` at commit `12136df` (tag `benchmark-v1.6`). The
 source of the rules is `docs/reference/invariants.md`, section 9.4 of
 `docs/design/SDD-ADC-001.md`, and ADR 0028 and ADR 0031 for the mandate
 register, in that repository. The invariants are unchanged since the earlier
