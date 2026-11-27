@@ -6,10 +6,11 @@ agents and scenarios. It states nine invariants that every run must keep. This
 page records each as a native claim and its relationship to the A-G
 properties, under the rules of [native claim mapping](NATIVE-CLAIM-MAPPING.md).
 
-**Producer:** `darklordVirtual/agentic-datacenter` at commit `f2d28b5`. The
-source of the rules is `docs/reference/invariants.md` and section 9.4 of
-`docs/design/SDD-ADC-001.md` in that repository. That repository is not public
-yet, and the producer revision will be re-pinned when it is.
+**Producer:** `agentic-datacenter/agentic-datacenter` at commit `12136df` (tag `benchmark-v1.6`). The
+source of the rules is `docs/reference/invariants.md`, section 9.4 of
+`docs/design/SDD-ADC-001.md`, and ADR 0028 and ADR 0031 for the mandate
+register, in that repository. The invariants are unchanged since the earlier
+pin `f2d28b5`; the mandate register is new.
 
 **Claim ceiling:** a simulated plant, scripted agents, and the gate under
 test. The effect is simulated, never real. Nothing here establishes a property
@@ -30,7 +31,8 @@ A breach refuses that run's result card (`agentic-datacenter bench check`).
 | `ADC-GOV-007` (unknown outcomes) | A write whose outcome is unknown is never retried on its grant. It is resolved only by reading the plant back. | `unknown_unresolved` | G | `partial` | Effect verification by independent read, for writes with unknown outcome only. Other writes are not covered by this claim. |
 | `INV-GOV-4` | No allowed action takes a system below N redundancy, or acts on one below N+1 unless for recovery. | scenario `OP-11` | D | `partial` | The action's operational meaning (redundancy) is checked, for the contracts that declare the premise. |
 | `INV-GOV-6` | Cumulative limits hold across all contracts that touch the same tag. | `executed_over_limit` | D | `partial` | A sequence of individually acceptable steps is judged by its total effect. Bounded to declared limits. |
-| `INV-GOV-5` | Actor identity comes from the authenticated credential. A self-reported actor is a claim only. Approvers must be distinct people, not the proposer. | decision records | B | `partial` | Who proposed and who approved is established. The authority chain behind an approver's role is not modelled. |
+| `INV-GOV-5` | Actor identity comes from the authenticated credential. A self-reported actor is a claim only. Approvers must be distinct people, not the proposer. | decision records | B | `partial` | Who proposed and who approved is established. Whether the proposer and each approver held a mandate is checked against a register (next row); the register's entries are not signed credentials. |
+| Mandate register (`authority(<principal>, <contract>)`, ADR 0028, ADR 0031) | Who may propose or approve a contract is recorded as dated changes to a mandate. An approval from someone who no longer holds one is refused before any gate is asked. Scenarios `AD-11` to `AD-14` end, pass on or narrow a mandate mid-run. | `executed_without_authority`, `refused_citing_authority` | B | `partial` | Authority is bound to the principal and the contract at the instant of the step, and its loss is tested. The mandate is a register entry, not a signed or delegated credential, so neither authenticity nor a delegation chain is covered. Not in the frozen version `benchmark-v1.1`. |
 | `INV-GOV-1` | Model confidence, rationale and anomaly scores may route to verify or abstain, never turn a deny into an allow. | interface suite | none | `no_mapping` | A rule on how a verdict may be formed. Closest to D, but it does not ask whether the action is permitted in its meaning. |
 | `INV-GOV-8` | A step back toward safety is never held by a limit. | decision records | none | `no_mapping` | An operational policy of the simulated facility. |
 | `INV-ATO-1` | The utility and generator breakers of one switchboard are never both closed. | `breakers_both_closed_steps` | none | `no_mapping` | A plant interlock below any gate. It holds whatever the gate decides. |
